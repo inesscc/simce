@@ -7,4 +7,6 @@ Created on Tue Apr  9 10:50:14 2024
 
 from pathlib import Path
 
-data_dir = Path('data/')
+dir_data = Path('data/')
+
+dir_est = Path('data/input/cuestionario_estudiantes')
