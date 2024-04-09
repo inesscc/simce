@@ -22,4 +22,3 @@ def crear_directorios():
         
     
     
-crear_directorios()
