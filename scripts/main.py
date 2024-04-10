@@ -9,3 +9,4 @@ from simce.utils import crear_directorios
 
 # Creamos directorios
 crear_directorios()
+
