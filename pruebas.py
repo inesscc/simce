@@ -13,10 +13,8 @@ import matplotlib.pyplot as plt
 import re
 from pathlib import Path
 from time import time
-x_int_left = 193
-x_int_right = 3240
-y_upp = 37
-y_low = 1720
+from simce.utils import dic_img_preg
+import pandas as pd
 
 p1 = list(chain.from_iterable(
     [[str(j) for j in i.iterdir() if '_1' in j.name] for i in dir_est.iterdir()]))
@@ -36,80 +34,129 @@ p1_sample_images_resize = [cv2.resize(img, (dims_minimas[0], dims_minimas[1]))
 
 
 
-cv2.imshow('rpueba',cv2.resize(img_crop, (1800, 900)))
-cv2.waitKey(0) 
-  
-# closing all open windows 
-cv2.destroyAllWindows() 
-
 
 #%%
 
-def crop_img(img_preg):
-    gray = cv2.cvtColor(img_preg, cv2.COLOR_BGR2GRAY) #convert roi into gray
-    Blur=cv2.GaussianBlur(gray,(5,5),1) #apply blur to roi
-    Canny=cv2.Canny(Blur,10,50) #apply canny to roi
 
-    #Find my contours
-    contours =cv2.findContours(Canny,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)[0]
 
-    contours_sizes = [cv2.contourArea(i) for i in contours]
-    max_contour = contours_sizes.index(max(contours_sizes))
-    x,y,w,h= cv2.boundingRect(contours[max_contour])
-    img_crop=img_preg[y+10:y-10+h, x+10:x-10+w]
-    #print(img_crop.shape)
-    return img_crop
-    
 now = time()
-e1 = Path('data/input/cuestionario_estudiantes/09952/')
-for n, preg in enumerate(e1.iterdir()):
-    
-    #if str(preg) == 'data\\input\\cuestionario_estudiantes\\09952\\4272352_2.jpg':
-         
-        page = re.search('_([^_]*)$', preg.with_suffix('').name).group(1)
+e1 = Path('data/input/cuestionario_estudiantes/09955/')
+for preg in (e1.iterdir()):
+    file_dir = re.sub(r'data\\input\\cuestionario_estudiantes\\', '', str(preg))
+    folder, file = file_dir.split('\\')
+    file_no_ext = Path(file).with_suffix('')
+    id_est = re.search('\d+',f'{file_no_ext}').group(0)
+    Path(f'data/output/{folder}').mkdir(exist_ok=True)
+    page = str(file_no_ext)[-1]
         
-        print(preg)
+        
+
+    if str(preg) == 'data\\input\\cuestionario_estudiantes\\09955\\4272452_3.jpg':
+        
+     
+
+           # print(preg)
         img_preg = cv2.imread(str(preg),1)
         
-        img_crop = crop_img(img_preg)
-        
-        
+        x,y = img_preg.shape[:2]
+        img_crop = img_preg[40:x - 200, 50:y-160]
 
+        punto_medio = int(np.round(img_crop.shape[1] / 2, 1))
+        
+        img_p1 = img_crop[:, :punto_medio] 
+        img_p2 = img_crop[:, punto_medio:]
+        
+        n = 0
+        for media_img in [img_p1, img_p2]:
+            print(media_img.shape)
             
-        gray = cv2.cvtColor(img_crop, cv2.COLOR_BGR2GRAY) #convert roi into gray
-        Blur=cv2.GaussianBlur(gray,(5,5),1) #apply blur to roi
-        Canny=cv2.Canny(Blur,10,50) #apply canny to roi
-        
-        #Find my contours
-        contours =cv2.findContours(Canny,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)[0]
-        big_contours = [i for i in contours if cv2.contourArea(i) > 30000]
-        big_contours_sizes = [cv2.contourArea(i) for i in big_contours]
-        
-        big_contours_sort = [i for _, i in sorted(zip(big_contours_sizes, big_contours))]
-        
-        
-        
-        file_dir = re.sub(r'data\\input\\cuestionario_estudiantes\\', '', str(preg))
-    
-        for n, c in enumerate(big_contours_sort):
-            x,y,w,h= cv2.boundingRect(c)
-            cropped_img=img_crop[y:y+h, x:x+w]
+            gray = cv2.cvtColor(media_img, cv2.COLOR_BGR2GRAY) #convert roi into gray
+            Blur=cv2.GaussianBlur(gray,(5,5),1) #apply blur to roi
+            Canny=cv2.Canny(Blur,10,50) #apply canny to roi
             
-            folder, file = file_dir.split('\\')
-            file_no_ext = Path(file).with_suffix('')
-    
-            Path(f'data/output/{folder}').mkdir(exist_ok=True)
-            cv2.imwrite(f'data/output/{folder}/{file_no_ext}_{n}.jpg',cropped_img)
+            #Find my contours
+            contours =cv2.findContours(Canny,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)[0]
+            big_contours = [i for i in contours if cv2.contourArea(i) > 30000]
+            big_contours_sizes = [cv2.contourArea(i) for i in big_contours]
+            
+            big_contours_sort = [i for _, i in sorted(zip(big_contours_sizes, big_contours))]
+            
+            
+            
+
+        
+            for c in (big_contours_sort):
+                print(n)
+                x,y,w,h= cv2.boundingRect(c)
+                cropped_img=media_img[y:y+h, x:x+w]
+                
+
+                id_img = f'{page}_{n}'
+                n += 1
+                file_out = f'data/output/{folder}/{id_est}_{dic_img_preg[id_img]}.jpg'
+                print(file_out)
+                cv2.imwrite(file_out, cropped_img)
+                
+      #  break
 
 
 
 print(time() - now)
 
+#%%
+
+n = 0
+
+gray = cv2.cvtColor(img_p1, cv2.COLOR_BGR2GRAY) #convert roi into gray
+Blur=cv2.GaussianBlur(gray,(5,5),1) #apply blur to roi
+Canny=cv2.Canny(Blur,10,50) #apply canny to roi
+
+#Find my contours
+contours =cv2.findContours(Canny,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)[0]
+big_contours = [i for i in contours if cv2.contourArea(i) > 30000]
+big_contours_sizes = [cv2.contourArea(i) for i in big_contours]
+
+big_contours_sort = [i for _, i in sorted(zip(big_contours_sizes, big_contours))]
+
+    
+    
+
+
+for c in (big_contours_sort):
+
+
+    print(n)
+    x,y,w,h= cv2.boundingRect(c)
+    cropped_img=img_p1[y:y+h, x:x+w]
+    
+    cv2.imshow('rpueba',cv2.resize(img_p1, (900, 900)))
+    cv2.waitKey(0) 
+      
+    # closing all open windows 
+    cv2.destroyAllWindows() 
+
+    id_img = f'{page}_{n}'
+    n += 1
+    file_out = f'data/output/{folder}/{id_est}_{dic_img_preg[id_img]}.jpg'
+    print(file_out)
+    cv2.imwrite(file_out, cropped_img)
+
+
 
 #%%
-import pandas as pd
+
+cv2.imshow('rpueba',cv2.resize(img_p1, (900, 900)))
+cv2.waitKey(0) 
+  
+# closing all open windows 
+cv2.destroyAllWindows() 
+
+#%%
+
 e2 = Path(f'data/output/{folder}')
 pd.Series([re.match('\d+', i.name).group(0) for i in e2.iterdir()]).value_counts()
+#%%
+
 
 #%%
 dst = p1_sample_images_resize[0]
