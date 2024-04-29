@@ -47,8 +47,9 @@ def updateImg():
     res = cv2.bitwise_and(img,img,mask=mask)
     cv2.imshow('Image', res)
 
-
+#%%
 ### initial setup:
+col = [[0,0,0],[179,255,255]]
 invert = False
 screen = "Control"
 cv2.namedWindow(screen, cv2.WINDOW_AUTOSIZE)
@@ -57,7 +58,7 @@ img =  cv2.resize(img, (2000, 900))
 img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 cv2.imshow('Image', img)
 createGUI()
-col = [[0,0,0],[179,255,255]]
+
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
