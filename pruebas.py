@@ -16,18 +16,18 @@ from time import time
 from simce.utils import dic_img_preg
 import pandas as pd
 
-p1 = list(chain.from_iterable(
-    [[str(j) for j in i.iterdir() if '_1' in j.name] for i in dir_est.iterdir()]))
-p1_sample = p1[:100]
+# p1 = list(chain.from_iterable(
+#     [[str(j) for j in i.iterdir() if '_1' in j.name] for i in dir_est.iterdir()]))
+# p1_sample = p1[:100]
 
 
 
 
-p1_sample_images = [cv2.imread(img,1) for img in p1_sample]
-dims_minimas = np.array([[j for j in i.shape]  for i in p1_sample_images]).min(axis=0)[:2]
+# p1_sample_images = [cv2.imread(img,1) for img in p1_sample]
+# dims_minimas = np.array([[j for j in i.shape]  for i in p1_sample_images]).min(axis=0)[:2]
 
-p1_sample_images_resize = [cv2.resize(img, (dims_minimas[0], dims_minimas[1])) 
-                           for img in p1_sample_images ]
+# p1_sample_images_resize = [cv2.resize(img, (dims_minimas[0], dims_minimas[1])) 
+#                            for img in p1_sample_images ]
 
 #%%
 
@@ -51,52 +51,58 @@ for preg in (e1.iterdir()):
         
         
 
-    if str(preg) == 'data\\input\\cuestionario_estudiantes\\09955\\4272452_3.jpg':
+   # if str(preg) == 'data\\input\\cuestionario_estudiantes\\09955\\4272452_3.jpg':
         
      
 
-           # print(preg)
-        img_preg = cv2.imread(str(preg),1)
-        
-        x,y = img_preg.shape[:2]
-        img_crop = img_preg[40:x - 200, 50:y-160]
+       # print(preg)
+    img_preg = cv2.imread(str(preg),1)
+    
+    x,y = img_preg.shape[:2]
+    img_crop = img_preg[40:x - 200, 50:y-160]
 
-        punto_medio = int(np.round(img_crop.shape[1] / 2, 1))
+    punto_medio = int(np.round(img_crop.shape[1] / 2, 1))
+    
+    img_p1 = img_crop[:, :punto_medio] 
+    img_p2 = img_crop[:, punto_medio:]
+    
+    n = 0
+    for media_img in [img_p1, img_p2]:
+        print(media_img.shape)
         
-        img_p1 = img_crop[:, :punto_medio] 
-        img_p2 = img_crop[:, punto_medio:]
+        gray = cv2.cvtColor(media_img, cv2.COLOR_BGR2GRAY) #convert roi into gray
+        Blur=cv2.GaussianBlur(gray,(5,5),1) #apply blur to roi
+       # Canny=cv2.Canny(Blur,10,50) #apply canny to roi
+        _,It = cv2.threshold(Blur,0,255,cv2.THRESH_OTSU)
+        sx = cv2.Sobel(It,cv2.CV_32F,1,0)
+        sy = cv2.Sobel(It,cv2.CV_32F,0,1)
+        m = cv2.magnitude(sx,sy)
+        m = cv2.normalize(m,None,0.,255.,cv2.NORM_MINMAX,cv2.CV_8U)
+        m = cv2.ximgproc.thinning(m,None,cv2.ximgproc.THINNING_GUOHALL)
         
-        n = 0
-        for media_img in [img_p1, img_p2]:
-            print(media_img.shape)
-            
-            gray = cv2.cvtColor(media_img, cv2.COLOR_BGR2GRAY) #convert roi into gray
-            Blur=cv2.GaussianBlur(gray,(5,5),1) #apply blur to roi
-            Canny=cv2.Canny(Blur,10,50) #apply canny to roi
-            
-            #Find my contours
-            contours =cv2.findContours(Canny,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)[0]
-            big_contours = [i for i in contours if cv2.contourArea(i) > 30000]
-            big_contours_sizes = [cv2.contourArea(i) for i in big_contours]
-            
-            big_contours_sort = [i for _, i in sorted(zip(big_contours_sizes, big_contours))]
-            
-            
+        #Find my contours
+        contours =cv2.findContours(m,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)[0]
+        big_contours = [i for i in contours if cv2.contourArea(i) > 30000]
+        big_contours_sizes = [cv2.contourArea(i) for i in big_contours]
+        
+        big_contours_sort = [i for _, i in sorted(zip(big_contours_sizes, big_contours))]
+        
+        
+        
+
+    
+        for c in (big_contours_sort):
+            print(n)
+            x,y,w,h= cv2.boundingRect(c)
+            cropped_img=media_img[y:y+h, x:x+w]
             
 
-        
-            for c in (big_contours_sort):
-                print(n)
-                x,y,w,h= cv2.boundingRect(c)
-                cropped_img=media_img[y:y+h, x:x+w]
-                
-
-                id_img = f'{page}_{n}'
-                n += 1
-                file_out = f'data/output/{folder}/{id_est}_{dic_img_preg[id_img]}.jpg'
-                print(file_out)
-                cv2.imwrite(file_out, cropped_img)
-                
+            id_img = f'{page}_{n}'
+            n += 1
+            file_out = f'data/output/{folder}/{id_est}_{dic_img_preg[id_img]}.jpg'
+            print(file_out)
+            cv2.imwrite(file_out, cropped_img)
+            
       #  break
 
 
@@ -108,19 +114,59 @@ print(time() - now)
 n = 0
 
 gray = cv2.cvtColor(img_p1, cv2.COLOR_BGR2GRAY) #convert roi into gray
-Blur=cv2.GaussianBlur(gray,(5,5),1) #apply blur to roi
-Canny=cv2.Canny(Blur,10,50) #apply canny to roi
+_,It = cv2.threshold(gray,0,255,cv2.THRESH_OTSU)
+sx = cv2.Sobel(It,cv2.CV_32F,1,0)
+sy = cv2.Sobel(It,cv2.CV_32F,0,1)
+m = cv2.magnitude(sx,sy)
+m = cv2.normalize(m,None,0.,255.,cv2.NORM_MINMAX,cv2.CV_8U)
+m = cv2.ximgproc.thinning(m,None,cv2.ximgproc.THINNING_GUOHALL)
+#Blur=cv2.GaussianBlur(gray,(5,5),1) #apply blur to roi
+#Canny=cv2.Canny(Blur,10,50) #apply canny to roi
 
 #Find my contours
-contours =cv2.findContours(Canny,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)[0]
-big_contours = [i for i in contours if cv2.contourArea(i) > 30000]
+contours =cv2.findContours(m,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)[0]
+
+big_contours = [i for i in contours if cv2.contourArea(i) > 25000]
 big_contours_sizes = [cv2.contourArea(i) for i in big_contours]
+
 
 big_contours_sort = [i for _, i in sorted(zip(big_contours_sizes, big_contours))]
 
     
-    
+cv2.imshow('rpueba',cv2.resize(m, (900, 900)))
+cv2.waitKey(0) 
+  
+# closing all open windows 
+cv2.destroyAllWindows() 
 
+
+#%% Cropped images
+
+gray = cv2.cvtColor(cropped_img, cv2.COLOR_BGR2GRAY) #convert roi into gray
+blur=cv2.GaussianBlur(gray,(5,5),1) #apply blur to roi
+canny=cv2.Canny(blur,10,50) #apply canny to roi
+sx = cv2.Sobel(canny,cv2.CV_32F,1,0)
+sy = cv2.Sobel(canny,cv2.CV_32F,0,1)
+m = cv2.magnitude(sx,sy)
+m = cv2.normalize(m,None,0.,255.,cv2.NORM_MINMAX,cv2.CV_8U)
+m = cv2.ximgproc.thinning(m,None,cv2.ximgproc.THINNING_GUOHALL)
+ # Threshold using Otsu's method
+#_, thresholded = cv2.threshold(blur, 200, 255, cv2.THRESH_BINARY)
+
+# Detect lines using HoughLinesP
+lines = cv2.HoughLinesP(m, 1, np.pi / 180, threshold=50, minLineLength=100, maxLineGap=10)
+
+
+#%%
+
+
+
+# Display the result
+cv2.imshow("Detected Lines", cv2.resize(m, (900, 900)))
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+#%%
 
 for c in (big_contours_sort):
 
@@ -129,11 +175,6 @@ for c in (big_contours_sort):
     x,y,w,h= cv2.boundingRect(c)
     cropped_img=img_p1[y:y+h, x:x+w]
     
-    cv2.imshow('rpueba',cv2.resize(img_p1, (900, 900)))
-    cv2.waitKey(0) 
-      
-    # closing all open windows 
-    cv2.destroyAllWindows() 
 
     id_img = f'{page}_{n}'
     n += 1
@@ -145,7 +186,7 @@ for c in (big_contours_sort):
 
 #%%
 
-cv2.imshow('rpueba',cv2.resize(img_p1, (900, 900)))
+cv2.imshow('rpueba',cv2.resize(cropped_img, (900, 900)))
 cv2.waitKey(0) 
   
 # closing all open windows 
