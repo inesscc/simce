@@ -5,7 +5,7 @@ Created on Mon Apr 29 16:59:23 2024
 @author: jeconchao
 """
 
-from simce.config import dir_est
+from simce.config import dir_estudiantes
 from itertools import chain
 import numpy as np
 import cv2
@@ -53,7 +53,7 @@ for n, preg in enumerate(est):
     print(pages)
 
 
-    m = 0
+
     for p, media_img in enumerate([img_p1, img_p2]):
         print(media_img.shape)
         
@@ -70,26 +70,30 @@ for n, preg in enumerate(est):
         #Find my contours
         contours =cv2.findContours(m,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)[0]
         big_contours = [i for i in contours if cv2.contourArea(i) > 30000]
-       # print([i[0][0][1] for i in big_contours] )
+        print([i[0][0][1] for i in big_contours] )
 
        # big_contours_sizes = [cv2.contourArea(i) for i in big_contours]
         
       #  big_contours_sort = [i for _, i in sorted(zip(big_contours_sizes, big_contours))]
-
+          
         print(f'página actual: {pages[p]}')
+        
+        if pages[p] < pages[1-p]:
+            # revertimos orden de contornos cuando es la página baja del cuadernillo
+           big_contours = big_contours[::-1]
     
-        for c in (big_contours[::-1]):
+        for c in (big_contours):
             print(n)
             x,y,w,h= cv2.boundingRect(c)
             cropped_img=media_img[y:y+h, x:x+w]
             
-            if pages[p] > pages[1-p]:
+            if pages[p] > pages[1-p]: # si es la pág más alta del cuadernillo
                 q2 -= 1
                 q = q2
-            elif (pages[p] < pages[1-p]) & (pages[p] != 1):
+            elif (pages[p] < pages[1-p]) & (pages[p] != 1): # si es la pág más baja del cuardenillo
                 q1 += 1
                 q = q1
-            else:
+            else: # Para la portada
                 q = '_'
             
     
@@ -99,3 +103,8 @@ for n, preg in enumerate(est):
             print(file_out)
             cv2.imwrite(file_out, cropped_img)
             
+#%%
+
+cv2.imshow("Detected Lines", cv2.resize(cropped_img, (900, 900)))
+cv2.waitKey(0)
+cv2.destroyAllWindows()

@@ -9,4 +9,4 @@ from pathlib import Path
 
 dir_data = Path('data/')
 
-dir_est = Path('data/input/cuestionario_estudiantes')
+dir_estudiantes = Path('data/input/cuestionario_estudiantes')
