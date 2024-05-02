@@ -157,36 +157,11 @@ cv2.destroyAllWindows()
 
 #%%
 
-
-contours =cv2.findContours(mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)[0]
-big_contours = [i for i in contours if cv2.contourArea(i) > 30000]
-
-
-
-for cnt in big_contours:
-    # epsilon = 0.1*cv2.arcLength(cnt,True)
-    # approx = cv2.approxPolyDP(cnt,epsilon,True)
-    # print(approx)
-    cv2.drawContours(media_img, [cv2.boundingRect(cnt)], 0, (0, 255, 0), 3)
-   
    
 cv2.imshow("Detected Lines", cv2.resize(media_img, (900, 900)))
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
-#%%
-cv2.convexHull(cnt)
-
-#%%
-cnt = big_contours[0]
-hull = cv2.convexHull(cnt)
-for contour in big_contours:
-    print(cv2.convexHull(contour).shape)
 
 #%%
 
-
-mask_img = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
-
-# Find contours in the mask
-contours = cv2.findContours(mask_img, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)[0]
