@@ -89,3 +89,24 @@ def get_mask_naranjo(media_img):
     # Create a mask for pale orange
     mask = cv2.inRange(hsv, lower_orange, upper_orange)
     return mask
+
+
+
+
+
+def procesamiento_antiguo(media_img):
+    
+      gray = cv2.cvtColor(media_img, cv2.COLOR_BGR2GRAY) #convert roi into gray
+      Blur=cv2.GaussianBlur(gray,(5,5),1) #apply blur to roi
+    # Canny=cv2.Canny(Blur,10,50) #apply canny to roi
+      _,It = cv2.threshold(gray,0,255,cv2.THRESH_OTSU)
+      sx = cv2.Sobel(It,cv2.CV_32F,1,0)
+      sy = cv2.Sobel(It,cv2.CV_32F,0,1)
+      m = cv2.magnitude(sx,sy)
+      m = cv2.normalize(m,None,0.,255.,cv2.NORM_MINMAX,cv2.CV_8U)
+      m = cv2.ximgproc.thinning(m,None,cv2.ximgproc.THINNING_GUOHALL)
+      kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
+      m = cv2.dilate(m, kernel, iterations=2)
+
+
+

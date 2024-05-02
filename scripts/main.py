@@ -6,6 +6,7 @@ Created on Tue Apr  9 10:34:05 2024
 """
 
 from simce.utils import crear_directorios, get_n_paginas, get_n_preguntas, get_mask_naranjo
+from simce.functions import recorte_imagen
 from simce.config import dir_estudiantes
 import cv2
 from pathlib import Path
@@ -16,9 +17,6 @@ crear_directorios()
 
 n_pages = get_n_paginas()
 n_preguntas = get_n_preguntas() 
-
-
-
 
 #%%
 for num, rbd in enumerate(dir_estudiantes.iterdir()):
@@ -34,29 +32,38 @@ for num, rbd in enumerate(dir_estudiantes.iterdir()):
         q1 = 0
         # pregunta inicial páginas altas
         q2 = n_preguntas + 1
+        
+        # Para cada imagen del cuadernillo de un estudiante (2 páginas por imagen):
         for num_pag, pag in enumerate(rbd.glob(f'{estudiante}*')):
-             file_dir = re.sub(r'data\\input\\cuestionario_estudiantes\\', '', str(pag))
-             folder, file = file_dir.split('\\')
+            
+            # Obtengo carpeta del rbd y archivo del estudiante a partir del path:
+             folder, file = (pag.parts[-2], pag.parts[-1])
             
           #   if int(folder) == 10013 and estudiante == '4274572':
              print('file:', file)
              print(f'num_pag: {num_pag}')
             # print(pages)
+            # Quitamos extensión al archivo
              file_no_ext = Path(file).with_suffix('')
-     
+             # Creamos directorio si no existe
              Path(f'data/output/{folder}').mkdir(exist_ok=True)
-             page = str(file_no_ext)[-1]
              
+             # Obtenemos página del archivo
+             page = re.search('\d+$',str(file_no_ext)).group(0)
+             
+             # Leemos imagen
              img_preg = cv2.imread(str(pag),1)
              
-             x,y = img_preg.shape[:2]
-             img_crop = img_preg[:x - 200, 50:y-160]
-             
+             # Recortamos info innecesaria de imagen
+             img_crop = recorte_imagen(img_preg, 0, 200, 50, 160)
+
+             # Buscamos punto medio de imagen para dividirla en las dos páginas del cuadernillo
              punto_medio = int(np.round(img_crop.shape[1] / 2, 1))
              
-             img_p1 = img_crop[:, :punto_medio] 
-             img_p2 = img_crop[:, punto_medio:]
+             img_p1 = img_crop[:, :punto_medio] # página izquierda
+             img_p2 = img_crop[:, punto_medio:] # página derecha
              
+             # Obtenemos páginas del cuadernillo actual:
              if (num_pag % 2 == 0) & (num_pag != 0): # si n es par y no es la primera página
                  pages = (pages[1]-1, pages[0] + 1) 
              elif num_pag % 2 == 1:
@@ -64,24 +71,15 @@ for num, rbd in enumerate(dir_estudiantes.iterdir()):
              print(pages)
              
              
+             # Para cada una de las dos imágenes del cuadernillo
              for p, media_img in enumerate([img_p1, img_p2]):
-            #     print(media_img.shape)
                  
-                #  gray = cv2.cvtColor(media_img, cv2.COLOR_BGR2GRAY) #convert roi into gray
-                #  Blur=cv2.GaussianBlur(gray,(5,5),1) #apply blur to roi
-                # # Canny=cv2.Canny(Blur,10,50) #apply canny to roi
-                #  _,It = cv2.threshold(gray,0,255,cv2.THRESH_OTSU)
-                #  sx = cv2.Sobel(It,cv2.CV_32F,1,0)
-                #  sy = cv2.Sobel(It,cv2.CV_32F,0,1)
-                #  m = cv2.magnitude(sx,sy)
-                #  m = cv2.normalize(m,None,0.,255.,cv2.NORM_MINMAX,cv2.CV_8U)
-                #  m = cv2.ximgproc.thinning(m,None,cv2.ximgproc.THINNING_GUOHALL)
-                #  kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
-                #  m = cv2.dilate(m, kernel, iterations=2)
+                 # Detecto recuadros naranjos
                  m = get_mask_naranjo(media_img)
                  
-                 #Find my contours
+                 # Obtengo contornos
                  contours =cv2.findContours(m,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)[0]
+                 # Me quedo contornos grandes
                  big_contours = [i for i in contours if cv2.contourArea(i) > 30000]
                #  print([i[0][0][1] for i in big_contours] )
 
@@ -93,10 +91,11 @@ for num, rbd in enumerate(dir_estudiantes.iterdir()):
                     big_contours = big_contours[::-1]
              
                  for c in (big_contours):
-                     
+                     # Obtengo coordenadas de contornos
                      x,y,w,h= cv2.boundingRect(c)
                      cropped_img=media_img[y:y+h, x:x+w]
                      
+                     # Obtengo n° de pregunta en base a lógica de cuadernillo:
                      if pages[p] > pages[1-p]: # si es la pág más alta del cuadernillo
                          q2 -= 1
                          q = q2
