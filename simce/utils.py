@@ -25,8 +25,8 @@ def crear_directorios():
     
 
 def get_n_paginas():
-    rbds = dir_estudiantes.iterdir()
-    rbd1 = next(rbds)
+    rbds = list(dir_estudiantes.iterdir())
+    rbd1 = rbds[0]
         
     estudiantes_rbd = {re.search('\d{7}',str(i)).group(0) 
                        for i in rbd1.iterdir()}
@@ -37,8 +37,8 @@ def get_n_paginas():
 
 
 def get_n_preguntas():
-    rbds = dir_estudiantes.iterdir()
-    rbd1 = next(rbds)
+    rbds = list(dir_estudiantes.iterdir())
+    rbd1 = rbds[0]
         
     estudiantes_rbd = {re.search('\d{7}',str(i)).group(0) 
                        for i in rbd1.iterdir()}
@@ -76,3 +76,16 @@ def get_n_preguntas():
             print(len(big_contours))
             total_imagenes += len(big_contours)
     return total_imagenes - 2 # Eliminamos 2 preguntas de portada
+
+
+def get_mask_naranjo(media_img):
+
+    hsv = cv2.cvtColor(media_img, cv2.COLOR_BGR2HSV)
+    
+    # Define range for pale orange color in HSV
+    lower_orange = np.array([13, 31, 0])
+    upper_orange = np.array([29, 255, 255])
+    
+    # Create a mask for pale orange
+    mask = cv2.inRange(hsv, lower_orange, upper_orange)
+    return mask
