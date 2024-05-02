@@ -3,13 +3,13 @@ import cv2
 import pandas 
 from time import time
 
-import simce.functions as func
+import simce.proc_imgs as proc
 
 
 # Procesamiento a subpreguntas----------------------------------------------
 
 ## ejemplo
-preguntas_ejemplo = func.ls(r'data\output\09952')
+preguntas_ejemplo = proc.ls(r'data\output\09952')
 folder = 'Subpreguntas'                           ### EDITAR RUTA ###
 
 now = time()
@@ -23,10 +23,10 @@ for pregunta in preguntas_ejemplo:
     
     try:
         img_preg = cv2.imread(pregunta,1)
-        img_crop = func.recorte_imagen(img_preg)
-        img_crop_col = func.procesamiento_color(img_crop)
+        img_crop = proc.recorte_imagen(img_preg)
+        img_crop_col = proc.procesamiento_color(img_crop)
         
-        puntoy = func.obtener_puntos(img_crop_col)
+        puntoy = proc.obtener_puntos(img_crop_col)
         
         n = 1 # id subpregunta
         try:
