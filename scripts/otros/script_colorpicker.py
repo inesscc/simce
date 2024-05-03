@@ -9,7 +9,7 @@ import cv2
 import numpy as np 
 
 # path to image
-image_path = 'data\\input\\cuestionario_estudiantes\\09965\\4272762_1.jpg'
+image_path = 'data\\input\\cuestionario_estudiantes\\00093\\4003683_1.jpg'
 # resize if image is larger than 800x600
 resize = True
 
@@ -49,7 +49,7 @@ def updateImg():
 
 #%%
 ### initial setup:
-col = [[0,0,0],[179,255,255]]
+col = [[13, 52, 0],[29, 255, 255]]
 invert = False
 screen = "Control"
 cv2.namedWindow(screen, cv2.WINDOW_AUTOSIZE)

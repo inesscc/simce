@@ -8,7 +8,7 @@ import numpy as np
 import cv2
 from itertools import chain
 
-def get_mask_naranjo(media_img, lower_color=np.array([13, 31, 0]), upper_color = np.array([29, 255, 255])):
+def get_mask_naranjo(media_img, lower_color=np.array([13, 52, 0]), upper_color = np.array([29, 255, 255])):
     """
     Genera una máscara binaria para una imagen dada, basada en un rango de color en el espacio de color HSV.
 

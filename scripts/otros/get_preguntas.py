@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Apr  9 10:34:05 2024
+Created on Fri May  3 14:54:01 2024
 
 @author: jeconchao
 """
@@ -22,9 +22,7 @@ n_preguntas = get_n_preguntas()
 revisar_pregunta = []
 
 
-
-    
-#%% Subpreguntas
+#%% Preguntas
 for num, rbd in enumerate(dir_estudiantes.iterdir()):
     print(rbd)
 
@@ -45,7 +43,7 @@ for num, rbd in enumerate(dir_estudiantes.iterdir()):
             # Obtengo carpeta del rbd y archivo del estudiante a partir del path:
              folder, file = (pag.parts[-2], pag.parts[-1])
             
-          #   if int(folder) == 10013 and estudiante == '4274572':
+           #  if int(folder) == 93 and estudiante == '4003683':
              print('file:', file)
              print(f'num_pag: {num_pag}')
             # print(pages)
@@ -110,113 +108,12 @@ for num, rbd in enumerate(dir_estudiantes.iterdir()):
                          q = q1
                      else: # Para la portada
                          q = '_'
-                    
-                    # exportamos preguntas válidas:
-                     if q not in  ['_', 1]:
-                         
-                         
-                        try:
-                             # Obtenemos subpreguntas:
-                             img_pregunta_crop = proc.recorte_imagen(img_pregunta)
-                             img_crop_col = proc.procesamiento_color(img_pregunta_crop)
-        
-                             puntoy = proc.obtener_puntos(img_crop_col)
-                             
-                             try:
-                                 for i in range(len(puntoy)-1):
-                                     print(i)
-                                     cropped_img_sub = img_pregunta_crop[puntoy[i]:puntoy[i+1],]
-                                 
-                         
-                                    # id_img = f'{page}_{n}'
-                                     file_out = f'data/output/{folder}/{estudiante}_p{q}_{i+1}.jpg'
-                                     print(file_out)
-                                     cv2.imwrite(file_out, cropped_img_sub)
-                             except Exception as e:
-                                 print('Ups, ocurrió un error al recortar la imagen con subpregunta ' + str(i+1))
-                                 print(e)
-                                 revisar_pregunta.append(q+ '__'+ str(i+1))
-                        except Exception as e:
-                            
-                            print('Ups, ocurrió un error con la pregunta' + q)
-                            print(e)
-                            revisar_pregunta.append(q)
-    
+                   
+                     
 
-#%%
-import pandas as pd
-from pathlib import Path
-errores_procesamiento = dict()
-
-for folder in Path('data/output/').iterdir():
-    s = pd.Series([re.match('\d+', i.name).group(0) for i in folder.iterdir()]).value_counts()
-    if s.min() < 30 or s.max() > 30:
-        print(folder)
-        errores_procesamiento.update({folder: s[s<30].index})
-        
-        print('mín: ', s.min())
-        print('máx: ', s.max())
-
-#%%
-folder = '09952'
-e2 = Path(f'data/output/{folder}')
-s = pd.Series([re.match('\d+', i.name).group(0) for i in e2.iterdir()])
-s2 = pd.Series([re.search('p\d{1,2}', i.name).group(0) for i in e2.iterdir()])
-s3 = pd.Series([re.search('p\d{1,2}_\d{1,2}', i.name).group(0) for i in e2.iterdir()])
-df_check = pd.concat([s.rename('id_est'), s2.rename('preg'),
-                      s3.rename('subpreg')], axis=1)
-df_check.groupby('id_est').preg.value_counts()
-
-for name, group in df_check.groupby("id_est"):
-    if len(group["subpreg"].unique()) > 1:
-        print(f"Group {name} has different values in the 'file' column: {group['subpreg'].unique()}")
-
-#%%
-
-e3 = Path(f'data/output')
-n
-for n,i in enumerate(e3.rglob('*')):
-    pass
-    
-#%%
-
-
-cv2.imshow("Detected Lines",cv2.resize(media_img, (900, 900)))
-
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-
-#%%
-
-
-img_crop = proc.recorte_imagen(cropped_img)
-img_crop_col = proc.procesamiento_color(img_crop)
-
-puntoy = proc.obtener_puntos(img_crop_col)
-
-for i in range(len(puntoy)-1):
-    print(i)
-    cropped_img_sub = img_crop[puntoy[i]:puntoy[i+1],]
-   
-    cv2.imshow("Detected Lines", cropped_img_sub)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-
-
-
-# def apply_approx(cnt):
-
-#     epsilon = 0.45*cv2.arcLength(cnt,True)
-#     approx = cv2.approxPolyDP(cnt,epsilon,True)
-#     return approx 
-
-#%%
-
-   
-cv2.imshow("Detected Lines", cv2.resize(cropped_img, (900, 900)))
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-
-
-#%%
-
+                     file_out = f'data/output/{folder}/{estudiante}_p{q}.jpg'
+                     print(file_out)
+                     cv2.imwrite(file_out, img_pregunta)
+                     
+                     
+#%% Chequeos

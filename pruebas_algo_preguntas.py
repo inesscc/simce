@@ -25,6 +25,7 @@ n_preguntas = 29 # OJO, está hardcodeado, se podría hacer una función que obt
 pages = (n_pages, 1)
 q1 = 0
 q2 = n_preguntas +1
+
 for n, preg in enumerate(est):
     file_dir = re.sub(r'data\\input\\cuestionario_estudiantes\\', '', str(preg))
     folder, file = file_dir.split('\\')
@@ -105,6 +106,6 @@ for n, preg in enumerate(est):
             
 #%%
 
-cv2.imshow("Detected Lines", cv2.resize(cropped_img, (900, 900)))
+cv2.imshow("Detected Lines", cropped_img)
 cv2.waitKey(0)
 cv2.destroyAllWindows()

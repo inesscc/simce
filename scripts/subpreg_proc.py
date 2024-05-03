@@ -2,14 +2,14 @@ import numpy as np
 import cv2
 import pandas 
 from time import time
-
+from simce.utils import ls
 import simce.proc_imgs as proc
 
 
 # Procesamiento a subpreguntas----------------------------------------------
 
 ## ejemplo
-preguntas_ejemplo = proc.ls(r'data\output\09952')
+preguntas_ejemplo = ls(r'data\output\09952')
 folder = 'Subpreguntas'                           ### EDITAR RUTA ###
 
 now = time()
