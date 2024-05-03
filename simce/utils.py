@@ -15,13 +15,10 @@ from os import getcwd, scandir
 from os.path import abspath
 
 def crear_directorios():
-
-        dir_data.mkdir(exist_ok=True)
         
-        (dir_data / 'input').mkdir(exist_ok=True)
-        (dir_data / 'output').mkdir(exist_ok=True)
+        (dir_data / 'output').mkdir(exist_ok=True, parents=True)
         
-        (dir_data / 'input/cuestionario_estudiantes').mkdir(exist_ok=True)
+        (dir_data / 'input/cuestionario_estudiantes').mkdir(exist_ok=True, parents=True)
         (dir_data / 'input/cuestionario_padres').mkdir(exist_ok=True)
         
 def ls(ruta = getcwd()):

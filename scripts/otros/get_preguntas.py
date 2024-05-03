@@ -50,7 +50,7 @@ for num, rbd in enumerate(dir_estudiantes.iterdir()):
             # Quitamos extensión al archivo
              file_no_ext = Path(file).with_suffix('')
              # Creamos directorio si no existe
-             Path(f'data/output/{folder}').mkdir(exist_ok=True)
+             Path(f'data/output_preg/{folder}').mkdir(exist_ok=True)
              
              # Obtenemos página del archivo
              page = re.search('\d+$',str(file_no_ext)).group(0)
@@ -111,7 +111,7 @@ for num, rbd in enumerate(dir_estudiantes.iterdir()):
                    
                      
 
-                     file_out = f'data/output/{folder}/{estudiante}_p{q}.jpg'
+                     file_out = f'data/output_preg/{folder}/{estudiante}_p{q}.jpg'
                      print(file_out)
                      cv2.imwrite(file_out, img_pregunta)
                      
