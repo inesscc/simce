@@ -50,7 +50,7 @@ for num, rbd in enumerate(dir_estudiantes.iterdir()):
             # Quitamos extensión al archivo
              file_no_ext = Path(file).with_suffix('')
              # Creamos directorio si no existe
-             Path(f'data/output_preg/{folder}').mkdir(exist_ok=True)
+             Path(f'data/output_preg/{folder}').mkdir(exist_ok=True, parents=True)
              
              # Obtenemos página del archivo
              page = re.search('\d+$',str(file_no_ext)).group(0)
