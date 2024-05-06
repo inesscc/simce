@@ -24,8 +24,11 @@ revisar_pregunta = []
 
 #%% Preguntas
 for num, rbd in enumerate(dir_estudiantes.iterdir()):
-    print(rbd)
 
+    print('#################################')
+    print(rbd)
+    print(num)
+    print('#################################')
     estudiantes_rbd = {re.search('\d{7}',str(i)).group(0) 
                        for i in rbd.iterdir()}
     
@@ -114,6 +117,7 @@ for num, rbd in enumerate(dir_estudiantes.iterdir()):
                      file_out = f'data/output_preg/{folder}/{estudiante}_p{q}.jpg'
                      print(file_out)
                      cv2.imwrite(file_out, img_pregunta)
+                     
                      
                      
 #%% Chequeos

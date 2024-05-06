@@ -26,7 +26,10 @@ revisar_pregunta = []
     
 #%% Subpreguntas
 for num, rbd in enumerate(dir_estudiantes.iterdir()):
+    print('############################')
     print(rbd)
+    print(num)
+    print('############################')
 
     estudiantes_rbd = {re.search('\d{7}',str(i)).group(0) 
                        for i in rbd.iterdir()}
@@ -118,7 +121,8 @@ for num, rbd in enumerate(dir_estudiantes.iterdir()):
                         try:
                              # Obtenemos subpreguntas:
                              img_pregunta_crop = proc.recorte_imagen(img_pregunta)
-                             img_crop_col = proc.procesamiento_color(img_pregunta_crop)
+                             img_crop_col = get_mask_naranjo(img_pregunta_crop, lower_color=np.array([0, 114, 139]), upper_color = np.array([17, 255, 255]))
+                             #img_crop_col = proc.procesamiento_color(img_pregunta_crop)
         
                              puntoy = proc.obtener_puntos(img_crop_col)
                              
