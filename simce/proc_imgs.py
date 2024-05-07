@@ -25,7 +25,8 @@ def get_mask_naranjo(media_img, lower_color=np.array([13, 52, 0]), upper_color =
 
     # Crea una máscara binaria donde los píxeles de la imagen que están dentro del rango de color especificado son blancos, y todos los demás píxeles son negros.
     mask = cv2.inRange(hsv, lower_color, upper_color)
-    
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
+    mask = cv2.dilate(mask, kernel, iterations=2)
     # Devuelve la máscara
     return mask
 
@@ -38,7 +39,7 @@ def get_mask_naranjo(media_img, lower_color=np.array([13, 52, 0]), upper_color =
       
       
 
-def recorte_imagen(img_preg, x0 =130, x1= 30, y0 = 50, y1=50):
+def recorte_imagen(img_preg, x0 =130, x1= 20, y0 = 50, y1=50):
     """Funcion para recortar margenes de las imagenes
 
     Args:
@@ -77,7 +78,7 @@ def procesamiento_color(img_crop):
 
 ### Procesamiento sub-pregunta
 
-def obtener_puntos(img_crop_canny, threshold = 100, minLineLength = 100):
+def obtener_puntos(img_crop_canny, threshold = 100, minLineLength = 200):
     """
     Funcion que identifica lineas para obtener puntos en el eje "y" para realizar el recorte a subpreguntas
 
@@ -97,15 +98,15 @@ def obtener_puntos(img_crop_canny, threshold = 100, minLineLength = 100):
     puntoy.append(img_crop_canny.shape[0])
     puntoy = sorted(puntoy)
     
-    print(puntoy)
+    #print(puntoy)
     
     y = []
     for i in range(len(puntoy)-1):
-        if puntoy[i+1]- puntoy[i]<35:
+        if puntoy[i+1]- puntoy[i]<27:
             y.append(i+1)
 
     print(puntoy)
-    print(y)
+    #print(y)
     
     for index in sorted(y, reverse=True):
         del puntoy[index]

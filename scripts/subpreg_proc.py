@@ -4,6 +4,7 @@ import pandas
 from time import time
 from simce.utils import ls
 import simce.proc_imgs as proc
+from simce.proc_imgs import get_mask_naranjo
 
 
 # Procesamiento a subpreguntas----------------------------------------------
@@ -24,7 +25,7 @@ for pregunta in preguntas_ejemplo:
     try:
         img_preg = cv2.imread(pregunta,1)
         img_crop = proc.recorte_imagen(img_preg)
-        img_crop_col = proc.procesamiento_color(img_crop)
+        img_crop_col = get_mask_naranjo(img_crop, lower_color=np.array([0, 114, 139]), upper_color = np.array([17, 255, 255]))
         
         puntoy = proc.obtener_puntos(img_crop_col)
         

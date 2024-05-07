@@ -9,7 +9,7 @@ import cv2
 import numpy as np 
 
 # path to image
-image_path = 'data\\input\\cuestionario_estudiantes\\00093\\4003683_1.jpg'
+image_path = 'data\\output_preg\\10008\\4274380_p12.jpg'
 # resize if image is larger than 800x600
 resize = True
 
