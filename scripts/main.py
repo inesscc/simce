@@ -14,6 +14,7 @@ from pathlib import Path
 import re
 import numpy as np
 import simce.proc_imgs as proc
+import pandas as pd
 # Creamos directorios
 crear_directorios()
 
@@ -144,32 +145,33 @@ for num, rbd in enumerate(dir_estudiantes.iterdir()):
     
 
 #%%
-import pandas as pd
-from pathlib import Path
-errores_procesamiento = dict()
 
-for folder in Path('data/output/').iterdir():
-    s = pd.Series([re.match('\d+', i.name).group(0) for i in folder.iterdir()]).value_counts()
-    if s.min() < 30 or s.max() > 30:
-        print(folder)
-        errores_procesamiento.update({folder: s[s<30].index})
-        
-        print('mín: ', s.min())
-        print('máx: ', s.max())
 
 #%%
-folder = '09952'
-e2 = Path(f'data/output/{folder}')
-s = pd.Series([re.match('\d+', i.name).group(0) for i in e2.iterdir()])
-s2 = pd.Series([re.search('p\d{1,2}', i.name).group(0) for i in e2.iterdir()])
-s3 = pd.Series([re.search('p\d{1,2}_\d{1,2}', i.name).group(0) for i in e2.iterdir()])
-df_check = pd.concat([s.rename('id_est'), s2.rename('preg'),
-                      s3.rename('subpreg')], axis=1)
-df_check.groupby('id_est').preg.value_counts()
+folder = '09954'
 
-for name, group in df_check.groupby("id_est"):
-    if len(group["subpreg"].unique()) > 1:
-        print(f"Group {name} has different values in the 'file' column: {group['subpreg'].unique()}")
+for folder in Path('data/output/').iterdir():
+
+
+    s = pd.Series([re.match('\d+', i.name).group(0) for i in folder.iterdir()])
+    s2 = pd.Series([re.search('p\d{1,2}', i.name).group(0) for i in folder.iterdir()])
+    s3 = pd.Series([re.search('p\d{1,2}_\d{1,2}', i.name).group(0) for i in folder.iterdir()])
+    df_check = pd.concat([s.rename('id_est'), s2.rename('preg'),
+                          s3.rename('subpreg')], axis=1)
+    
+    n_est = df_check.id_est.nunique()
+    subpregs = df_check.groupby('subpreg').id_est.count()
+    
+    
+    df_check.groupby('id_est').preg.value_counts()
+    
+    nsubpreg_x_alumno = s.value_counts()
+    
+    if not nsubpreg_x_alumno[nsubpreg_x_alumno.ne(165)].empty:
+        print(f'RBD {folder.name}:\n')
+        print(nsubpreg_x_alumno[nsubpreg_x_alumno.ne(165)])
+        print(subpregs[subpregs.ne(n_est)]) 
+        print('\n')
 
 #%%
 

@@ -117,3 +117,16 @@ for num, rbd in enumerate(dir_estudiantes.iterdir()):
                      
                      
 #%% Chequeos
+
+import pandas as pd
+from pathlib import Path
+errores_procesamiento = dict()
+
+for folder in Path('data/output_preg/').iterdir():
+    s = pd.Series([re.match('\d+', i.name).group(0) for i in folder.iterdir()]).value_counts()
+    if s.min() < 30 or s.max() > 30:
+        print(folder)
+        errores_procesamiento.update({folder: s[s<30].index})
+        
+        print('mín: ', s.min())
+        print('máx: ', s.max())

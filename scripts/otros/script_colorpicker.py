@@ -49,7 +49,7 @@ def updateImg():
 
 #%%
 ### initial setup:
-col = [[13, 52, 0],[29, 255, 255]]
+col = [[0, 0, 0],[255, 255, 255]]
 invert = False
 screen = "Control"
 cv2.namedWindow(screen, cv2.WINDOW_AUTOSIZE)
