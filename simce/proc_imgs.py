@@ -105,7 +105,7 @@ def obtener_puntos(img_crop_canny, threshold = 100, minLineLength = 200):
         if puntoy[i+1]- puntoy[i]<27:
             y.append(i+1)
 
-    print(puntoy)
+   # print(puntoy)
     #print(y)
     
     for index in sorted(y, reverse=True):

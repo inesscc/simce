@@ -9,6 +9,7 @@ from simce.proc_imgs import get_mask_naranjo, recorte_imagen
 
 from simce.config import dir_estudiantes
 from simce.utils import crear_directorios, get_n_paginas, get_n_preguntas
+
 import cv2
 from pathlib import Path
 import re
