@@ -10,3 +10,6 @@ from pathlib import Path
 dir_data = Path('data/')
 
 dir_estudiantes = Path('data/input/cuestionario_estudiantes')
+dir_padres = Path('data/input/cuestionario_padres')
+
+dir_output = Path('data/output')

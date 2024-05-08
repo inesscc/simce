@@ -36,7 +36,7 @@ def get_mask_naranjo(media_img, lower_color=np.array([13, 52, 0]), upper_color=n
     # Esto permite eliminar manchas de color que a veces se dan
     idx_low_rows = np.where(mean_row < 100)[0]
     mask[idx_low_rows, :] = 0
-    # Devuelve la máscara
+
     return mask
 
 

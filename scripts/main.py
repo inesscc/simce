@@ -7,7 +7,7 @@ Created on Tue Apr  9 10:34:05 2024
 from os import environ
 from simce.proc_imgs import get_mask_naranjo, recorte_imagen
 
-from simce.config import dir_estudiantes
+from simce.config import dir_estudiantes, dir_output
 from simce.utils import crear_directorios
 from simce.trabajar_rutas import get_n_paginas, get_n_preguntas
 from simce.errors import anotar_error
@@ -40,7 +40,7 @@ def get_baseline():
 
     get_subpreguntas(filter_rbd=rbds)
 
-    rutas_output = [i for i in islice(Path('data/output').iterdir(), 3)]
+    rutas_output = [i for i in islice(dir_output.iterdir(), 3)]
 
     rutas_output_total = []
 
@@ -120,7 +120,7 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
                 # Quitamos extensión al archivo
                 # file_no_ext = Path(file).with_suffix('')
                 # Creamos directorio si no existe
-                Path(f'data/output/{folder}').mkdir(exist_ok=True)
+                (dir_output / f'{folder}').mkdir(exist_ok=True)
 
                 # Obtenemos página del archivo
                 # page = re.search('\d+$',str(file_no_ext)).group(0)
@@ -213,7 +213,8 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
                                                                             puntoy[i+1],]
 
                                         # id_img = f'{page}_{n}'
-                                        file_out = f'data/output/{folder}/{estudiante}_p{q}_{i+1}.jpg'
+                                        file_out = str(
+                                            dir_output / f'{folder}/{estudiante}_p{q}_{i+1}.jpg')
                                         # print(file_out)
                                         cv2.imwrite(file_out, cropped_img_sub)
 
@@ -222,7 +223,7 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
                                             f'Ups, ocurrió un error al recortar la imagen \
                                             con subpregunta {i+1}')
                                         print(e)
-                                        preg_error = f'data/output/{folder}/{estudiante}_p{q}_{i+1}'
+                                        preg_error = str(dir_output / f'{folder}/{estudiante}_p{q}_{i+1}')
                                         anotar_error(
                                             pregunta=preg_error,
                                             error='Subregunta no pudo ser procesada')
@@ -231,7 +232,7 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
 
                             except Exception as e:
 
-                                preg_error = f'data/output/{folder}/{estudiante}_p{q}'
+                                preg_error = str(dir_output / f'{folder}/{estudiante}_p{q}')
                                 anotar_error(
                                     pregunta=preg_error, error='Pregunta no pudo ser procesada')
                                 print(
@@ -244,7 +245,7 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
                 error = f'N° de subpreguntas incorrecto para estudiante {estudiante},\
                     se encontraron {n_subpreg} subpreguntas'
                 print(error)
-                preg_error = f'data/output/{folder}/{estudiante}'
+                preg_error = str(dir_output / f'{folder}/{estudiante}')
 
                 anotar_error(
                     pregunta=preg_error, error=error)
@@ -296,7 +297,7 @@ revisar_pregunta = []
 
 
 if __name__ == '__main__':
-    # get_subpreguntas(filter_rbd='10121', filter_rbd_int=False)
+    get_subpreguntas(filter_rbd='10121', filter_rbd_int=False)
 
     # a = get_subpreguntas(filter_estudiante='4279607')
 
@@ -334,7 +335,7 @@ if __name__ == '__main__':
         pass
 
     # %%
-    cv2.imshow("Detected Lines", img_pregunta)
+    cv2.imshow("Detected Lines", img_crop_col)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     # %%
