@@ -8,7 +8,8 @@ import numpy as np
 import cv2
 from itertools import chain
 
-def get_mask_naranjo(media_img, lower_color=np.array([13, 52, 0]), upper_color = np.array([29, 255, 255])):
+
+def get_mask_naranjo(media_img, lower_color=np.array([13, 52, 0]), upper_color=np.array([29, 255, 255])):
     """
     Genera una máscara binaria para una imagen dada, basada en un rango de color en el espacio de color HSV.
 
@@ -23,23 +24,23 @@ def get_mask_naranjo(media_img, lower_color=np.array([13, 52, 0]), upper_color =
     # Convierte la imagen de entrada de BGR a HSV
     hsv = cv2.cvtColor(media_img, cv2.COLOR_BGR2HSV)
 
-    # Crea una máscara binaria donde los píxeles de la imagen que están dentro del rango de color especificado son blancos, y todos los demás píxeles son negros.
+    # Crea una máscara binaria donde los píxeles de la imagen que están dentro del rango de color
+    # especificado son blancos, y todos los demás píxeles son negros.
     mask = cv2.inRange(hsv, lower_color, upper_color)
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
     mask = cv2.dilate(mask, kernel, iterations=2)
+
+    # Calculamos la media de cada fila
+    mean_row = mask.mean(axis=1)
+    # Si la media es menor a 100, reemplazamos con 0 (negro):
+    # Esto permite eliminar manchas de color que a veces se dan
+    idx_low_rows = np.where(mean_row < 100)[0]
+    mask[idx_low_rows, :] = 0
     # Devuelve la máscara
     return mask
 
 
-
-
-
-
-      
-      
-      
-
-def recorte_imagen(img_preg, x0 =130, x1= 20, y0 = 50, y1=50):
+def recorte_imagen(img_preg, x0=130, x1=20, y0=50, y1=50):
     """Funcion para recortar margenes de las imagenes
 
     Args:
@@ -52,8 +53,8 @@ def recorte_imagen(img_preg, x0 =130, x1= 20, y0 = 50, y1=50):
     Returns:
         (array imagen): imagen cortada
     """
-    
-    x,y = img_preg.shape[:2]
+
+    x, y = img_preg.shape[:2]
     img_crop = img_preg[x0:x-x1, y0:y-y1]
     return img_crop
 
@@ -72,13 +73,13 @@ def procesamiento_color(img_crop):
     gray = cv2.cvtColor(img_crop, cv2.COLOR_BGR2GRAY)
     # blur = cv2.GaussianBlur(gray, (5, 5), 0)
     Canny = cv2.Canny(gray, 50, 150, apertureSize=3)
-    
+
     return Canny
 
 
-### Procesamiento sub-pregunta
+# Procesamiento sub-pregunta
 
-def obtener_puntos(img_crop_canny, threshold = 100, minLineLength = 200):
+def obtener_puntos(img_crop_canny, threshold=100, minLineLength=200):
     """
     Funcion que identifica lineas para obtener puntos en el eje "y" para realizar el recorte a subpreguntas
 
@@ -89,42 +90,43 @@ def obtener_puntos(img_crop_canny, threshold = 100, minLineLength = 200):
         lines: _description_
     """
     # obteniendo lineas
-    lines = cv2.HoughLinesP(img_crop_canny, 1, np.pi/180, threshold= threshold, minLineLength = minLineLength)
-    
+    lines = cv2.HoughLinesP(img_crop_canny, 1, np.pi/180,
+                            threshold=threshold, minLineLength=minLineLength)
+
     indices_ordenados = np.argsort(lines[:, :, 1].flatten())
     lines_sorted = lines[indices_ordenados]
-    
-    puntoy = list(set(chain.from_iterable(lines_sorted[:, :,1].tolist())))
+
+    puntoy = list(set(chain.from_iterable(lines_sorted[:, :, 1].tolist())))
     puntoy.append(img_crop_canny.shape[0])
     puntoy = sorted(puntoy)
-    
-    #print(puntoy)
-    
+
+    # print(puntoy)
+
     y = []
     for i in range(len(puntoy)-1):
-        if puntoy[i+1]- puntoy[i]<27:
+        if puntoy[i+1] - puntoy[i] < 27:
             y.append(i+1)
 
    # print(puntoy)
-    #print(y)
-    
+    # print(y)
+
     for index in sorted(y, reverse=True):
         del puntoy[index]
-    
+
     return puntoy
 
 
 def procesamiento_antiguo(media_img):
     '''Función en desuso. Procesaba imagen para detección de contornos'''
-    
-    gray = cv2.cvtColor(media_img, cv2.COLOR_BGR2GRAY) #convert roi into gray
-    #Blur=cv2.GaussianBlur(gray,(5,5),1) #apply blur to roi
-    #Canny=cv2.Canny(Blur,10,50) #apply canny to roi
-    _,It = cv2.threshold(gray,0,255,cv2.THRESH_OTSU)
-    sx = cv2.Sobel(It,cv2.CV_32F,1,0)
-    sy = cv2.Sobel(It,cv2.CV_32F,0,1)
-    m = cv2.magnitude(sx,sy)
-    m = cv2.normalize(m,None,0.,255.,cv2.NORM_MINMAX,cv2.CV_8U)
-    m = cv2.ximgproc.thinning(m,None,cv2.ximgproc.THINNING_GUOHALL)
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
+
+    gray = cv2.cvtColor(media_img, cv2.COLOR_BGR2GRAY)  # convert roi into gray
+    # Blur=cv2.GaussianBlur(gray,(5,5),1) #apply blur to roi
+    # Canny=cv2.Canny(Blur,10,50) #apply canny to roi
+    _, It = cv2.threshold(gray, 0, 255, cv2.THRESH_OTSU)
+    sx = cv2.Sobel(It, cv2.CV_32F, 1, 0)
+    sy = cv2.Sobel(It, cv2.CV_32F, 0, 1)
+    m = cv2.magnitude(sx, sy)
+    m = cv2.normalize(m, None, 0., 255., cv2.NORM_MINMAX, cv2.CV_8U)
+    m = cv2.ximgproc.thinning(m, None, cv2.ximgproc.THINNING_GUOHALL)
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
     m = cv2.dilate(m, kernel, iterations=2)

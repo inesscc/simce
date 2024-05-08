@@ -8,7 +8,8 @@ from os import environ
 from simce.proc_imgs import get_mask_naranjo, recorte_imagen
 
 from simce.config import dir_estudiantes
-from simce.utils import crear_directorios, get_n_paginas, get_n_preguntas
+from simce.utils import crear_directorios
+from simce.trabajar_rutas import get_n_paginas, get_n_preguntas
 from simce.errors import anotar_error
 import cv2
 from pathlib import Path
@@ -17,32 +18,65 @@ import numpy as np
 import simce.proc_imgs as proc
 import pandas as pd
 from dotenv import load_dotenv
+from itertools import islice
+
+
 load_dotenv()
 
 # Creamos directorios
 crear_directorios()
 
-if environ.get('ENVIRONMENT') == 'dev':
-    n_pages = 12
-    n_preguntas = 29
-    n_subpreg_tot = 165
-else:
-    n_pages = get_n_paginas()
-    n_preguntas = get_n_preguntas()
-revisar_pregunta = []
-
-
 # %% Subpreguntas
+
+
+def get_baseline():
+    rbds = set()
+    paths = []
+
+    for rbd in (islice(dir_estudiantes.iterdir(), 3)):
+        print(rbd)
+        paths.extend(list(rbd.iterdir()))
+        rbds.update([rbd.name])
+
+    get_subpreguntas(filter_rbd=rbds)
+
+    rutas_output = [i for i in islice(Path('data/output').iterdir(), 3)]
+
+    rutas_output_total = []
+
+    for ruta in rutas_output:
+        rutas_output_total.extend(list(ruta.iterdir()))
+
+    df = pd.DataFrame([str(i) for i in rutas_output_total], columns=['ruta'])
+
+    df['est'] = df.ruta.str.extract(r'(\d{7})')
+    df['preg'] = df.ruta.str.extract(r'p(\d{1,2})').astype(int)
+    df['subpreg'] = df.ruta.str.extract(r'p(\d{1,2}_\d{1,2})')
+    # n° mediano de subpreguntas por pregunta, de acuerdo a datos obtenidos de
+    # alumnos en primeros 3 colegios
+    df_resumen = (df.groupby(['est']).preg.value_counts()
+                  .groupby('preg').median().sort_values()
+                  .sort_index().astype(int))
+
+    df_resumen.index = 'p'+df_resumen.index.astype('string')
+
+    return df_resumen
+
 
 def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
                      filter_rbd_int=False):
+
+    # Si queremos correr función para rbd específico
     if filter_rbd:
+        # Si queremos correr función desde un rbd en adelante
         if filter_rbd_int:
             directorios = [i for i in dir_estudiantes.iterdir()
                            if int(i.name) >= filter_rbd]
+        # Si queremos correr función solo para el rbd ingresado
         else:
-            directorios = [i for i in dir_estudiantes.iterdir()
-                           if i.name == filter_rbd]
+            if isinstance(filter_rbd, str):
+                filter_rbd = [filter_rbd]
+            directorios = [i for i in dir_estudiantes.iterdir() if i.name in filter_rbd]
     else:
         directorios = dir_estudiantes.iterdir()
 
@@ -55,10 +89,12 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
 
         estudiantes_rbd = {re.search(r'\d{7}', str(i)).group(0)
                            for i in rbd.iterdir()}
-
+        # Si queremos correr función para un estudiante específico:
         if filter_estudiante:
+            if isinstance(filter_estudiante, str):
+                filter_estudiante = [filter_estudiante]
             estudiantes_rbd = {
-                i for i in estudiantes_rbd if i == filter_estudiante}
+                i for i in estudiantes_rbd if i in filter_estudiante}
 
         for estudiante in estudiantes_rbd:
 
@@ -216,80 +252,122 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
     return revisar_pregunta
 
 
-get_subpreguntas(filter_rbd='10044', filter_rbd_int=False)
-# a = get_subpreguntas(filter_estudiante='4275748')
+if environ.get('ENVIRONMENT') == 'dev':
+    n_pages = 12
+    n_preguntas = 29
+    n_subpreg_tot = 165
+    subpreg_x_preg = {'p2': 12,
+                      'p3': 6,
+                      'p4': 10,
+                      'p5': 6,
+                      'p6': 7,
+                      'p7': 6,
+                      'p8': 8,
+                      'p9': 5,
+                      'p10': 8,
+                      'p11': 9,
+                      'p12': 4,
+                      'p13': 4,
+                      'p14': 7,
+                      'p15': 5,
+                      'p16': 4,
+                      'p17': 4,
+                      'p18': 6,
+                      'p19': 6,
+                      'p20': 4,
+                      'p21': 4,
+                      'p22': 4,
+                      'p23': 4,
+                      'p24': 6,
+                      'p25': 11,
+                      'p26': 6,
+                      'p27': 4,
+                      'p28': 2,
+                      'p29': 3}
+else:
+    n_pages = get_n_paginas()
+    n_preguntas = get_n_preguntas()
+    subpreg_x_preg = get_baseline()
 
-# %%
-folder = '09954'
+revisar_pregunta = []
 
-for folder in Path('data/output/').iterdir():
-
-    s = pd.Series([re.match(r'\d+', i.name).group(0) for i in folder.iterdir()])
-    s2 = pd.Series([re.search(r'p\d{1,2}', i.name).group(0)
-                   for i in folder.iterdir()])
-    s3 = pd.Series(
-        [re.search(r'p\d{1,2}_\d{1,2}', i.name).group(0) for i in folder.iterdir()])
-    df_check = pd.concat([s.rename('id_est'), s2.rename('preg'),
-                          s3.rename('subpreg')], axis=1)
-
-    n_est = df_check.id_est.nunique()
-    subpregs = df_check.groupby('subpreg').id_est.count()
-
-    df_check.groupby('id_est').preg.value_counts()
-
-    nsubpreg_x_alumno = s.value_counts()
-
-    if not nsubpreg_x_alumno[nsubpreg_x_alumno.ne(165)].empty:
-        print(f'RBD {folder.name}:\n')
-        print(nsubpreg_x_alumno[nsubpreg_x_alumno.ne(165)])
-        print(subpregs[subpregs.ne(n_est)])
-        print('\n')
-
-# %%
-
-e3 = Path('data/output')
-
-for n, i in enumerate(e3.rglob('*')):
-    pass
-
-# %%
-cv2.imshow("Detected Lines", img_crop)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-# %%
-cv2.imshow("Detected Lines", cv2.resize(img_crop, (900, 900)))
-cv2.waitKey(0)
-cv2.destroyAllWindows()
 
 # %%
 
 
-img_crop = proc.recorte_imagen(cropped_img)
-img_crop_col = proc.procesamiento_color(img_crop)
+if __name__ == '__main__':
+    # get_subpreguntas(filter_rbd='10121', filter_rbd_int=False)
 
-puntoy = proc.obtener_puntos(img_crop_col)
+    # a = get_subpreguntas(filter_estudiante='4279607')
 
-for i in range(len(puntoy)-1):
-    print(i)
-    cropped_img_sub = img_crop[puntoy[i]:puntoy[i+1],]
+    # %%
+    folder = '09954'
 
-    cv2.imshow("Detected Lines", cropped_img_sub)
+    for folder in Path('data/output/').iterdir():
+
+        s = pd.Series([re.match(r'\d+', i.name).group(0) for i in folder.iterdir()])
+        s2 = pd.Series([re.search(r'p\d{1,2}', i.name).group(0)
+                       for i in folder.iterdir()])
+        s3 = pd.Series(
+            [re.search(r'p\d{1,2}_\d{1,2}', i.name).group(0) for i in folder.iterdir()])
+        df_check = pd.concat([s.rename('id_est'), s2.rename('preg'),
+                              s3.rename('subpreg')], axis=1)
+
+        n_est = df_check.id_est.nunique()
+        subpregs = df_check.groupby('subpreg').id_est.count()
+
+        df_check.groupby('id_est').preg.value_counts()
+
+        nsubpreg_x_alumno = s.value_counts()
+
+        if not nsubpreg_x_alumno[nsubpreg_x_alumno.ne(165)].empty:
+            print(f'RBD {folder.name}:\n')
+            print(nsubpreg_x_alumno[nsubpreg_x_alumno.ne(165)])
+            print(subpregs[subpregs.ne(n_est)])
+            print('\n')
+
+    # %%
+
+    e3 = Path('data/output')
+
+    for n, i in enumerate(e3.rglob('*')):
+        pass
+
+    # %%
+    cv2.imshow("Detected Lines", img_pregunta)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    # %%
+    cv2.imshow("Detected Lines", cv2.resize(m, (900, 900)))
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
+    # %%
 
-# def apply_approx(cnt):
+    img_crop = proc.recorte_imagen(cropped_img)
+    img_crop_col = proc.procesamiento_color(img_crop)
 
-#     epsilon = 0.45*cv2.arcLength(cnt,True)
-#     approx = cv2.approxPolyDP(cnt,epsilon,True)
-#     return approx
+    puntoy = proc.obtener_puntos(img_crop_col)
 
-# %%
+    for i in range(len(puntoy)-1):
+        print(i)
+        cropped_img_sub = img_crop[puntoy[i]:puntoy[i+1],]
 
+        cv2.imshow("Detected Lines", cropped_img_sub)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
-cv2.imshow("Detected Lines", cv2.resize(cropped_img, (900, 900)))
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+    # def apply_approx(cnt):
+
+    #     epsilon = 0.45*cv2.arcLength(cnt,True)
+    #     approx = cv2.approxPolyDP(cnt,epsilon,True)
+    #     return approx
+
+    # %%
+
+    cv2.imshow("Detected Lines", cv2.resize(cropped_img, (900, 900)))
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
 
 # %%
