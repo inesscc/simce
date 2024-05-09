@@ -9,8 +9,8 @@ import pandas as pd
 from simce.proc_imgs import get_mask_naranjo, recorte_imagen
 
 from simce.config import dir_estudiantes
-from simce.utils import crear_directorios, get_n_paginas, get_n_preguntas
-
+from simce.trabajar_rutas import get_n_paginas, get_n_preguntas
+from simce.utils import crear_directorios
 import cv2
 from pathlib import Path
 import re
@@ -36,7 +36,7 @@ for num, rbd in enumerate(dir_estudiantes.iterdir()):
 #    if rbd.name == '09963':
     for n, estudiante in enumerate(estudiantes_rbd):
 
-        if estudiante == '4279607':
+        if estudiante == '4278294':
             # páginas del cuardenillo
             pages = (n_pages, 1)
             # pregunta inicial páginas bajas
@@ -60,7 +60,7 @@ for num, rbd in enumerate(dir_estudiantes.iterdir()):
                 Path(f'data/output_preg/{folder}').mkdir(exist_ok=True, parents=True)
 
                 # Obtenemos página del archivo
-                page = re.search('\d+$', str(file_no_ext)).group(0)
+                page = re.search(r'\d+$', str(file_no_ext)).group(0)
 
                 # Leemos imagen
                 img_preg = cv2.imread(str(pag), 1)

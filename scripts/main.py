@@ -249,8 +249,10 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
 
                 anotar_error(
                     pregunta=preg_error, error=error)
+            else:
+                print(f'{n_subpreg=}')
 
-    return revisar_pregunta
+    return 'Éxito!'
 
 
 if environ.get('ENVIRONMENT') == 'dev':
@@ -290,14 +292,12 @@ else:
     n_preguntas = get_n_preguntas()
     subpreg_x_preg = get_baseline()
 
-revisar_pregunta = []
-
 
 # %%
 
 
 if __name__ == '__main__':
-    get_subpreguntas(filter_rbd='10121', filter_rbd_int=False)
+    get_subpreguntas(filter_rbd='10044', filter_rbd_int=False)
 
     # a = get_subpreguntas(filter_estudiante='4279607')
 
