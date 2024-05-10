@@ -15,7 +15,7 @@ import cv2
 from pathlib import Path
 import re
 import numpy as np
-import simce.proc_imgs as proc
+
 # Creamos directorios
 crear_directorios()
 

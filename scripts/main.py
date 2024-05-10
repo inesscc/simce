@@ -7,7 +7,7 @@ Created on Tue Apr  9 10:34:05 2024
 
 from simce.utils import crear_directorios
 from simce.proc_imgs import get_subpreguntas
-
+from simce.proc_tabla_99 import get_tablas_99
 import cv2
 from pathlib import Path
 import re
@@ -19,11 +19,14 @@ crear_directorios()
 
 # %% Subpreguntas
 
-
 # %%
 
 
 if __name__ == '__main__':
+
+    # 1. Generar tablas con dobles marcas
+    get_tablas_99()
+    # 2.  Obtener preguntas
     get_subpreguntas(filter_estudiante='4054806')
 
     # a = get_subpreguntas(filter_estudiante='4279607')

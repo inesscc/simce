@@ -8,10 +8,11 @@ Created on Tue Apr  9 10:50:14 2024
 from pathlib import Path
 
 dir_data = Path('data/')
+dir_input = dir_data / 'input'
+dir_estudiantes = dir_input / '/cuestionario_estudiantes'
+dir_padres = dir_input / '/cuestionario_padres'
 
-dir_estudiantes = Path('data/input/cuestionario_estudiantes')
-dir_padres = Path('data/input/cuestionario_padres')
-
-dir_output = Path('data/output')
+dir_output = Path('data/output/output_subpreg')
+dir_tabla_99 = Path('data/output/output_tabla_99/')
 
 regex_estudiante = r'(\d{7,})_.*jpg'
