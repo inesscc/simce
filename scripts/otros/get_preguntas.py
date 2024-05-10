@@ -36,7 +36,7 @@ for num, rbd in enumerate(dir_estudiantes.iterdir()):
 #    if rbd.name == '09963':
     for n, estudiante in enumerate(estudiantes_rbd):
 
-        if estudiante == '4278294':
+        if estudiante == '4035677':
             # páginas del cuardenillo
             pages = (n_pages, 1)
             # pregunta inicial páginas bajas

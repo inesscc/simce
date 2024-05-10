@@ -13,3 +13,5 @@ dir_estudiantes = Path('data/input/cuestionario_estudiantes')
 dir_padres = Path('data/input/cuestionario_padres')
 
 dir_output = Path('data/output')
+
+regex_estudiante = r'(\d{7,})_.*jpg'
