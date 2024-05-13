@@ -18,17 +18,23 @@ from os import environ
 from pathlib import Path
 load_dotenv()
 
+VALID_INPUT = {'cuadernillo', 'pagina'}
 
-def get_preg_por_hoja(armar_dic='cuadernillo'):
+
+def get_preg_por_hoja(nivel='cuadernillo'):
+
+    if nivel not in VALID_INPUT:
+        raise ValueError(f"nivel debe ser uno de los siguientes valores: {VALID_INPUT}")
 
     primer_est = re.search(
         regex_estudiante,
         # primer estudiante del primer rbd:
         str(next(next(dir_estudiantes.iterdir()).iterdir()))).group(1)
-    if armar_dic == 'cuadernillo':
-        dic = get_subpreguntas(filter_estudiante=primer_est, armar_dic_cuadernillo=True)
-    elif armar_dic == 'pagina':
-        dic = get_subpreguntas(filter_estudiante=primer_est, armar_dic_pagina=True)
+    if nivel == 'cuadernillo':
+        dic = get_subpreguntas(filter_estudiante=primer_est,
+                               nivel=nivel)
+    elif nivel == 'pagina':
+        dic = get_subpreguntas(filter_estudiante=primer_est, nivel=nivel)
     return dic
 
 
@@ -83,30 +89,29 @@ if environ.get('ENVIRONMENT') == 'dev':
                       'p24': 6,                      'p25': 11,
                       'p26': 6, 'p27': 4, 'p28': 2, 'p29': 3}
 
-    dic_cuadernillo = {'p29': '1', 'p28': '1', 'p27': '1', 'p2': '2', 'p3': '2', 'p26': '2', 'p25': '2',
-                       'p24': '3', 'p23': '3', 'p22': '3', 'p21': '3', 'p4': '3', 'p5': '3', 'p6': '4',
-                       'p7': '4', 'p20': '4', 'p19': '4', 'p18': '4', 'p17': '5', 'p16': '5', 'p15': '5',
-                       'p8': '5', 'p9': '5', 'p10': '6', 'p11': '6', 'p14': '6', 'p13': '6', 'p12': '6'}
-
-    dic_pagina = {'p29': 12,     'p28': 12,     'p27': 12,     'p2': 2,     'p3': 2,     'p26': 11,
+    dic_cuadernillo = {'p29': '1', 'p28': '1', 'p27': '1', 'p_': '1', 'p1': '2', 'p2': '2', 'p3': '2',
+                       'p26': '2', 'p25': '2', 'p24': '3', 'p23': '3', 'p22': '3', 'p21': '3', 'p4': '3',
+                       'p5': '3', 'p6': '4', 'p7': '4', 'p20': '4', 'p19': '4', 'p18': '4', 'p17': '5',
+                       'p16': '5', 'p15': '5', 'p8': '5', 'p9': '5', 'p10': '6', 'p11': '6', 'p14': '6',
+                       'p13': '6', 'p12': '6'}
+    dic_pagina = {'p29': 12, 'p28': 12, 'p27': 12, 'p_': 1, 'p1': 2, 'p2': 2, 'p3': 2, 'p26': 11,
                   'p25': 11, 'p24': 10, 'p23': 10, 'p22': 10, 'p21': 10, 'p4': 3, 'p5': 3, 'p6': 4,
-                  'p7': 4, 'p20': 9, 'p19': 9, 'p18': 9, 'p17': 8, 'p16': 8, 'p15': 8, 'p8': 5,
-                  'p9': 5, 'p10': 6, 'p11': 6, 'p14': 7, 'p13': 7, 'p12': 7}
+                  'p7': 4, 'p20': 9, 'p19': 9, 'p18': 9, 'p17': 8, 'p16': 8, 'p15': 8, 'p8': 5, 'p9': 5,
+                  'p10': 6, 'p11': 6, 'p14': 7, 'p13': 7, 'p12': 7}
 else:
     n_pages = get_n_paginas()
     n_preguntas = get_n_preguntas()
     subpreg_x_preg = get_baseline()
-    dic_cuadernillo = get_preg_por_hoja()
-    dic_pagina = get_preg_por_hoja(armar_dic='pagina')
+    dic_cuadernillo = get_preg_por_hoja(nivel='cuadernillo')
+    dic_pagina = get_preg_por_hoja(nivel='pagina')
 
 
 def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
-                     filter_rbd_int=False, armar_dic_cuadernillo=False,
-                     armar_dic_pagina=False):
+                     filter_rbd_int=False, nivel=None):
 
-  #  df99 = pd.read_csv(dir_tabla_99 / 'casos_99_compilados.csv')
+    #  df99 = pd.read_csv(dir_tabla_99 / 'casos_99_compilados.csv')
 
- #   dir_preg99 = [dir_input / Path(i) for i in df99.ruta_imagen]
+    #   dir_preg99 = [dir_input / Path(i) for i in df99.ruta_imagen]
 
     # Si queremos correr función para rbd específico
     if filter_rbd:
@@ -123,10 +128,8 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
         directorios = dir_estudiantes.iterdir()
 
     # Permite armar diccionario con mapeo pregunta -> página cuadernillo (archivo input)
-    if armar_dic_cuadernillo:
-        dic_cuadernillo = dict()
-    if armar_dic_pagina:
-        dic_paginas = dict()
+    if nivel:
+        diccionario_nivel = dict()
 
     for num, rbd in enumerate(directorios):
         if not filter_estudiante:
@@ -151,10 +154,12 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
 
             # páginas del cuardenillo
             pages = (n_pages, 1)
-            # pregunta inicial páginas bajas
-            q1 = 0
-            # pregunta inicial páginas altas
-            q2 = n_preguntas + 1
+
+            dic_q = {
+                # pregunta inicial páginas bajas
+                'q1': 0,
+                # pregunta inicial páginas altas
+                'q2': n_preguntas + 1}
 
             # Para cada imagen del cuadernillo de un estudiante (2 pág x img):
             for num_pag, pag in enumerate(rbd.glob(f'{estudiante}*')):
@@ -165,82 +170,44 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
 
                 print(f'{file=}')
                 print(f'{num_pag=}')
-                # print(pages)
-                # Quitamos extensión al archivo
-                # file_no_ext = Path(file).with_suffix('')
+
                 # Creamos directorio si no existe
                 (dir_output / f'{folder}').mkdir(exist_ok=True)
 
-                # Obtenemos página del archivo
-                # page = re.search('\d+$',str(file_no_ext)).group(0)
-
-                # Leemos imagen
-                img_preg = cv2.imread(str(pag), 1)
+                # Leemos imagen y eliminamos franjas negras en caso de existir
                 img_preg2 = eliminar_franjas_negras(cv2.imread(str(pag), 1))
 
                 # Recortamos info innecesaria de imagen
                 img_crop = recorte_imagen(img_preg2, 0, 200, 50, 160)
 
-                # Buscamos punto medio de imagen para dividirla en las dos
-                # páginas del cuadernillo
-                punto_medio = int(np.round(img_crop.shape[1] / 2, 1))
-
-                img_p1 = img_crop[:, :punto_medio]  # página izquierda
-                img_p2 = img_crop[:, punto_medio:]  # página derecha
+                # Divimos imagen en dos páginas del cuadernillo
+                img_p1, img_p2 = partir_imagen_por_mitad(img_crop)
 
                 # Obtenemos páginas del cuadernillo actual:
-                # si num_pag es par y no es la primera página
-                if (num_pag % 2 == 0) & (num_pag != 0):
-                    pages = (pages[1]-1, pages[0] + 1)
-                elif num_pag % 2 == 1:
-                    pages = (pages[1]+1, pages[0] - 1)
+                pages = get_current_pages_cuadernillo(num_pag, pages)
 
                 # Para cada una de las dos imágenes del cuadernillo
                 for p, media_img in enumerate([img_p1, img_p2]):
 
                     # Detecto recuadros naranjos
-                    m = get_mask_naranjo(media_img)
+                    mask_naranjo = get_mask_naranjo(media_img)
 
                     # Obtengo contornos
-                    contours = cv2.findContours(
-                        m, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[0]
-                    # Me quedo contornos grandes
-                    big_contours = [
-                        i for i in contours if cv2.contourArea(i) > 30000]
-                    #  print([i[0][0][1] for i in big_contours] )
+                    big_contours = get_contornos_grandes(mask_naranjo, pages, p)
 
-                    #  print(f'página actual: {pages[p]}')
-
-                    if pages[p] < pages[1-p]:
-                        # revertimos orden de contornos cuando es la página baja
-                        # del cuadernillo
-                        big_contours = big_contours[::-1]
-
-                    # Agregamos conteo número de preguntas
-
+                    # Para cada contorno de pregunta:
                     for c in (big_contours):
 
-                        # Obtengo coordenadas de contornos
-                        x, y, w, h = cv2.boundingRect(c)
-                        img_pregunta = media_img[y:y+h, x:x+w]
+                        # Obtengo coordenadas de contornos y corto imagen
+                        img_pregunta = bound_and_crop(media_img, c)
 
                         # Obtengo n° de pregunta en base a lógica de cuadernillo:
-                        # si es la pág + alta del cuadernillo:
-                        if pages[p] > pages[1-p]:
-                            q2 -= 1
-                            q = q2
-                        # si es la pág más baja del cuardenillo
-                        elif (pages[p] < pages[1-p]) & (pages[p] != 1):
-                            q1 += 1
-                            q = q1
-                        else:  # Para la portada
-                            q = '_'
+                        q, dic_q = calcular_pregunta_actual(pages, p, dic_q)
 
-                        if armar_dic_cuadernillo and q != '_':
-                            hoja_cuadernillo = re.search(r'_(\d+)', pag.name).group(1)
-                            dic_cuadernillo[f'p{q}'] = hoja_cuadernillo
-                        elif armar_dic_pagina and q != '_':
-                            dic_paginas[f'p{q}'] = pages[p]
+                        if nivel:
+                            diccionario_nivel = poblar_diccionario_preguntas(q, diccionario_nivel,
+                                                                             nivel=nivel,
+                                                                             pag=pag, page=pages[p])
 
                         # exportamos preguntas válidas:
                         if q not in ['_', 1]:
@@ -264,37 +231,27 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
                                 for i in range(len(puntoy)-1):
                                     try:
 
-                                        #  print(i)
-                                        cropped_img_sub = img_pregunta_crop[puntoy[i]:
-                                                                            puntoy[i+1],]
+                                        crop_and_save_subpreg(img_pregunta_crop,
+                                                              puntoy, i, dir_output,
+                                                              folder, estudiante, q)
 
-                                        # id_img = f'{page}_{n}'
-                                        file_out = str(
-                                            dir_output / f'{folder}/{estudiante}_p{q}_{i+1}.jpg')
-                                        # print(file_out)
-                                        cv2.imwrite(file_out, cropped_img_sub)
-
+                                    # Si hay error en procesamiento subpregunta
                                     except Exception as e:
-                                        print(
-                                            f'Ups, ocurrió un error al recortar la imagen \
-                                            con subpregunta {i+1}')
-                                        print(e)
+
                                         preg_error = str(
                                             dir_output / f'{folder}/{estudiante}_p{q}_{i+1}')
                                         anotar_error(
                                             pregunta=preg_error,
-                                            error='Subregunta no pudo ser procesada')
+                                            error='Subregunta no pudo ser procesada',
+                                            e=e, i=i)
 
                                         continue
-
+                            # Si hay error en procesamiento pregunta
                             except Exception as e:
 
                                 preg_error = str(dir_output / f'{folder}/{estudiante}_p{q}')
                                 anotar_error(
-                                    pregunta=preg_error, error='Pregunta no pudo ser procesada')
-                                print(
-                                    f'Ups, ocurrió un error con la pregunta {preg_error}')
-                                print(e)
+                                    pregunta=preg_error, error='Pregunta no pudo ser procesada', e=e)
 
                                 continue
 
@@ -307,14 +264,12 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
                 error = f'N° de subpreguntas incorrecto para estudiante {estudiante},\
  se encontraron {n_subpreg} subpreguntas {dic_dif}'
 
-                print(error)
                 anotar_error(
                     pregunta=preg_error, error=error)
 
-    if armar_dic_cuadernillo:
-        return dic_cuadernillo
-    elif armar_dic_pagina:
-        return dic_paginas
+    if nivel:
+        return diccionario_nivel
+
     else:
         return 'Éxito!'
 
@@ -377,8 +332,7 @@ def eliminar_franjas_negras(img_preg):
     area_cont = [cv2.contourArea(i) for i in contours]
     c = contours[area_cont.index(max(area_cont))]
 
-    x, y, w, h = cv2.boundingRect(c)
-    img_pregunta = img_preg[y:y+h, x:x+w]
+    img_pregunta = bound_and_crop(img_preg, c)
     return img_pregunta
 
 
@@ -456,6 +410,97 @@ def obtener_puntos(img_crop_canny, threshold=100, minLineLength=200):
         del puntoy[index]
 
     return puntoy
+
+
+def bound_and_crop(img, c):
+
+    # Obtengo coordenadas de contorno
+    x, y, w, h = cv2.boundingRect(c)
+    # Recorto imagen en base a contorno
+    img_crop = img[y:y+h, x:x+w]
+    return img_crop
+
+
+def crop_and_save_subpreg(img_pregunta_crop, puntoy, i, dir_output, folder, estudiante, q):
+    cropped_img_sub = img_pregunta_crop[puntoy[i]:
+                                        puntoy[i+1],]
+
+    # id_img = f'{page}_{n}'
+    file_out = str(
+        dir_output / f'{folder}/{estudiante}_p{q}_{i+1}.jpg')
+    # print(file_out)
+    cv2.imwrite(file_out, cropped_img_sub)
+
+
+def calcular_pregunta_actual(pages, p, dic_q):
+
+    # si es la pág + alta del cuadernillo:
+    if pages[p] > pages[1-p]:
+        dic_q['q2'] -= 1
+        q = dic_q['q2']
+    # si es la pág más baja del cuardenillo
+    elif (pages[p] < pages[1-p]) & (pages[p] != 1):
+        dic_q['q1'] += 1
+        q = dic_q['q1']
+    else:  # Para la portada
+        q = '_'
+
+    return q, dic_q
+
+
+def poblar_diccionario_preguntas(q, diccionario, nivel='cuadernillo',
+                                 pag=None, page=None):
+
+    if nivel == 'cuadernillo':
+        print(pag)
+        hoja_cuadernillo = re.search(r'_(\d+)', pag.name).group(1)
+        diccionario[f'p{q}'] = hoja_cuadernillo
+    elif nivel == 'pagina':
+        diccionario[f'p{q}'] = page
+
+    return diccionario
+
+
+def partir_imagen_por_mitad(img_crop):
+    # Buscamos punto medio de imagen para dividirla en las dos
+    # páginas del cuadernillo
+    punto_medio = int(np.round(img_crop.shape[1] / 2, 1))
+
+    img_p1 = img_crop[:, :punto_medio]  # página izquierda
+    img_p2 = img_crop[:, punto_medio:]  # página derecha
+
+    return img_p1, img_p2
+
+
+def get_current_pages_cuadernillo(num_pag, pages):
+
+    # si num_pag es par y no es la primera página
+    if (num_pag % 2 == 0) & (num_pag != 0):
+        pages = (pages[1]-1, pages[0] + 1)
+    elif num_pag % 2 == 1:
+        pages = (pages[1]+1, pages[0] - 1)
+
+    return pages
+
+
+def get_contornos_grandes(mask, pages, p):
+
+    # Obtengo contornos
+    contours = cv2.findContours(
+        mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[0]
+    # Me quedo contornos grandes
+    big_contours = [
+        i for i in contours if cv2.contourArea(i) > 30000]
+    #  print([i[0][0][1] for i in big_contours] )
+
+    #  print(f'página actual: {pages[p]}')
+
+    if pages[p] < pages[1-p]:
+        # revertimos orden de contornos cuando es la página baja
+        # del cuadernillo
+        big_contours = big_contours[::-1]
+
+    return big_contours
 
 
 def procesamiento_antiguo(media_img):

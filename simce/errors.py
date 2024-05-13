@@ -9,7 +9,12 @@ from openpyxl import load_workbook, Workbook
 from pathlib import Path
 
 
-def anotar_error(pregunta, error):
+def anotar_error(pregunta, error, e=None, i=None):
+
+    print(error)
+
+    if e:
+        print(e)
 
     if not Path('problemas_datos.xlsx').is_file():
         wb = Workbook()
