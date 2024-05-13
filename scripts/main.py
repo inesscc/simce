@@ -25,9 +25,9 @@ crear_directorios()
 if __name__ == '__main__':
 
     # 1. Generar tablas con dobles marcas
-    get_tablas_99()
+   # get_tablas_99()
     # 2.  Obtener preguntas
-    get_subpreguntas(filter_estudiante='4054806')
+    get_subpreguntas()
 
     # a = get_subpreguntas(filter_estudiante='4279607')
 
