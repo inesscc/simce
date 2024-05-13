@@ -7,7 +7,7 @@ Created on Thu May  2 17:22:37 2024
 import numpy as np
 import cv2
 from itertools import chain
-from simce.config import dir_estudiantes, dir_output, regex_estudiante
+from simce.config import dir_estudiantes, dir_output, regex_estudiante, dir_tabla_99, dir_input
 from simce.errors import anotar_error
 from itertools import islice
 import pandas as pd
@@ -15,7 +15,7 @@ import re
 from dotenv import load_dotenv
 from simce.trabajar_rutas import get_n_paginas, get_n_preguntas
 from os import environ
-
+from pathlib import Path
 load_dotenv()
 
 
@@ -95,20 +95,25 @@ else:
 def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
                      filter_rbd_int=False, armar_dic_cuadernillo=False):
 
+    df99 = pd.read_csv(dir_tabla_99 / 'casos_99_compilados.csv')
+
+    dir_preg99 = [dir_input / Path(i) for i in df99.ruta_imagen]
+
     # Si queremos correr función para rbd específico
     if filter_rbd:
         # Si queremos correr función desde un rbd en adelante
         if filter_rbd_int:
-            directorios = [i for i in dir_estudiantes.iterdir()
+            directorios = [i for i in dir_preg99
                            if int(i.name) >= filter_rbd]
         # Si queremos correr función solo para el rbd ingresado
         else:
             if isinstance(filter_rbd, str):
                 filter_rbd = [filter_rbd]
-            directorios = [i for i in dir_estudiantes.iterdir() if i.name in filter_rbd]
+            directorios = [i for i in dir_preg99 if i.name in filter_rbd]
     else:
-        directorios = dir_estudiantes.iterdir()
+        directorios = dir_preg99
 
+    # Permite armar diccionario con mapeo pregunta -> página cuadernillo (archivo input)
     if armar_dic_cuadernillo:
         dic_cuadernillo = dict()
 
@@ -121,6 +126,7 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
 
         estudiantes_rbd = {re.search(regex_estudiante, str(i)).group(1)
                            for i in rbd.iterdir()}
+
         # Si queremos correr función para un estudiante específico:
         if filter_estudiante:
             if isinstance(filter_estudiante, str):
@@ -239,6 +245,7 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
 
                                 for i in range(len(puntoy)-1):
                                     try:
+                                        if f'p{q}_{i+1}'
                                         #  print(i)
                                         cropped_img_sub = img_pregunta_crop[puntoy[i]:
                                                                             puntoy[i+1],]
