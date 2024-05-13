@@ -19,14 +19,16 @@ from pathlib import Path
 load_dotenv()
 
 
-def get_preg_por_hoja():
+def get_preg_por_hoja(armar_dic='cuadernillo'):
 
     primer_est = re.search(
         regex_estudiante,
         # primer estudiante del primer rbd:
         str(next(next(dir_estudiantes.iterdir()).iterdir()))).group(1)
-
-    dic = get_subpreguntas(filter_estudiante=primer_est, armar_dic_cuadernillo=True)
+    if armar_dic == 'cuadernillo':
+        dic = get_subpreguntas(filter_estudiante=primer_est, armar_dic_cuadernillo=True)
+    elif armar_dic == 'pagina':
+        dic = get_subpreguntas(filter_estudiante=primer_est, armar_dic_pagina=True)
     return dic
 
 
@@ -85,37 +87,46 @@ if environ.get('ENVIRONMENT') == 'dev':
                        'p24': '3', 'p23': '3', 'p22': '3', 'p21': '3', 'p4': '3', 'p5': '3', 'p6': '4',
                        'p7': '4', 'p20': '4', 'p19': '4', 'p18': '4', 'p17': '5', 'p16': '5', 'p15': '5',
                        'p8': '5', 'p9': '5', 'p10': '6', 'p11': '6', 'p14': '6', 'p13': '6', 'p12': '6'}
+
+    dic_pagina = {'p29': 12,     'p28': 12,     'p27': 12,     'p2': 2,     'p3': 2,     'p26': 11,
+                  'p25': 11, 'p24': 10, 'p23': 10, 'p22': 10, 'p21': 10, 'p4': 3, 'p5': 3, 'p6': 4,
+                  'p7': 4, 'p20': 9, 'p19': 9, 'p18': 9, 'p17': 8, 'p16': 8, 'p15': 8, 'p8': 5,
+                  'p9': 5, 'p10': 6, 'p11': 6, 'p14': 7, 'p13': 7, 'p12': 7}
 else:
     n_pages = get_n_paginas()
     n_preguntas = get_n_preguntas()
     subpreg_x_preg = get_baseline()
     dic_cuadernillo = get_preg_por_hoja()
+    dic_pagina = get_preg_por_hoja(armar_dic='pagina')
 
 
 def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
-                     filter_rbd_int=False, armar_dic_cuadernillo=False):
+                     filter_rbd_int=False, armar_dic_cuadernillo=False,
+                     armar_dic_pagina=False):
 
-    df99 = pd.read_csv(dir_tabla_99 / 'casos_99_compilados.csv')
+  #  df99 = pd.read_csv(dir_tabla_99 / 'casos_99_compilados.csv')
 
-    dir_preg99 = [dir_input / Path(i) for i in df99.ruta_imagen]
+ #   dir_preg99 = [dir_input / Path(i) for i in df99.ruta_imagen]
 
     # Si queremos correr función para rbd específico
     if filter_rbd:
         # Si queremos correr función desde un rbd en adelante
         if filter_rbd_int:
-            directorios = [i for i in dir_preg99
+            directorios = [i for i in dir_estudiantes.iterdir()
                            if int(i.name) >= filter_rbd]
         # Si queremos correr función solo para el rbd ingresado
         else:
             if isinstance(filter_rbd, str):
                 filter_rbd = [filter_rbd]
-            directorios = [i for i in dir_preg99 if i.name in filter_rbd]
+            directorios = [i for i in dir_estudiantes.iterdir() if i.name in filter_rbd]
     else:
-        directorios = dir_preg99
+        directorios = dir_estudiantes.iterdir()
 
     # Permite armar diccionario con mapeo pregunta -> página cuadernillo (archivo input)
     if armar_dic_cuadernillo:
         dic_cuadernillo = dict()
+    if armar_dic_pagina:
+        dic_paginas = dict()
 
     for num, rbd in enumerate(directorios):
         if not filter_estudiante:
@@ -245,7 +256,7 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
 
                                 for i in range(len(puntoy)-1):
                                     try:
-                                        if f'p{q}_{i+1}'
+
                                         #  print(i)
                                         cropped_img_sub = img_pregunta_crop[puntoy[i]:
                                                                             puntoy[i+1],]
@@ -253,6 +264,8 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
                                         if armar_dic_cuadernillo:
                                             hoja_cuadernillo = re.search(r'_(\d+)', pag.name).group(1)
                                             dic_cuadernillo[f'p{q}'] = hoja_cuadernillo
+                                        elif armar_dic_pagina:
+                                            dic_paginas[f'p{q}'] = pages[p]
 
                                         # id_img = f'{page}_{n}'
                                         file_out = str(
@@ -298,6 +311,8 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
 
     if armar_dic_cuadernillo:
         return dic_cuadernillo
+    elif armar_dic_pagina:
+        return dic_paginas
     else:
         return 'Éxito!'
 
