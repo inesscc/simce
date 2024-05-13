@@ -175,7 +175,7 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
                 # page = re.search('\d+$',str(file_no_ext)).group(0)
 
                 # Leemos imagen
-                img_preg = cv2.imread(str(pag), 1)
+                img_preg = eliminar_franjas_negras(cv2.imread(str(pag), 1))
 
                 # Recortamos info innecesaria de imagen
                 img_crop = recorte_imagen(img_preg, 0, 200, 50, 160)
@@ -235,6 +235,12 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
                         else:  # Para la portada
                             q = '_'
 
+                        if armar_dic_cuadernillo and q != '_':
+                            hoja_cuadernillo = re.search(r'_(\d+)', pag.name).group(1)
+                            dic_cuadernillo[f'p{q}'] = hoja_cuadernillo
+                        elif armar_dic_pagina and q != '_':
+                            dic_paginas[f'p{q}'] = pages[p]
+
                         # exportamos preguntas válidas:
                         if q not in ['_', 1]:
 
@@ -261,12 +267,6 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
                                         cropped_img_sub = img_pregunta_crop[puntoy[i]:
                                                                             puntoy[i+1],]
 
-                                        if armar_dic_cuadernillo:
-                                            hoja_cuadernillo = re.search(r'_(\d+)', pag.name).group(1)
-                                            dic_cuadernillo[f'p{q}'] = hoja_cuadernillo
-                                        elif armar_dic_pagina:
-                                            dic_paginas[f'p{q}'] = pages[p]
-
                                         # id_img = f'{page}_{n}'
                                         file_out = str(
                                             dir_output / f'{folder}/{estudiante}_p{q}_{i+1}.jpg')
@@ -278,7 +278,8 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
                                             f'Ups, ocurrió un error al recortar la imagen \
                                             con subpregunta {i+1}')
                                         print(e)
-                                        preg_error = str(dir_output / f'{folder}/{estudiante}_p{q}_{i+1}')
+                                        preg_error = str(
+                                            dir_output / f'{folder}/{estudiante}_p{q}_{i+1}')
                                         anotar_error(
                                             pregunta=preg_error,
                                             error='Subregunta no pudo ser procesada')
@@ -335,7 +336,8 @@ def get_subpregs_distintas(folder, estudiante):
     return dic_dif
 
 
-def get_mask_naranjo(media_img, lower_color=np.array([13, 52, 0]), upper_color=np.array([29, 255, 255])):
+def get_mask_naranjo(media_img, lower_color=np.array([13, 52, 0]), upper_color=np.array([29, 255, 255]),
+                     iters=4):
     """
     Genera una máscara binaria para una imagen dada, basada en un rango de color en el espacio de color HSV.
 
@@ -354,7 +356,7 @@ def get_mask_naranjo(media_img, lower_color=np.array([13, 52, 0]), upper_color=n
     # especificado son blancos, y todos los demás píxeles son negros.
     mask = cv2.inRange(hsv, lower_color, upper_color)
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
-    mask = cv2.dilate(mask, kernel, iterations=4)
+    mask = cv2.dilate(mask, kernel, iterations=iters)
 
     # Calculamos la media de cada fila
     mean_row = mask.mean(axis=1)
@@ -364,6 +366,16 @@ def get_mask_naranjo(media_img, lower_color=np.array([13, 52, 0]), upper_color=n
     mask[idx_low_rows, :] = 0
 
     return mask
+
+
+def eliminar_franjas_negras(img_preg):
+    im2 = get_mask_naranjo(img_preg, lower_color=np.array([0, 0, 57]),
+                           upper_color=np.array([179, 231, 255]), iters=2)
+    contours = cv2.findContours(
+        im2, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[0]
+    x, y, w, h = cv2.boundingRect(contours[0])
+    img_pregunta = img_preg[y:y+h, x:x+w]
+    return img_pregunta
 
 
 def recorte_imagen(img_preg, x0=110, x1=20, y0=50, y1=50):

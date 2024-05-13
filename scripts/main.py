@@ -25,7 +25,7 @@ crear_directorios()
 if __name__ == '__main__':
 
     # 1. Generar tablas con dobles marcas
-    get_tablas_99()
+    # get_tablas_99()
     # 2.  Obtener preguntas
     get_subpreguntas(filter_estudiante='4054806')
 
@@ -65,11 +65,11 @@ if __name__ == '__main__':
         pass
 
     # %%
-    cv2.imshow("Detected Lines", img_pregunta_crop)
+    cv2.imshow("Detected Lines", img_pregunta)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     # %%
-    cv2.imshow("Detected Lines", cv2.resize(m, (900, 900)))
+    cv2.imshow("Detected Lines", cv2.resize(img_pregunta, (900, 900)))
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
