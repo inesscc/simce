@@ -27,7 +27,7 @@ if __name__ == '__main__':
     # 1. Generar tablas con dobles marcas
     # get_tablas_99()
     # 2.  Obtener preguntas
-    get_subpreguntas(filter_estudiante='4054806')
+    get_subpreguntas(filter_estudiante='4046262')
 
     # a = get_subpreguntas(filter_estudiante='4279607')
 
@@ -65,10 +65,14 @@ if __name__ == '__main__':
         pass
 
     # %%
+
     cv2.imshow("Detected Lines", img_pregunta)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     # %%
+
+    hsv_img = cv2.cvtColor(im2,  cv2.COLOR_GRAY2BGR)
+    hsv_img = cv2.drawContours(hsv_img, contours, -1, (60, 200, 200), 3)
     cv2.imshow("Detected Lines", cv2.resize(img_pregunta, (900, 900)))
     cv2.waitKey(0)
     cv2.destroyAllWindows()

@@ -7,9 +7,9 @@ Created on Wed Apr 10 15:53:22 2024
 
 import cv2
 import numpy as np
-
+from simce.config import dir_estudiantes
 # path to image
-image_path = 'data\\output_preg\\10088\\4277181_p8.jpg'
+image_path = str(dir_estudiantes / '01672/4046262_2.jpg')
 # resize if image is larger than 800x600
 resize = True
 

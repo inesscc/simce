@@ -175,10 +175,11 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
                 # page = re.search('\d+$',str(file_no_ext)).group(0)
 
                 # Leemos imagen
-                img_preg = eliminar_franjas_negras(cv2.imread(str(pag), 1))
+                img_preg = cv2.imread(str(pag), 1)
+                img_preg2 = eliminar_franjas_negras(cv2.imread(str(pag), 1))
 
                 # Recortamos info innecesaria de imagen
-                img_crop = recorte_imagen(img_preg, 0, 200, 50, 160)
+                img_crop = recorte_imagen(img_preg2, 0, 200, 50, 160)
 
                 # Buscamos punto medio de imagen para dividirla en las dos
                 # páginas del cuadernillo
@@ -369,11 +370,14 @@ def get_mask_naranjo(media_img, lower_color=np.array([13, 52, 0]), upper_color=n
 
 
 def eliminar_franjas_negras(img_preg):
-    im2 = get_mask_naranjo(img_preg, lower_color=np.array([0, 0, 57]),
-                           upper_color=np.array([179, 231, 255]), iters=2)
+    im2 = get_mask_naranjo(img_preg, lower_color=np.array([0, 0, 241]),
+                           upper_color=np.array([179, 255, 255]), iters=2)
     contours = cv2.findContours(
         im2, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[0]
-    x, y, w, h = cv2.boundingRect(contours[0])
+    area_cont = [cv2.contourArea(i) for i in contours]
+    c = contours[area_cont.index(max(area_cont))]
+
+    x, y, w, h = cv2.boundingRect(c)
     img_pregunta = img_preg[y:y+h, x:x+w]
     return img_pregunta
 
