@@ -116,52 +116,61 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
     # Permite armar diccionario con mapeo pregunta -> página cuadernillo (archivo input)
     if armar_dic_cuadernillo:
         dic_cuadernillo = dict()
+        dic_paginas = dict()
 
-    for num, rbd in enumerate(directorios):
+    for num, rbd in enumerate(directorios):  # for colegio
         if not filter_estudiante:
             print('############################')
             print(rbd)
             print(num)
             print('############################')
 
-        estudiantes_rbd = {re.search(regex_estudiante, str(i)).group(1)
-                           for i in rbd.iterdir()}
+        # estudiantes_rbd = {re.search(regex_estudiante, str(i)).group(1)
+        #                    for i in rbd.parent.iterdir()}
 
-        # Si queremos correr función para un estudiante específico:
-        if filter_estudiante:
-            if isinstance(filter_estudiante, str):
-                filter_estudiante = [filter_estudiante]
-            estudiantes_rbd = {
-                i for i in estudiantes_rbd if i in filter_estudiante}
+        # # Si queremos correr función para un estudiante específico:
+        # if filter_estudiante:
+        #     if isinstance(filter_estudiante, str):
+        #         filter_estudiante = [filter_estudiante]
+        #     estudiantes_rbd = {
+        #         i for i in estudiantes_rbd if i in filter_estudiante}
 
-        for estudiante in estudiantes_rbd:
+        # for estudiante in estudiantes_rbd: # for estudiante
+        estudiante = re.search(regex_estudiante, str(rbd)).group(1)
+        n_subpreg = 0
 
-            n_subpreg = 0
+        # páginas del cuardenillo
+        pages = (n_pages, 1)
+        # pregunta inicial páginas bajas
+        q1 = 0
+        # pregunta inicial páginas altas
+        q2 = n_preguntas + 1
 
-            # páginas del cuardenillo
-            pages = (n_pages, 1)
-            # pregunta inicial páginas bajas
-            q1 = 0
-            # pregunta inicial páginas altas
-            q2 = n_preguntas + 1
+        # Para cada imagen del cuadernillo de un estudiante (2 pág x img):
+        for num_pag, pag in enumerate(rbd.parent.glob(f'{estudiante}*')):
 
-            # Para cada imagen del cuadernillo de un estudiante (2 pág x img):
-            for num_pag, pag in enumerate(rbd.glob(f'{estudiante}*')):
+            # Obtengo carpeta del rbd y archivo del estudiante a
+            # partir del path:
+            folder, file = (pag.parts[-2], pag.parts[-1])
 
-                # Obtengo carpeta del rbd y archivo del estudiante a
-                # partir del path:
-                folder, file = (pag.parts[-2], pag.parts[-1])
+            print(f'{file=}')
+            print(f'{num_pag=}')
+            # print(pages)
+            # Quitamos extensión al archivo
+            # file_no_ext = Path(file).with_suffix('')
+            # Creamos directorio si no existe
+            (dir_output / f'{folder}').mkdir(exist_ok=True)
 
-                print(f'{file=}')
-                print(f'{num_pag=}')
-                # print(pages)
-                # Quitamos extensión al archivo
-                # file_no_ext = Path(file).with_suffix('')
-                # Creamos directorio si no existe
-                (dir_output / f'{folder}').mkdir(exist_ok=True)
+            # Obtenemos páginas del cuadernillo actual:
+            # si num_pag es par y no es la primera página
+            if (num_pag % 2 == 0) & (num_pag != 0):
+                pages = (pages[1]-1, pages[0] + 1)
+            elif num_pag % 2 == 1:
+                pages = (pages[1]+1, pages[0] - 1)
 
-                # Obtenemos página del archivo
-                # page = re.search('\d+$',str(file_no_ext)).group(0)
+            # Obtenemos página del archivo
+            # page = re.search('\d+$',str(file_no_ext)).group(0)
+            if rbd == pag:
 
                 # Leemos imagen
                 img_preg = cv2.imread(str(pag), 1)
@@ -176,112 +185,105 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
                 img_p1 = img_crop[:, :punto_medio]  # página izquierda
                 img_p2 = img_crop[:, punto_medio:]  # página derecha
 
-                # Obtenemos páginas del cuadernillo actual:
-                # si num_pag es par y no es la primera página
-                if (num_pag % 2 == 0) & (num_pag != 0):
-                    pages = (pages[1]-1, pages[0] + 1)
-                elif num_pag % 2 == 1:
-                    pages = (pages[1]+1, pages[0] - 1)
+            # Para cada una de las dos imágenes del cuadernillo
+            for p, media_img in enumerate([img_p1, img_p2]):
 
-                # Para cada una de las dos imágenes del cuadernillo
-                for p, media_img in enumerate([img_p1, img_p2]):
+                # Detecto recuadros naranjos
+                m = get_mask_naranjo(media_img)
 
-                    # Detecto recuadros naranjos
-                    m = get_mask_naranjo(media_img)
+                # Obtengo contornos
+                contours = cv2.findContours(
+                    m, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[0]
+                # Me quedo contornos grandes
+                big_contours = [
+                    i for i in contours if cv2.contourArea(i) > 30000]
+                #  print([i[0][0][1] for i in big_contours] )
 
-                    # Obtengo contornos
-                    contours = cv2.findContours(
-                        m, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[0]
-                    # Me quedo contornos grandes
-                    big_contours = [
-                        i for i in contours if cv2.contourArea(i) > 30000]
-                    #  print([i[0][0][1] for i in big_contours] )
+                #  print(f'página actual: {pages[p]}')
 
-                    #  print(f'página actual: {pages[p]}')
+                if pages[p] < pages[1-p]:
+                    # revertimos orden de contornos cuando es la página baja
+                    # del cuadernillo
+                    big_contours = big_contours[::-1]
 
-                    if pages[p] < pages[1-p]:
-                        # revertimos orden de contornos cuando es la página baja
-                        # del cuadernillo
-                        big_contours = big_contours[::-1]
+                # Agregamos conteo número de preguntas
 
-                    # Agregamos conteo número de preguntas
+                for c in (big_contours):
 
-                    for c in (big_contours):
+                    # Obtengo coordenadas de contornos
+                    x, y, w, h = cv2.boundingRect(c)
+                    img_pregunta = media_img[y:y+h, x:x+w]
 
-                        # Obtengo coordenadas de contornos
-                        x, y, w, h = cv2.boundingRect(c)
-                        img_pregunta = media_img[y:y+h, x:x+w]
+                    # Obtengo n° de pregunta en base a lógica de cuadernillo:
+                    # si es la pág + alta del cuadernillo:
+                    if pages[p] > pages[1-p]:
+                        q2 -= 1
+                        q = q2
+                    # si es la pág más baja del cuardenillo
+                    elif (pages[p] < pages[1-p]) & (pages[p] != 1):
+                        q1 += 1
+                        q = q1
+                    else:  # Para la portada
+                        q = '_'
 
-                        # Obtengo n° de pregunta en base a lógica de cuadernillo:
-                        # si es la pág + alta del cuadernillo:
-                        if pages[p] > pages[1-p]:
-                            q2 -= 1
-                            q = q2
-                        # si es la pág más baja del cuardenillo
-                        elif (pages[p] < pages[1-p]) & (pages[p] != 1):
-                            q1 += 1
-                            q = q1
-                        else:  # Para la portada
-                            q = '_'
+                    # exportamos preguntas válidas:
+                    if q not in ['_', 1]:
 
-                        # exportamos preguntas válidas:
-                        if q not in ['_', 1]:
+                        try:
+                            # Obtenemos subpreguntas:
+                            img_pregunta_crop = recorte_imagen(
+                                img_pregunta)
+                            #  print(q)
+                            img_crop_col = get_mask_naranjo(img_pregunta_crop,
+                                                            lower_color=np.array(
+                                                                [0, 114, 139]),
+                                                            upper_color=np.array([23, 255, 255]))
+                            # img_crop_col = proc.procesamiento_color(img_pregunta_crop)
 
-                            try:
-                                # Obtenemos subpreguntas:
-                                img_pregunta_crop = recorte_imagen(
-                                    img_pregunta)
-                                #  print(q)
-                                img_crop_col = get_mask_naranjo(img_pregunta_crop,
-                                                                lower_color=np.array(
-                                                                    [0, 114, 139]),
-                                                                upper_color=np.array([23, 255, 255]))
-                                # img_crop_col = proc.procesamiento_color(img_pregunta_crop)
+                            puntoy = obtener_puntos(
+                                img_crop_col, minLineLength=250)
 
-                                puntoy = obtener_puntos(
-                                    img_crop_col, minLineLength=250)
+                            n_subpreg += len(puntoy) - 1
 
-                                n_subpreg += len(puntoy) - 1
+                            for i in range(len(puntoy)-1):
+                                try:
+                                    if f'p{q}_{i+1}'
+                                    #  print(i)
+                                    cropped_img_sub = img_pregunta_crop[puntoy[i]:
+                                                                        puntoy[i+1],]
 
-                                for i in range(len(puntoy)-1):
-                                    try:
-                                        if f'p{q}_{i+1}'
-                                        #  print(i)
-                                        cropped_img_sub = img_pregunta_crop[puntoy[i]:
-                                                                            puntoy[i+1],]
+                                    if armar_dic_cuadernillo:
+                                        hoja_cuadernillo = re.search(r'_(\d+)', pag.name).group(1)
+                                        dic_cuadernillo[f'p{q}'] = hoja_cuadernillo
 
-                                        if armar_dic_cuadernillo:
-                                            hoja_cuadernillo = re.search(r'_(\d+)', pag.name).group(1)
-                                            dic_cuadernillo[f'p{q}'] = hoja_cuadernillo
+                                    # id_img = f'{page}_{n}'
+                                    file_out = str(
+                                        dir_output / f'{folder}/{estudiante}_p{q}_{i+1}.jpg')
+                                    # print(file_out)
+                                    cv2.imwrite(file_out, cropped_img_sub)
 
-                                        # id_img = f'{page}_{n}'
-                                        file_out = str(
-                                            dir_output / f'{folder}/{estudiante}_p{q}_{i+1}.jpg')
-                                        # print(file_out)
-                                        cv2.imwrite(file_out, cropped_img_sub)
+                                except Exception as e:
+                                    print(
+                                        f'Ups, ocurrió un error al recortar la imagen \
+                                        con subpregunta {i+1}')
+                                    print(e)
+                                    preg_error = str(dir_output / f'{folder}/{estudiante}_p{q}_{i+1}')
+                                    anotar_error(
+                                        pregunta=preg_error,
+                                        error='Subregunta no pudo ser procesada')
 
-                                    except Exception as e:
-                                        print(
-                                            f'Ups, ocurrió un error al recortar la imagen \
-                                            con subpregunta {i+1}')
-                                        print(e)
-                                        preg_error = str(dir_output / f'{folder}/{estudiante}_p{q}_{i+1}')
-                                        anotar_error(
-                                            pregunta=preg_error,
-                                            error='Subregunta no pudo ser procesada')
+                                    continue
 
-                                        continue
+                        except Exception as e:
 
-                            except Exception as e:
+                            preg_error = str(dir_output / f'{folder}/{estudiante}_p{q}')
+                            anotar_error(
+                                pregunta=preg_error, error='Pregunta no pudo ser procesada')
+                            print(
+                                f'Ups, ocurrió un error con la pregunta {preg_error}')
+                            print(e)
 
-                                preg_error = str(dir_output / f'{folder}/{estudiante}_p{q}')
-                                anotar_error(
-                                    pregunta=preg_error, error='Pregunta no pudo ser procesada')
-                                print(
-                                    f'Ups, ocurrió un error con la pregunta {preg_error}')
-                                print(e)
-
-                                continue
+                            continue
 
             if n_subpreg != n_subpreg_tot:
 
