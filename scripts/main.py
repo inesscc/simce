@@ -28,7 +28,7 @@ if __name__ == '__main__':
     # get_tablas_99()
     # 2.  Obtener preguntas
 
-    get_subpreguntas(filter_estudiante='4046262')
+    get_subpreguntas()
 
     # a = get_subpreguntas(filter_estudiante='4279607')
 
