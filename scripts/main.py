@@ -6,7 +6,7 @@ Created on Tue Apr  9 10:34:05 2024
 """
 
 from simce.utils import crear_directorios
-from simce.proc_imgs import get_subpreguntas
+from simce.proc_imgs import get_subpreguntas, get_preg_por_hoja
 from simce.proc_tabla_99 import get_tablas_99
 import cv2
 from pathlib import Path
@@ -27,7 +27,7 @@ if __name__ == '__main__':
     # 1. Generar tablas con dobles marcas
     # get_tablas_99()
     # 2.  Obtener preguntas
-
+    dic_cuadernillo = get_preg_por_hoja(nivel='cuadernillo')
     get_subpreguntas()
 
     # a = get_subpreguntas(filter_estudiante='4279607')
