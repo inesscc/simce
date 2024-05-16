@@ -10,6 +10,8 @@ from simce.config import dir_estudiantes
 import re
 import cv2
 import numpy as np
+from simce.utils import get_mask_naranjo
+
 
 def get_n_paginas():
     rbds = list(dir_estudiantes.iterdir())
@@ -45,15 +47,7 @@ def get_n_preguntas():
 
         for p, media_img in enumerate([img_p1, img_p2]):
 
-            gray = cv2.cvtColor(media_img, cv2.COLOR_BGR2GRAY)  # convert roi into gray
-            Blur = cv2.GaussianBlur(gray, (5, 5), 1)  # apply blur to roi
-            # Canny=cv2.Canny(Blur,10,50) #apply canny to roi
-            _, It = cv2.threshold(Blur, 0, 255, cv2.THRESH_OTSU)
-            sx = cv2.Sobel(It, cv2.CV_32F, 1, 0)
-            sy = cv2.Sobel(It, cv2.CV_32F, 0, 1)
-            m = cv2.magnitude(sx, sy)
-            m = cv2.normalize(m, None, 0., 255., cv2.NORM_MINMAX, cv2.CV_8U)
-            m = cv2.ximgproc.thinning(m, None, cv2.ximgproc.THINNING_GUOHALL)
+            m = get_mask_naranjo(media_img)
 
             # Find my contours
             contours = cv2.findContours(m, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[0]

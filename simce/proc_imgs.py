@@ -9,11 +9,13 @@ import cv2
 from itertools import chain
 from simce.config import dir_estudiantes, dir_output, regex_estudiante, dir_tabla_99, dir_input
 from simce.errors import anotar_error
+# from simce.apoyo_proc_imgs import get_subpreguntas_completo
 from itertools import islice
 import pandas as pd
 import re
 from dotenv import load_dotenv
 from simce.trabajar_rutas import get_n_paginas, get_n_preguntas
+from simce.utils import get_mask_naranjo
 from os import environ
 from pathlib import Path
 load_dotenv()
@@ -21,89 +23,89 @@ load_dotenv()
 VALID_INPUT = {'cuadernillo', 'pagina'}
 
 
-def get_preg_por_hoja(nivel='cuadernillo'):
+# def get_preg_por_hoja(nivel='cuadernillo'):
 
-    if nivel not in VALID_INPUT:
-        raise ValueError(f"nivel debe ser uno de los siguientes valores: {VALID_INPUT}")
+#     if nivel not in VALID_INPUT:
+#         raise ValueError(f"nivel debe ser uno de los siguientes valores: {VALID_INPUT}")
 
-    primer_est = re.search(
-        regex_estudiante,
-        # primer estudiante del primer rbd:
-        str(next(next(dir_estudiantes.iterdir()).iterdir()))).group(1)
-    if nivel == 'cuadernillo':
-        dic = get_subpreguntas_completo(filter_estudiante=primer_est,
-                                        nivel=nivel)
-    elif nivel == 'pagina':
-        dic = get_subpreguntas_completo(filter_estudiante=primer_est, nivel=nivel)
-    return dic
-
-
-def get_baseline():
-    rbds = set()
-    paths = []
-
-    for rbd in (islice(dir_estudiantes.iterdir(), 3)):
-        print(rbd)
-        paths.extend(list(rbd.iterdir()))
-        rbds.update([rbd.name])
-
-    get_subpreguntas(filter_rbd=rbds)
-
-    rutas_output = [i for i in islice(dir_output.iterdir(), 3)]
-
-    rutas_output_total = []
-
-    for ruta in rutas_output:
-        rutas_output_total.extend(list(ruta.iterdir()))
-
-    df = pd.DataFrame([str(i) for i in rutas_output_total], columns=['ruta'])
-
-    df['est'] = df.ruta.str.extract(regex_estudiante)
-    df['preg'] = df.ruta.str.extract(r'p(\d{1,2})').astype(int)
-    df['subpreg'] = df.ruta.str.extract(r'p(\d{1,2}_\d{1,2})')
-    # n° mediano de subpreguntas por pregunta, de acuerdo a datos obtenidos de
-    # alumnos en primeros 3 colegios
-    df_resumen = (df.groupby(['est']).preg.value_counts()
-                  .groupby('preg').median().sort_values()
-                  .sort_index().astype(int))
-
-    df_resumen.index = 'p'+df_resumen.index.astype('string')
-
-    return df_resumen
+#     primer_est = re.search(
+#         regex_estudiante,
+#         # primer estudiante del primer rbd:
+#         str(next(next(dir_estudiantes.iterdir()).iterdir()))).group(1)
+#     if nivel == 'cuadernillo':
+#         dic = get_subpreguntas_completo(filter_estudiante=primer_est,
+#                                         nivel=nivel)
+#     elif nivel == 'pagina':
+#         dic = get_subpreguntas_completo(filter_estudiante=primer_est, nivel=nivel)
+#     return dic
 
 
-if environ.get('ENVIRONMENT') == 'dev':
-    n_pages = 12
-    n_preguntas = 29
-    n_subpreg_tot = 165
-    subpreg_x_preg = {'p2': 12, 'p3': 6, 'p4': 10, 'p5': 6,
-                      'p6': 7,                      'p7': 6,
-                      'p8': 8,                      'p9': 5,
-                      'p10': 8,                      'p11': 9,
-                      'p12': 4,                      'p13': 4,
-                      'p14': 7,                      'p15': 5,
-                      'p16': 4,                      'p17': 4,
-                      'p18': 6,                      'p19': 6,
-                      'p20': 4,                      'p21': 4,
-                      'p22': 4,                      'p23': 4,
-                      'p24': 6,                      'p25': 11,
-                      'p26': 6, 'p27': 4, 'p28': 2, 'p29': 3}
+# def get_baseline():
+#     rbds = set()
+#     paths = []
 
-    dic_cuadernillo = {'p29': '1', 'p28': '1', 'p27': '1', 'p_': '1', 'p1': '2', 'p2': '2', 'p3': '2',
-                       'p26': '2', 'p25': '2', 'p24': '3', 'p23': '3', 'p22': '3', 'p21': '3', 'p4': '3',
-                       'p5': '3', 'p6': '4', 'p7': '4', 'p20': '4', 'p19': '4', 'p18': '4', 'p17': '5',
-                       'p16': '5', 'p15': '5', 'p8': '5', 'p9': '5', 'p10': '6', 'p11': '6', 'p14': '6',
-                       'p13': '6', 'p12': '6'}
-    dic_pagina = {'p29': 12, 'p28': 12, 'p27': 12, 'p_': 1, 'p1': 2, 'p2': 2, 'p3': 2, 'p26': 11,
-                  'p25': 11, 'p24': 10, 'p23': 10, 'p22': 10, 'p21': 10, 'p4': 3, 'p5': 3, 'p6': 4,
-                  'p7': 4, 'p20': 9, 'p19': 9, 'p18': 9, 'p17': 8, 'p16': 8, 'p15': 8, 'p8': 5, 'p9': 5,
-                  'p10': 6, 'p11': 6, 'p14': 7, 'p13': 7, 'p12': 7}
-else:
-    n_pages = get_n_paginas()
-    n_preguntas = get_n_preguntas()
-    subpreg_x_preg = get_baseline()
-    dic_cuadernillo = get_preg_por_hoja(nivel='cuadernillo')
-    dic_pagina = get_preg_por_hoja(nivel='pagina')
+#     for rbd in (islice(dir_estudiantes.iterdir(), 3)):
+#         print(rbd)
+#         paths.extend(list(rbd.iterdir()))
+#         rbds.update([rbd.name])
+
+#     get_subpreguntas_completo(filter_rbd=rbds)
+
+#     rutas_output = [i for i in islice(dir_output.iterdir(), 3)]
+
+#     rutas_output_total = []
+
+#     for ruta in rutas_output:
+#         rutas_output_total.extend(list(ruta.iterdir()))
+
+#     df = pd.DataFrame([str(i) for i in rutas_output_total], columns=['ruta'])
+
+#     df['est'] = df.ruta.str.extract(regex_estudiante)
+#     df['preg'] = df.ruta.str.extract(r'p(\d{1,2})').astype(int)
+#     df['subpreg'] = df.ruta.str.extract(r'p(\d{1,2}_\d{1,2})')
+#     # n° mediano de subpreguntas por pregunta, de acuerdo a datos obtenidos de
+#     # alumnos en primeros 3 colegios
+#     df_resumen = (df.groupby(['est']).preg.value_counts()
+#                   .groupby('preg').median().sort_values()
+#                   .sort_index().astype(int))
+
+#     df_resumen.index = 'p'+df_resumen.index.astype('string')
+
+#     return df_resumen
+
+
+# if environ.get('ENVIRONMENT') == 'dev':
+#     n_pages = 12
+#     n_preguntas = 29
+#     n_subpreg_tot = 165
+#     subpreg_x_preg = {'p2': 12, 'p3': 6, 'p4': 10, 'p5': 6,
+#                       'p6': 7,                      'p7': 6,
+#                       'p8': 8,                      'p9': 5,
+#                       'p10': 8,                      'p11': 9,
+#                       'p12': 4,                      'p13': 4,
+#                       'p14': 7,                      'p15': 5,
+#                       'p16': 4,                      'p17': 4,
+#                       'p18': 6,                      'p19': 6,
+#                       'p20': 4,                      'p21': 4,
+#                       'p22': 4,                      'p23': 4,
+#                       'p24': 6,                      'p25': 11,
+#                       'p26': 6, 'p27': 4, 'p28': 2, 'p29': 3}
+
+#     dic_cuadernillo = {'p29': '1', 'p28': '1', 'p27': '1', 'p_': '1', 'p1': '2', 'p2': '2', 'p3': '2',
+#                        'p26': '2', 'p25': '2', 'p24': '3', 'p23': '3', 'p22': '3', 'p21': '3', 'p4': '3',
+#                        'p5': '3', 'p6': '4', 'p7': '4', 'p20': '4', 'p19': '4', 'p18': '4', 'p17': '5',
+#                        'p16': '5', 'p15': '5', 'p8': '5', 'p9': '5', 'p10': '6', 'p11': '6', 'p14': '6',
+#                        'p13': '6', 'p12': '6'}
+#     dic_pagina = {'p29': 12, 'p28': 12, 'p27': 12, 'p_': 1, 'p1': 2, 'p2': 2, 'p3': 2, 'p26': 11,
+#                   'p25': 11, 'p24': 10, 'p23': 10, 'p22': 10, 'p21': 10, 'p4': 3, 'p5': 3, 'p6': 4,
+#                   'p7': 4, 'p20': 9, 'p19': 9, 'p18': 9, 'p17': 8, 'p16': 8, 'p15': 8, 'p8': 5, 'p9': 5,
+#                   'p10': 6, 'p11': 6, 'p14': 7, 'p13': 7, 'p12': 7}
+# else:
+#     n_pages = get_n_paginas()
+#     n_preguntas = get_n_preguntas()
+#     subpreg_x_preg = get_baseline()
+#     dic_cuadernillo = get_preg_por_hoja(nivel='cuadernillo')
+#     dic_pagina = get_preg_por_hoja(nivel='pagina')
 
 
 def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
@@ -157,12 +159,6 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
         # páginas del cuardenillo
         pages = (n_pages, 1)
 
-        dic_q = {
-            # pregunta inicial páginas bajas - 1
-            'q1': 1 - 1,
-            # pregunta inicial páginas altas + 1
-            'q2': n_preguntas + 1}
-
         # Para cada imagen del cuadernillo de un estudiante (2 pág x img):
         for num_pag, pag in enumerate(rbd.parent.glob(f'{estudiante}*')):
 
@@ -194,6 +190,8 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
             # Divimos imagen en dos páginas del cuadernillo
             img_p1, img_p2 = partir_imagen_por_mitad(img_crop)
 
+            # Obtenemos la pregunta desde la cual comienza la página
+
             # Para cada una de las dos imágenes del cuadernillo
             for p, media_img in enumerate([img_p1, img_p2]):
 
@@ -207,11 +205,19 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
                 # Obtengo contornos
                 big_contours = get_contornos_grandes(mask_naranjo, pages, p)
 
+                q_base = get_pregunta_inicial_pagina(pages, p)
+
                 # Para cada contorno de pregunta:
                 for num_preg, c in enumerate(big_contours):
 
+                    q = q_base + num_preg
+
                     # Obtengo n° de pregunta en base a lógica de cuadernillo:
-                    q, dic_q = calcular_pregunta_actual(pages, p, dic_q)
+                    q, dic_q = calcular_pregunta_actual(pages, p, q_base, dic_q)
+
+                    # Si la pregunta selecciona no es la que nos interesa, seguimos
+                    if f'p{q}' != pregunta_selec:
+                        continue
 
                     # Obtengo coordenadas de contornos y corto imagen
                     img_pregunta = bound_and_crop(media_img, c)
@@ -302,38 +308,6 @@ def get_subpregs_distintas(folder, estudiante):
     df_resumen = df_resumen.rename(columns={'count': 'origen'})
     dic_dif = df_resumen[df_resumen['origen'].ne(df_resumen.baseline)].to_dict()
     return dic_dif
-
-
-def get_mask_naranjo(media_img, lower_color=np.array([13, 52, 0]), upper_color=np.array([29, 255, 255]),
-                     iters=4):
-    """
-    Genera una máscara binaria para una imagen dada, basada en un rango de color en el espacio de color HSV.
-
-    Args:
-    media_img (np.ndarray): La imagen de entrada en formato BGR.
-    lower_color (np.ndarray, optional): El límite inferior del rango de color en formato HSV. Por defecto es np.array([13, 31, 0]), que corresponde al color naranjo.
-    upper_color (np.ndarray, optional): El límite superior del rango de color en formato HSV. Por defecto es np.array([29, 255, 255]), que corresponde al color naranjo.
-
-    Returns:
-    mask (numpy.ndarray): Una máscara binaria donde los píxeles de la imagen que están dentro del rango de color especificado son blancos, y todos los demás píxeles son negros.
-    """
-    # Convierte la imagen de entrada de BGR a HSV
-    hsv = cv2.cvtColor(media_img, cv2.COLOR_BGR2HSV)
-
-    # Crea una máscara binaria donde los píxeles de la imagen que están dentro del rango de color
-    # especificado son blancos, y todos los demás píxeles son negros.
-    mask = cv2.inRange(hsv, lower_color, upper_color)
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
-    mask = cv2.dilate(mask, kernel, iterations=iters)
-
-    # Calculamos la media de cada fila
-    mean_row = mask.mean(axis=1)
-    # Si la media es menor a 100, reemplazamos con 0 (negro):
-    # Esto permite eliminar manchas de color que a veces se dan
-    idx_low_rows = np.where(mean_row < 100)[0]
-    mask[idx_low_rows, :] = 0
-
-    return mask
 
 
 def eliminar_franjas_negras(img_preg):
@@ -458,23 +432,26 @@ def get_pregunta_inicial_pagina(pages, p):
         print(f'q min: {q_base}')
 
     else:  # Para la portada
-        q = '0'
+        q_base = 0
+
+    return q_base
 
 
-def calcular_pregunta_actual(pages, p, dic_q):
+def calcular_pregunta_actual(pages, p, q_base, dic_q):
 
     # si es la pág + alta del cuadernillo:
     if pages[p] > pages[1-p]:
-        dic_q['q2'] -= 1
-        q = dic_q['q2']
+        q_base -= 1
+        dic_q['q2'] = q_base
+
     # si es la pág más baja del cuardenillo
     elif (pages[p] < pages[1-p]) & (pages[p] != 1):
-        dic_q['q1'] += 1
-        q = dic_q['q1']
+        q_base += 1
+        dic_q['q1'] = q_base
     else:  # Para la portada
-        q = '0'
+        q_base = 1
 
-    return q, dic_q
+    return q_base, dic_q
 
 
 def poblar_diccionario_preguntas(q, diccionario, nivel='cuadernillo',
@@ -532,6 +509,22 @@ def get_contornos_grandes(mask, pages, p):
         big_contours = big_contours[::-1]
 
     return big_contours
+
+
+def procesamiento_antiguo(media_img):
+    '''Función en desuso. Procesaba imagen para detección de contornos'''
+
+    gray = cv2.cvtColor(media_img, cv2.COLOR_BGR2GRAY)  # convert roi into gray
+    # Blur=cv2.GaussianBlur(gray,(5,5),1) #apply blur to roi
+    # Canny=cv2.Canny(Blur,10,50) #apply canny to roi
+    _, It = cv2.threshold(gray, 0, 255, cv2.THRESH_OTSU)
+    sx = cv2.Sobel(It, cv2.CV_32F, 1, 0)
+    sy = cv2.Sobel(It, cv2.CV_32F, 0, 1)
+    m = cv2.magnitude(sx, sy)
+    m = cv2.normalize(m, None, 0., 255., cv2.NORM_MINMAX, cv2.CV_8U)
+    m = cv2.ximgproc.thinning(m, None, cv2.ximgproc.THINNING_GUOHALL)
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+    m = cv2.dilate(m, kernel, iterations=2)
 
 
 def get_subpreguntas_completo(filter_rbd=None, filter_estudiante=None,
@@ -639,6 +632,7 @@ def get_subpreguntas_completo(filter_rbd=None, filter_estudiante=None,
 
                         # exportamos preguntas válidas:
                         if q not in [0, 1]:
+                            print(f'{q=}')
 
                             try:
                                 # Obtenemos subpreguntas:
@@ -700,19 +694,3 @@ def get_subpreguntas_completo(filter_rbd=None, filter_estudiante=None,
 
     else:
         return 'Éxito!'
-
-
-def procesamiento_antiguo(media_img):
-    '''Función en desuso. Procesaba imagen para detección de contornos'''
-
-    gray = cv2.cvtColor(media_img, cv2.COLOR_BGR2GRAY)  # convert roi into gray
-    # Blur=cv2.GaussianBlur(gray,(5,5),1) #apply blur to roi
-    # Canny=cv2.Canny(Blur,10,50) #apply canny to roi
-    _, It = cv2.threshold(gray, 0, 255, cv2.THRESH_OTSU)
-    sx = cv2.Sobel(It, cv2.CV_32F, 1, 0)
-    sy = cv2.Sobel(It, cv2.CV_32F, 0, 1)
-    m = cv2.magnitude(sx, sy)
-    m = cv2.normalize(m, None, 0., 255., cv2.NORM_MINMAX, cv2.CV_8U)
-    m = cv2.ximgproc.thinning(m, None, cv2.ximgproc.THINNING_GUOHALL)
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
-    m = cv2.dilate(m, kernel, iterations=2)
