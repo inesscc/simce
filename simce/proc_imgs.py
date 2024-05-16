@@ -93,17 +93,19 @@ if environ.get('ENVIRONMENT') == 'dev':
                        'p26': '2', 'p25': '2', 'p24': '3', 'p23': '3', 'p22': '3', 'p21': '3', 'p4': '3',
                        'p5': '3', 'p6': '4', 'p7': '4', 'p20': '4', 'p19': '4', 'p18': '4', 'p17': '5',
                        'p16': '5', 'p15': '5', 'p8': '5', 'p9': '5', 'p10': '6', 'p11': '6', 'p14': '6',
-                       'p13': '6', 'p12': '6'}
+                       'p13': '6', 'p12': '6'}.pop('p_')
     dic_pagina = {'p29': 12, 'p28': 12, 'p27': 12, 'p_': 1, 'p1': 2, 'p2': 2, 'p3': 2, 'p26': 11,
                   'p25': 11, 'p24': 10, 'p23': 10, 'p22': 10, 'p21': 10, 'p4': 3, 'p5': 3, 'p6': 4,
                   'p7': 4, 'p20': 9, 'p19': 9, 'p18': 9, 'p17': 8, 'p16': 8, 'p15': 8, 'p8': 5, 'p9': 5,
-                  'p10': 6, 'p11': 6, 'p14': 7, 'p13': 7, 'p12': 7}
+                  'p10': 6, 'p11': 6, 'p14': 7, 'p13': 7, 'p12': 7}.pop('p_')
 else:
     n_pages = get_n_paginas()
     n_preguntas = get_n_preguntas()
     subpreg_x_preg = get_baseline()
     dic_cuadernillo = get_preg_por_hoja(nivel='cuadernillo')
+    dic_cuadernillo.pop('p_')
     dic_pagina = get_preg_por_hoja(nivel='pagina')
+    dic_pagina.pop('p_')
 
 
 def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
@@ -169,112 +171,115 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
             # Obtenemos páginas del cuadernillo actual:
             pages = get_current_pages_cuadernillo(num_pag, pages)
 
-            # Si archivo corresponde a la página del cuadernillo correcta
-            if dic_cuadernillo[pregunta_selec] == str(num_pag + 1):
+            # Si archivo no corresponde a la página del cuadernillo correcta, saltamos loop
+            if dic_cuadernillo[pregunta_selec] != str(num_pag + 1):
+                continue
 
-                # Obtengo carpeta del rbd y archivo del estudiante a
-                # partir del path:
-                folder, file = (pag.parts[-2], pag.parts[-1])
+            # Obtengo carpeta del rbd y archivo del estudiante a
+            # partir del path:
+            folder, file = (pag.parts[-2], pag.parts[-1])
 
-                print(f'{file=}')
-                print(f'{num_pag=}')
+            print(f'{file=}')
+            print(f'{num_pag=}')
 
-                # Creamos directorio si no existe
-                (dir_output / f'{folder}').mkdir(exist_ok=True)
+            # Creamos directorio si no existe
+            (dir_output / f'{folder}').mkdir(exist_ok=True)
 
-                # Leemos imagen
-                img_preg = cv2.imread(str(pag), 1)
-                # Eliminamos franjas negras en caso de existir
-                img_preg2 = eliminar_franjas_negras(img_preg)
+            # Leemos imagen
+            img_preg = cv2.imread(str(pag), 1)
+            # Eliminamos franjas negras en caso de existir
+            img_preg2 = eliminar_franjas_negras(img_preg)
 
-                # Recortamos info innecesaria de imagen
-                img_crop = recorte_imagen(img_preg2, 0, 200, 50, 160)
+            # Recortamos info innecesaria de imagen
+            img_crop = recorte_imagen(img_preg2, 0, 200, 50, 160)
 
-                # Divimos imagen en dos páginas del cuadernillo
-                img_p1, img_p2 = partir_imagen_por_mitad(img_crop)
+            # Divimos imagen en dos páginas del cuadernillo
+            img_p1, img_p2 = partir_imagen_por_mitad(img_crop)
 
-                # Para cada una de las dos imágenes del cuadernillo
-                for p, media_img in enumerate([img_p1, img_p2]):
+            # Para cada una de las dos imágenes del cuadernillo
+            for p, media_img in enumerate([img_p1, img_p2]):
 
-                    if dic_pagina[pregunta_selec] == pages[p]:
+                # Si página actual no corresponde a la página que nos interesa, saltamos loop
+                if dic_pagina[pregunta_selec] != pages[p]:
+                    continue
 
-                        # Detecto recuadros naranjos
-                        mask_naranjo = get_mask_naranjo(media_img)
+                # Detecto recuadros naranjos
+                mask_naranjo = get_mask_naranjo(media_img)
 
-                        # Obtengo contornos
-                        big_contours = get_contornos_grandes(mask_naranjo, pages, p)
+                # Obtengo contornos
+                big_contours = get_contornos_grandes(mask_naranjo, pages, p)
 
-                        # Para cada contorno de pregunta:
-                        for num_subpreg, c in enumerate(big_contours):
+                # Para cada contorno de pregunta:
+                for num_preg, c in enumerate(big_contours):
 
-                            # Obtengo coordenadas de contornos y corto imagen
-                            img_pregunta = bound_and_crop(media_img, c)
+                    # Obtengo n° de pregunta en base a lógica de cuadernillo:
+                    q, dic_q = calcular_pregunta_actual(pages, p, dic_q)
 
-                            # Obtengo n° de pregunta en base a lógica de cuadernillo:
-                            q, dic_q = calcular_pregunta_actual(pages, p, dic_q)
+                    # Obtengo coordenadas de contornos y corto imagen
+                    img_pregunta = bound_and_crop(media_img, c)
 
-                            if nivel:
-                                diccionario_nivel = poblar_diccionario_preguntas(q, diccionario_nivel,
-                                                                                 nivel=nivel,
-                                                                                 pag=pag, page=pages[p])
+                    if nivel:
+                        diccionario_nivel = poblar_diccionario_preguntas(q, diccionario_nivel,
+                                                                         nivel=nivel,
+                                                                         pag=pag, page=pages[p])
 
-                            # exportamos preguntas válidas:
-                            if q not in ['_', 1]:
+                    # exportamos preguntas válidas:
+                    if q not in ['_', 1]:
 
+                        try:
+                            # Obtenemos subpreguntas:
+                            img_pregunta_crop = recorte_imagen(
+                                img_pregunta)
+                            #  print(q)
+                            img_crop_col = get_mask_naranjo(img_pregunta_crop,
+                                                            lower_color=np.array(
+                                                                [0, 114, 139]),
+                                                            upper_color=np.array([23, 255, 255]))
+                            # img_crop_col = proc.procesamiento_color(img_pregunta_crop)
+
+                            puntoy = obtener_puntos(
+                                img_crop_col, minLineLength=250)
+
+                            n_subpreg += len(puntoy) - 1
+
+                            for i in range(len(puntoy)-1):
                                 try:
-                                    # Obtenemos subpreguntas:
-                                    img_pregunta_crop = recorte_imagen(
-                                        img_pregunta)
-                                    #  print(q)
-                                    img_crop_col = get_mask_naranjo(img_pregunta_crop,
-                                                                    lower_color=np.array(
-                                                                        [0, 114, 139]),
-                                                                    upper_color=np.array([23, 255, 255]))
-                                    # img_crop_col = proc.procesamiento_color(img_pregunta_crop)
 
-                                    puntoy = obtener_puntos(
-                                        img_crop_col, minLineLength=250)
+                                    crop_and_save_subpreg(img_pregunta_crop,
+                                                          puntoy, i, dir_output,
+                                                          folder, estudiante, q)
 
-                                    n_subpreg += len(puntoy) - 1
-
-                                    for i in range(len(puntoy)-1):
-                                        try:
-
-                                            crop_and_save_subpreg(img_pregunta_crop,
-                                                                  puntoy, i, dir_output,
-                                                                  folder, estudiante, q)
-
-                                        # Si hay error en procesamiento subpregunta
-                                        except Exception as e:
-
-                                            preg_error = str(
-                                                dir_output / f'{folder}/{estudiante}_p{q}_{i+1}')
-                                            anotar_error(
-                                                pregunta=preg_error,
-                                                error='Subregunta no pudo ser procesada',
-                                                e=e, i=i)
-
-                                            continue
-                                # Si hay error en procesamiento pregunta
+                                # Si hay error en procesamiento subpregunta
                                 except Exception as e:
 
-                                    preg_error = str(dir_output / f'{folder}/{estudiante}_p{q}')
+                                    preg_error = str(
+                                        dir_output / f'{folder}/{estudiante}_p{q}_{i+1}')
                                     anotar_error(
-                                        pregunta=preg_error, error='Pregunta no pudo ser procesada', e=e)
+                                        pregunta=preg_error,
+                                        error='Subregunta no pudo ser procesada',
+                                        e=e, i=i)
 
                                     continue
+                        # Si hay error en procesamiento pregunta
+                        except Exception as e:
 
-                    if n_subpreg != n_subpreg_tot:
+                            preg_error = str(dir_output / f'{folder}/{estudiante}_p{q}')
+                            anotar_error(
+                                pregunta=preg_error, error='Pregunta no pudo ser procesada', e=e)
 
-                        preg_error = str(dir_output / f'{folder}/{estudiante}')
+                            continue
 
-                        dic_dif = get_subpregs_distintas(folder, estudiante)
+            if n_subpreg != n_subpreg_tot:
 
-                        error = f'N° de subpreguntas incorrecto para estudiante {estudiante},\
-            se encontraron {n_subpreg} subpreguntas {dic_dif}'
+                preg_error = str(dir_output / f'{folder}/{estudiante}')
 
-                        anotar_error(
-                            pregunta=preg_error, error=error)
+                dic_dif = get_subpregs_distintas(folder, estudiante)
+
+                error = f'N° de subpreguntas incorrecto para estudiante {estudiante},\
+    se encontraron {n_subpreg} subpreguntas {dic_dif}'
+
+                anotar_error(
+                    pregunta=preg_error, error=error)
 
     if nivel:
         return diccionario_nivel
@@ -439,6 +444,23 @@ def crop_and_save_subpreg(img_pregunta_crop, puntoy, i, dir_output, folder, estu
         dir_output / f'{folder}/{estudiante}_p{q}_{i+1}.jpg')
     # print(file_out)
     cv2.imwrite(file_out, cropped_img_sub)
+
+
+def get_pregunta_inicial_pagina(pages, p):
+
+    if pages[p] > pages[1-p]:
+        q_base = max([int(re.search(r'(\d+)', k).group(0))
+                      for k, v in dic_pagina.items() if v == pages[p]])
+        print(f'q max: {q_base}')
+
+    # si es la pág más baja del cuardenillo
+    elif (pages[p] < pages[1-p]) & (pages[p] != 1):
+        q_base = min([int(re.search(r'(\d+)', k).group(0))
+                      for k, v in dic_pagina.items() if v == pages[p]])
+        print(f'q min: {q_base}')
+
+    else:  # Para la portada
+        q = '_'
 
 
 def calcular_pregunta_actual(pages, p, dic_q):
