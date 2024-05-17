@@ -6,7 +6,8 @@ Created on Tue Apr  9 10:34:05 2024
 """
 
 from simce.utils import crear_directorios
-from simce.proc_imgs import get_subpreguntas, get_preg_por_hoja
+from simce.generar_insumos_img import generar_insumos
+from simce.proc_imgs import get_subpreguntas
 from simce.proc_tabla_99 import get_tablas_99
 import cv2
 from pathlib import Path
@@ -23,12 +24,13 @@ crear_directorios()
 
 
 if __name__ == '__main__':
-
-    # 1. Generar tablas con dobles marcas
+    # 1.  Generar insumos para procesamiento
+    # generar_insumos()
+    # 2. Generar tablas con dobles marcas
     # get_tablas_99()
-    # 2.  Obtener preguntas
 
-    get_subpreguntas()
+    # 3. Recortar subpreguntas
+    get_subpreguntas(muestra=True)
 
     # a = get_subpreguntas(filter_estudiante='4279607')
 
@@ -67,18 +69,23 @@ if __name__ == '__main__':
 
     # %%
 
-    cv2.imshow("Detected Lines", img_pregunta)
+    cv2.imshow("Detected Lines", img_pregunta_crop)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     # %%
 
-    hsv_img = cv2.cvtColor(im2,  cv2.COLOR_GRAY2BGR)
-    hsv_img = cv2.drawContours(hsv_img, contours, -1, (60, 200, 200), 3)
-    cv2.imshow("Detected Lines", cv2.resize(img_pregunta, (900, 900)))
+    # hsv_img = cv2.cvtColor(im2,  cv2.COLOR_GRAY2BGR)
+    # hsv_img = cv2.drawContours(hsv_img, contours, -1, (60, 200, 200), 3)
+    cv2.imshow("Detected Lines", cv2.resize(img_p1, (900, 900)))
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-    # %%
+# %%
+
+    big_contours
+    img_pregunta = bound_and_crop(media_img, c)
+
+# %%
 
     img_crop = proc.recorte_imagen(cropped_img)
     img_crop_col = proc.procesamiento_color(img_crop)

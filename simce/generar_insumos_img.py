@@ -266,7 +266,8 @@ def generar_insumos():
                'n_preguntas': n_preguntas,
                'n_subpreg_tot': n_subpreg_tot,
                'dic_cuadernillo': dic_cuadernillo,
-               'dic_pagina': dic_pagina}
+               'dic_pagina': dic_pagina,
+               'subpreg_x_preg': subpreg_x_preg.to_dict()}
 
     dir_insumos.mkdir(exist_ok=True)
     with open(dir_insumos / 'insumos.json', 'w') as fp:

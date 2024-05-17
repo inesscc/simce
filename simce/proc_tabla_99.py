@@ -5,12 +5,17 @@ Created on Thu May  9 17:20:37 2024
 @author: jeconchao
 """
 import pandas as pd
-from simce.config import dir_tabla_99, dir_input
+from simce.config import dir_tabla_99, dir_input, dir_insumos
 import re
-from simce.proc_imgs import dic_cuadernillo
+import json
 
 
 def get_tablas_99():
+
+    with open(dir_insumos / 'insumos.json') as f:
+        insumos = json.load(f)
+    dic_cuadernillo = insumos['dic_cuadernillo']
+
     CE_Final_DobleMarca = pd.read_csv(dir_input / 'CE_Final_DobleMarca.csv', delimiter=';')
     CE_Origen_DobleMarca = pd.read_csv(dir_input / 'CE_Origen_DobleMarca.csv', delimiter=';')
 
@@ -23,6 +28,8 @@ def get_tablas_99():
 
     # Exportando tablas:
     df_final.to_csv(dir_tabla_99 / 'casos_99_compilados.csv')
+
+    print('Tabla compilada generada exitosamente!')
 
 
 def procesar_casos_99(df_rptas, nombres_col, dic_cuadernillo):
