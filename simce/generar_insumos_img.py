@@ -7,22 +7,47 @@ Created on Thu May 16 17:46:31 2024
 
 import numpy as np
 import cv2
-from itertools import chain
-from simce.config import dir_estudiantes, dir_output, regex_estudiante, dir_tabla_99, dir_input
+from simce.config import dir_estudiantes, dir_output, regex_estudiante, dir_insumos
 from simce.errors import anotar_error
 # from simce.apoyo_proc_imgs import get_subpreguntas_completo
 from itertools import islice
 import pandas as pd
 import re
-from dotenv import load_dotenv
+
 from simce.trabajar_rutas import get_n_paginas, get_n_preguntas
 from simce.utils import get_mask_naranjo
-from os import environ
-from pathlib import Path
 import simce.proc_imgs as proc
+import json
 
 
-def get_subpreguntas_completo(filter_rbd=None, filter_estudiante=None,
+def calcular_pregunta_actual(pages, p, dic_q):
+
+    # si es la pág + alta del cuadernillo:
+    if pages[p] > pages[1-p]:
+        dic_q['q2'] -= 1
+        q = dic_q['q2']
+    # si es la pág más baja del cuardenillo
+    elif (pages[p] < pages[1-p]) & (pages[p] != 1):
+        dic_q['q1'] += 1
+        q = dic_q['q1']
+    else:  # Para la portada
+        q = '_'
+
+    return q, dic_q
+
+
+def get_current_pages_cuadernillo(num_pag, pages):
+
+    # si num_pag es par y no es la primera página
+    if (num_pag % 2 == 0) & (num_pag != 0):
+        pages = (pages[1]-1, pages[0] + 1)
+    elif num_pag % 2 == 1:
+        pages = (pages[1]+1, pages[0] - 1)
+
+    return pages
+
+
+def get_subpreguntas_completo(n_pages, n_preguntas, filter_rbd=None, filter_estudiante=None,
                               filter_rbd_int=False, nivel=None):
 
     #  df99 = pd.read_csv(dir_tabla_99 / 'casos_99_compilados.csv')
@@ -100,7 +125,7 @@ def get_subpreguntas_completo(filter_rbd=None, filter_estudiante=None,
                 img_p1, img_p2 = proc.partir_imagen_por_mitad(img_crop)
 
                 # Obtenemos páginas del cuadernillo actual:
-                pages = proc.get_current_pages_cuadernillo(num_pag, pages)
+                pages = get_current_pages_cuadernillo(num_pag, pages)
 
                 # Para cada una de las dos imágenes del cuadernillo
                 for p, media_img in enumerate([img_p1, img_p2]):
@@ -118,7 +143,7 @@ def get_subpreguntas_completo(filter_rbd=None, filter_estudiante=None,
                         img_pregunta = proc.bound_and_crop(media_img, c)
 
                         # Obtengo n° de pregunta en base a lógica de cuadernillo:
-                        q, dic_q = proc.calcular_pregunta_actual(pages, p, dic_q)
+                        q, dic_q = calcular_pregunta_actual(pages, p, dic_q)
 
                         if nivel:
                             diccionario_nivel = proc.poblar_diccionario_preguntas(q, diccionario_nivel,
@@ -126,8 +151,7 @@ def get_subpreguntas_completo(filter_rbd=None, filter_estudiante=None,
                                                                                   pag=pag, page=pages[p])
 
                         # exportamos preguntas válidas:
-                        if q not in [0, 1]:
-                            print(f'{q=}')
+                        if q not in ['_', 1]:
 
                             try:
                                 # Obtenemos subpreguntas:
@@ -172,18 +196,6 @@ def get_subpreguntas_completo(filter_rbd=None, filter_estudiante=None,
 
                                 continue
 
-            if n_subpreg != n_subpreg_tot:
-
-                preg_error = str(dir_output / f'{folder}/{estudiante}')
-
-                dic_dif = proc.get_subpregs_distintas(folder, estudiante)
-
-                error = f'N° de subpreguntas incorrecto para estudiante {estudiante},\
- se encontraron {n_subpreg} subpreguntas {dic_dif}'
-
-                anotar_error(
-                    pregunta=preg_error, error=error)
-
     if nivel:
         return diccionario_nivel
 
@@ -191,7 +203,7 @@ def get_subpreguntas_completo(filter_rbd=None, filter_estudiante=None,
         return 'Éxito!'
 
 
-def get_preg_por_hoja(nivel='cuadernillo'):
+def get_preg_por_hoja(n_pages, n_preguntas, nivel='cuadernillo'):
 
     if nivel not in proc.VALID_INPUT:
         raise ValueError(f"nivel debe ser uno de los siguientes valores: {proc.VALID_INPUT}")
@@ -201,25 +213,25 @@ def get_preg_por_hoja(nivel='cuadernillo'):
         # primer estudiante del primer rbd:
         str(next(next(dir_estudiantes.iterdir()).iterdir()))).group(1)
     if nivel == 'cuadernillo':
-        dic = get_subpreguntas_completo(filter_estudiante=primer_est,
+        dic = get_subpreguntas_completo(n_pages, n_preguntas, filter_estudiante=primer_est,
                                         nivel=nivel)
     elif nivel == 'pagina':
-        dic = get_subpreguntas_completo(filter_estudiante=primer_est, nivel=nivel)
+        dic = get_subpreguntas_completo(n_pages, n_preguntas, filter_estudiante=primer_est, nivel=nivel)
     return dic
 
 
-def get_baseline():
+def get_baseline(n_pages, n_preguntas):
     rbds = set()
     paths = []
 
-    for rbd in (islice(dir_estudiantes.iterdir(), 3)):
+    for rbd in (islice(dir_estudiantes.iterdir(), 2)):
         print(rbd)
         paths.extend(list(rbd.iterdir()))
         rbds.update([rbd.name])
 
-    get_subpreguntas_completo(filter_rbd=rbds)
+    get_subpreguntas_completo(n_pages, n_preguntas, filter_rbd=rbds)
 
-    rutas_output = [i for i in islice(dir_output.iterdir(), 3)]
+    rutas_output = [i for i in islice(dir_output.iterdir(), 2)]
 
     rutas_output_total = []
 
@@ -242,35 +254,26 @@ def get_baseline():
     return df_resumen
 
 
-if environ.get('ENVIRONMENT') == 'dev':
-    n_pages = 12
-    n_preguntas = 29
-    n_subpreg_tot = 165
-    subpreg_x_preg = {'p2': 12, 'p3': 6, 'p4': 10, 'p5': 6,
-                      'p6': 7,                      'p7': 6,
-                      'p8': 8,                      'p9': 5,
-                      'p10': 8,                      'p11': 9,
-                      'p12': 4,                      'p13': 4,
-                      'p14': 7,                      'p15': 5,
-                      'p16': 4,                      'p17': 4,
-                      'p18': 6,                      'p19': 6,
-                      'p20': 4,                      'p21': 4,
-                      'p22': 4,                      'p23': 4,
-                      'p24': 6,                      'p25': 11,
-                      'p26': 6, 'p27': 4, 'p28': 2, 'p29': 3}
-
-    dic_cuadernillo = {'p29': '1', 'p28': '1', 'p27': '1', 'p_': '1', 'p1': '2', 'p2': '2', 'p3': '2',
-                       'p26': '2', 'p25': '2', 'p24': '3', 'p23': '3', 'p22': '3', 'p21': '3', 'p4': '3',
-                       'p5': '3', 'p6': '4', 'p7': '4', 'p20': '4', 'p19': '4', 'p18': '4', 'p17': '5',
-                       'p16': '5', 'p15': '5', 'p8': '5', 'p9': '5', 'p10': '6', 'p11': '6', 'p14': '6',
-                       'p13': '6', 'p12': '6'}
-    dic_pagina = {'p29': 12, 'p28': 12, 'p27': 12, 'p_': 1, 'p1': 2, 'p2': 2, 'p3': 2, 'p26': 11,
-                  'p25': 11, 'p24': 10, 'p23': 10, 'p22': 10, 'p21': 10, 'p4': 3, 'p5': 3, 'p6': 4,
-                  'p7': 4, 'p20': 9, 'p19': 9, 'p18': 9, 'p17': 8, 'p16': 8, 'p15': 8, 'p8': 5, 'p9': 5,
-                  'p10': 6, 'p11': 6, 'p14': 7, 'p13': 7, 'p12': 7}
-else:
+def generar_insumos():
     n_pages = get_n_paginas()
     n_preguntas = get_n_preguntas()
-    subpreg_x_preg = get_baseline()
-    dic_cuadernillo = get_preg_por_hoja(nivel='cuadernillo')
-    dic_pagina = get_preg_por_hoja(nivel='pagina')
+    subpreg_x_preg = get_baseline(n_pages, n_preguntas)
+    n_subpreg_tot = str(subpreg_x_preg.sum())
+    dic_cuadernillo = get_preg_por_hoja(n_pages, n_preguntas, nivel='cuadernillo')
+    dic_pagina = get_preg_por_hoja(n_pages, n_preguntas, nivel='pagina')
+
+    insumos = {'n_pages': n_pages,
+               'n_preguntas': n_preguntas,
+               'n_subpreg_tot': n_subpreg_tot,
+               'dic_cuadernillo': dic_cuadernillo,
+               'dic_pagina': dic_pagina}
+
+    dir_insumos.mkdir(exist_ok=True)
+    with open(dir_insumos / 'insumos.json', 'w') as fp:
+        json.dump(insumos, fp)
+
+    print('Insumos generados exitosamente!')
+
+
+if __name__ == '__main__':
+    generar_insumos()

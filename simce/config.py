@@ -14,5 +14,6 @@ dir_padres = dir_input / 'CP'
 
 dir_output = Path('data/output/output_subpreg')
 dir_tabla_99 = Path('data/output/output_tabla_99/')
+dir_insumos = Path('data/output/insumos/')
 
 regex_estudiante = r'(\d{7,})_.*jpg'

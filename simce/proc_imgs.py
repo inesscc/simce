@@ -10,102 +10,29 @@ from itertools import chain
 from simce.config import dir_estudiantes, dir_output, regex_estudiante, dir_tabla_99, dir_input
 from simce.errors import anotar_error
 # from simce.apoyo_proc_imgs import get_subpreguntas_completo
-from itertools import islice
+
 import pandas as pd
 import re
 from dotenv import load_dotenv
-from simce.trabajar_rutas import get_n_paginas, get_n_preguntas
+
 from simce.utils import get_mask_naranjo
 from os import environ
 from pathlib import Path
+import json
+from simce.config import dir_insumos
 load_dotenv()
 
 VALID_INPUT = {'cuadernillo', 'pagina'}
 
+with open(dir_insumos / 'insumos.json') as f:
+    insumos = json.load(f)
 
-# def get_preg_por_hoja(nivel='cuadernillo'):
-
-#     if nivel not in VALID_INPUT:
-#         raise ValueError(f"nivel debe ser uno de los siguientes valores: {VALID_INPUT}")
-
-#     primer_est = re.search(
-#         regex_estudiante,
-#         # primer estudiante del primer rbd:
-#         str(next(next(dir_estudiantes.iterdir()).iterdir()))).group(1)
-#     if nivel == 'cuadernillo':
-#         dic = get_subpreguntas_completo(filter_estudiante=primer_est,
-#                                         nivel=nivel)
-#     elif nivel == 'pagina':
-#         dic = get_subpreguntas_completo(filter_estudiante=primer_est, nivel=nivel)
-#     return dic
-
-
-# def get_baseline():
-#     rbds = set()
-#     paths = []
-
-#     for rbd in (islice(dir_estudiantes.iterdir(), 3)):
-#         print(rbd)
-#         paths.extend(list(rbd.iterdir()))
-#         rbds.update([rbd.name])
-
-#     get_subpreguntas_completo(filter_rbd=rbds)
-
-#     rutas_output = [i for i in islice(dir_output.iterdir(), 3)]
-
-#     rutas_output_total = []
-
-#     for ruta in rutas_output:
-#         rutas_output_total.extend(list(ruta.iterdir()))
-
-#     df = pd.DataFrame([str(i) for i in rutas_output_total], columns=['ruta'])
-
-#     df['est'] = df.ruta.str.extract(regex_estudiante)
-#     df['preg'] = df.ruta.str.extract(r'p(\d{1,2})').astype(int)
-#     df['subpreg'] = df.ruta.str.extract(r'p(\d{1,2}_\d{1,2})')
-#     # n° mediano de subpreguntas por pregunta, de acuerdo a datos obtenidos de
-#     # alumnos en primeros 3 colegios
-#     df_resumen = (df.groupby(['est']).preg.value_counts()
-#                   .groupby('preg').median().sort_values()
-#                   .sort_index().astype(int))
-
-#     df_resumen.index = 'p'+df_resumen.index.astype('string')
-
-#     return df_resumen
-
-
-# if environ.get('ENVIRONMENT') == 'dev':
-#     n_pages = 12
-#     n_preguntas = 29
-#     n_subpreg_tot = 165
-#     subpreg_x_preg = {'p2': 12, 'p3': 6, 'p4': 10, 'p5': 6,
-#                       'p6': 7,                      'p7': 6,
-#                       'p8': 8,                      'p9': 5,
-#                       'p10': 8,                      'p11': 9,
-#                       'p12': 4,                      'p13': 4,
-#                       'p14': 7,                      'p15': 5,
-#                       'p16': 4,                      'p17': 4,
-#                       'p18': 6,                      'p19': 6,
-#                       'p20': 4,                      'p21': 4,
-#                       'p22': 4,                      'p23': 4,
-#                       'p24': 6,                      'p25': 11,
-#                       'p26': 6, 'p27': 4, 'p28': 2, 'p29': 3}
-
-#     dic_cuadernillo = {'p29': '1', 'p28': '1', 'p27': '1', 'p_': '1', 'p1': '2', 'p2': '2', 'p3': '2',
-#                        'p26': '2', 'p25': '2', 'p24': '3', 'p23': '3', 'p22': '3', 'p21': '3', 'p4': '3',
-#                        'p5': '3', 'p6': '4', 'p7': '4', 'p20': '4', 'p19': '4', 'p18': '4', 'p17': '5',
-#                        'p16': '5', 'p15': '5', 'p8': '5', 'p9': '5', 'p10': '6', 'p11': '6', 'p14': '6',
-#                        'p13': '6', 'p12': '6'}
-#     dic_pagina = {'p29': 12, 'p28': 12, 'p27': 12, 'p_': 1, 'p1': 2, 'p2': 2, 'p3': 2, 'p26': 11,
-#                   'p25': 11, 'p24': 10, 'p23': 10, 'p22': 10, 'p21': 10, 'p4': 3, 'p5': 3, 'p6': 4,
-#                   'p7': 4, 'p20': 9, 'p19': 9, 'p18': 9, 'p17': 8, 'p16': 8, 'p15': 8, 'p8': 5, 'p9': 5,
-#                   'p10': 6, 'p11': 6, 'p14': 7, 'p13': 7, 'p12': 7}
-# else:
-#     n_pages = get_n_paginas()
-#     n_preguntas = get_n_preguntas()
-#     subpreg_x_preg = get_baseline()
-#     dic_cuadernillo = get_preg_por_hoja(nivel='cuadernillo')
-#     dic_pagina = get_preg_por_hoja(nivel='pagina')
+n_pages = insumos['n_pages']
+n_preguntas = insumos['n_preguntas']
+subpreg_x_preg = insumos['subpreg_x_preg']
+dic_cuadernillo = insumos['dic_cuadernillo']
+dic_pagina = insumos['dic_pagina']
+n_subpreg_tot = insumos['n_subpreg_tot']
 
 
 def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
@@ -213,7 +140,7 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
                     q = q_base + num_preg
 
                     # Obtengo n° de pregunta en base a lógica de cuadernillo:
-                    q, dic_q = calcular_pregunta_actual(pages, p, q_base, dic_q)
+                    q = calcular_pregunta_actual(pages, p, q_base)
 
                     # Si la pregunta selecciona no es la que nos interesa, seguimos
                     if f'p{q}' != pregunta_selec:
@@ -437,21 +364,20 @@ def get_pregunta_inicial_pagina(pages, p):
     return q_base
 
 
-def calcular_pregunta_actual(pages, p, q_base, dic_q):
+def calcular_pregunta_actual(pages, p, q_base):
 
     # si es la pág + alta del cuadernillo:
     if pages[p] > pages[1-p]:
         q_base -= 1
-        dic_q['q2'] = q_base
 
     # si es la pág más baja del cuardenillo
     elif (pages[p] < pages[1-p]) & (pages[p] != 1):
         q_base += 1
-        dic_q['q1'] = q_base
+
     else:  # Para la portada
         q_base = 1
 
-    return q_base, dic_q
+    return q_base
 
 
 def poblar_diccionario_preguntas(q, diccionario, nivel='cuadernillo',
@@ -525,172 +451,3 @@ def procesamiento_antiguo(media_img):
     m = cv2.ximgproc.thinning(m, None, cv2.ximgproc.THINNING_GUOHALL)
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
     m = cv2.dilate(m, kernel, iterations=2)
-
-
-def get_subpreguntas_completo(filter_rbd=None, filter_estudiante=None,
-                              filter_rbd_int=False, nivel=None):
-
-    #  df99 = pd.read_csv(dir_tabla_99 / 'casos_99_compilados.csv')
-
-    #   dir_preg99 = [dir_input / Path(i) for i in df99.ruta_imagen]
-
-    # Si queremos correr función para rbd específico
-    if filter_rbd:
-        # Si queremos correr función desde un rbd en adelante
-        if filter_rbd_int:
-            directorios = [i for i in dir_estudiantes.iterdir()
-                           if int(i.name) >= filter_rbd]
-        # Si queremos correr función solo para el rbd ingresado
-        else:
-            if isinstance(filter_rbd, str):
-                filter_rbd = [filter_rbd]
-            directorios = [i for i in dir_estudiantes.iterdir() if i.name in filter_rbd]
-    else:
-        directorios = dir_estudiantes.iterdir()
-
-    # Permite armar diccionario con mapeo pregunta -> página cuadernillo (archivo input)
-    if nivel:
-        diccionario_nivel = dict()
-
-    for num, rbd in enumerate(directorios):
-        if not filter_estudiante:
-            print('############################')
-            print(rbd)
-            print(num)
-            print('############################')
-
-        estudiantes_rbd = {re.search(regex_estudiante, str(i)).group(1)
-                           for i in rbd.iterdir()}
-
-        # Si queremos correr función para un estudiante específico:
-        if filter_estudiante:
-            if isinstance(filter_estudiante, str):
-                filter_estudiante = [filter_estudiante]
-            estudiantes_rbd = {
-                i for i in estudiantes_rbd if i in filter_estudiante}
-
-        for estudiante in estudiantes_rbd:
-
-            n_subpreg = 0
-
-            # páginas del cuardenillo
-            pages = (n_pages, 1)
-
-            dic_q = {
-                # pregunta inicial páginas bajas
-                'q1': 0,
-                # pregunta inicial páginas altas
-                'q2': n_preguntas + 1}
-
-            # Para cada imagen del cuadernillo de un estudiante (2 pág x img):
-            for num_pag, pag in enumerate(rbd.glob(f'{estudiante}*')):
-
-                # Obtengo carpeta del rbd y archivo del estudiante a
-                # partir del path:
-                folder, file = (pag.parts[-2], pag.parts[-1])
-
-                print(f'{file=}')
-                print(f'{num_pag=}')
-
-                # Creamos directorio si no existe
-                (dir_output / f'{folder}').mkdir(exist_ok=True)
-
-                # Leemos imagen y eliminamos franjas negras en caso de existir
-                img_preg2 = eliminar_franjas_negras(cv2.imread(str(pag), 1))
-
-                # Recortamos info innecesaria de imagen
-                img_crop = recorte_imagen(img_preg2, 0, 200, 50, 160)
-
-                # Divimos imagen en dos páginas del cuadernillo
-                img_p1, img_p2 = partir_imagen_por_mitad(img_crop)
-
-                # Obtenemos páginas del cuadernillo actual:
-                pages = get_current_pages_cuadernillo(num_pag, pages)
-
-                # Para cada una de las dos imágenes del cuadernillo
-                for p, media_img in enumerate([img_p1, img_p2]):
-
-                    # Detecto recuadros naranjos
-                    mask_naranjo = get_mask_naranjo(media_img)
-
-                    # Obtengo contornos
-                    big_contours = get_contornos_grandes(mask_naranjo, pages, p)
-
-                    # Para cada contorno de pregunta:
-                    for c in (big_contours):
-
-                        # Obtengo coordenadas de contornos y corto imagen
-                        img_pregunta = bound_and_crop(media_img, c)
-
-                        # Obtengo n° de pregunta en base a lógica de cuadernillo:
-                        q, dic_q = calcular_pregunta_actual(pages, p, dic_q)
-
-                        if nivel:
-                            diccionario_nivel = poblar_diccionario_preguntas(q, diccionario_nivel,
-                                                                             nivel=nivel,
-                                                                             pag=pag, page=pages[p])
-
-                        # exportamos preguntas válidas:
-                        if q not in [0, 1]:
-                            print(f'{q=}')
-
-                            try:
-                                # Obtenemos subpreguntas:
-                                img_pregunta_crop = recorte_imagen(
-                                    img_pregunta)
-                                #  print(q)
-                                img_crop_col = get_mask_naranjo(img_pregunta_crop,
-                                                                lower_color=np.array(
-                                                                    [0, 114, 139]),
-                                                                upper_color=np.array([23, 255, 255]))
-                                # img_crop_col = proc.procesamiento_color(img_pregunta_crop)
-
-                                puntoy = obtener_puntos(
-                                    img_crop_col, minLineLength=250)
-
-                                n_subpreg += len(puntoy) - 1
-
-                                for i in range(len(puntoy)-1):
-                                    try:
-
-                                        crop_and_save_subpreg(img_pregunta_crop,
-                                                              puntoy, i, dir_output,
-                                                              folder, estudiante, q)
-
-                                    # Si hay error en procesamiento subpregunta
-                                    except Exception as e:
-
-                                        preg_error = str(
-                                            dir_output / f'{folder}/{estudiante}_p{q}_{i+1}')
-                                        anotar_error(
-                                            pregunta=preg_error,
-                                            error='Subregunta no pudo ser procesada',
-                                            e=e, i=i)
-
-                                        continue
-                            # Si hay error en procesamiento pregunta
-                            except Exception as e:
-
-                                preg_error = str(dir_output / f'{folder}/{estudiante}_p{q}')
-                                anotar_error(
-                                    pregunta=preg_error, error='Pregunta no pudo ser procesada', e=e)
-
-                                continue
-
-            if n_subpreg != n_subpreg_tot:
-
-                preg_error = str(dir_output / f'{folder}/{estudiante}')
-
-                dic_dif = get_subpregs_distintas(folder, estudiante)
-
-                error = f'N° de subpreguntas incorrecto para estudiante {estudiante},\
- se encontraron {n_subpreg} subpreguntas {dic_dif}'
-
-                anotar_error(
-                    pregunta=preg_error, error=error)
-
-    if nivel:
-        return diccionario_nivel
-
-    else:
-        return 'Éxito!'
