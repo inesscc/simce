@@ -25,12 +25,12 @@ crear_directorios()
 
 if __name__ == '__main__':
     # 1.  Generar insumos para procesamiento
-    # generar_insumos()
+    generar_insumos()
     # 2. Generar tablas con dobles marcas
-    # get_tablas_99()
+    get_tablas_99()
 
     # 3. Recortar subpreguntas
-    get_subpreguntas(muestra=True)
+    get_subpreguntas(muestra=False)
 
     # a = get_subpreguntas(filter_estudiante='4279607')
 
