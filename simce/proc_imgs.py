@@ -154,20 +154,27 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
 
                     q = q_base + num_preg
 
-                    # Si la pregunta selecciona no es la que nos interesa, seguimos
+                    # Si la pregunta seleccionada no es la que nos interesa, seguimos
                     if f'p{q}' != pregunta_selec:
                         continue
 
                     # Obtengo coordenadas de contornos y corto imagen
                     img_pregunta = bound_and_crop(media_img, c)
 
+                    # Si quiero poblar el diccionario de cuadernillo o página:
                     if nivel:
                         diccionario_nivel = poblar_diccionario_preguntas(q, diccionario_nivel,
                                                                          nivel=nivel,
                                                                          pag=pag, page=pages[p])
+                        continue
+
+                    if subpreg_x_preg[f'p{q}'] == 1:
+                        print('Pregunta no cuenta con subpreguntas, se guardará imagen')
+                        file_out = str(dir_output / f'{rbd.name}/{estudiante}_p{q}.jpg')
+                        cv2.imwrite(file_out, img_pregunta)
 
                     # exportamos preguntas válidas:
-                    if q not in [0, 1]:
+                    elif q not in [0, 1]:
 
                         try:
                             # Obtenemos subpreguntas:
@@ -178,12 +185,11 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
                                                             lower_color=np.array(
                                                                 [0, 114, 139]),
                                                             upper_color=np.array([23, 255, 255]))
-                            # img_crop_col = proc.procesamiento_color(img_pregunta_crop)
 
-                            puntoy = obtener_puntos(
+                            lineas_horizontales = obtener_puntos(
                                 img_crop_col, minLineLength=250)
 
-                            n_subpreg = len(puntoy) - 1
+                            n_subpreg = len(lineas_horizontales) - 1
 
                             n_subpreg_acum += n_subpreg
 
@@ -193,9 +199,10 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
                                     if (i+1) != int(subpreg_selec):
                                         continue
 
-                                    crop_and_save_subpreg(img_pregunta_crop,
-                                                          puntoy, i, dir_output,
-                                                          folder, estudiante, q)
+                                    file_out = str(
+                                        dir_output / f'{folder}/{estudiante}_p{q}_{i+1}.jpg')
+                                    crop_and_save_subpreg(img_pregunta_crop, lineas_horizontales,
+                                                          i, file_out)
 
                                 # Si hay error en procesamiento subpregunta
                                 except Exception as e:
@@ -208,6 +215,7 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
                                         e=e, i=i)
 
                                     continue
+
                         # Si hay error en procesamiento pregunta
                         except Exception as e:
 
@@ -356,15 +364,13 @@ def bound_and_crop(img, c):
     return img_crop
 
 
-def crop_and_save_subpreg(img_pregunta_crop, puntoy, i, dir_output, folder, estudiante, q):
-    cropped_img_sub = img_pregunta_crop[puntoy[i]:
-                                        puntoy[i+1],]
+def crop_and_save_subpreg(img_pregunta_crop, lineas_horizontales, i, file_out):
+    cropped_img_sub = img_pregunta_crop[lineas_horizontales[i]:
+                                        lineas_horizontales[i+1],]
 
-    # id_img = f'{page}_{n}'
-    file_out = str(
-        dir_output / f'{folder}/{estudiante}_p{q}_{i+1}.jpg')
     # print(file_out)
     cv2.imwrite(file_out, cropped_img_sub)
+    print(f'{file_out} guardado!')
 
 
 def get_pregunta_inicial_pagina(dic_pagina, pages, p):

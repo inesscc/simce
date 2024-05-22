@@ -69,7 +69,7 @@ if __name__ == '__main__':
 
     # %%
 
-    cv2.imshow("Detected Lines", img_pregunta_crop)
+    cv2.imshow("Detected Lines", img_crop_col)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     # %%
