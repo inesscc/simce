@@ -7,7 +7,7 @@ Created on Thu May  2 17:22:37 2024
 import numpy as np
 import cv2
 from itertools import chain
-from simce.config import dir_output, regex_estudiante, dir_tabla_99, dir_input
+from simce.config import dir_output, regex_estudiante, dir_tabla_99, dir_input, n_pixeles_entre_lineas
 from simce.errors import anotar_error
 # from simce.apoyo_proc_imgs import get_subpreguntas_completo
 
@@ -319,27 +319,32 @@ def obtener_puntos(img_crop_canny, threshold=100, minLineLength=200):
     lines = cv2.HoughLinesP(img_crop_canny, 1, np.pi/180,
                             threshold=threshold, minLineLength=minLineLength)
 
-    indices_ordenados = np.argsort(lines[:, :, 1].flatten())
-    lines_sorted = lines[indices_ordenados]
+    if lines is not None:
 
-    puntoy = list(set(chain.from_iterable(lines_sorted[:, :, 1].tolist())))
-    puntoy.append(img_crop_canny.shape[0])
-    puntoy = sorted(puntoy)
+        indices_ordenados = np.argsort(lines[:, :, 1].flatten())
+        lines_sorted = lines[indices_ordenados]
 
-    # print(puntoy)
+        puntoy = list(set(chain.from_iterable(lines_sorted[:, :, 1].tolist())))
+        puntoy.append(img_crop_canny.shape[0])
+        puntoy = sorted(puntoy)
 
-    y = []
-    for i in range(len(puntoy)-1):
-        if puntoy[i+1] - puntoy[i] < 27:
-            y.append(i+1)
+        # print(puntoy)
 
-    # print(puntoy)
-    # print(y)
+        y = []
+        for i in range(len(puntoy)-1):
+            if puntoy[i+1] - puntoy[i] < n_pixeles_entre_lineas:
+                y.append(i+1)
 
-    for index in sorted(y, reverse=True):
-        del puntoy[index]
+        # print(puntoy)
+        # print(y)
 
-    return puntoy
+        for index in sorted(y, reverse=True):
+            del puntoy[index]
+
+        return puntoy
+    else:
+        # Pregunta no cuenta con subpreguntas
+        return None
 
 
 def bound_and_crop(img, c):

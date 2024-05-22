@@ -11,14 +11,15 @@ import re
 import cv2
 import numpy as np
 from simce.utils import get_mask_naranjo
+from simce.config import regex_estudiante
 
 
 def get_n_paginas():
     rbds = list(dir_estudiantes.iterdir())
     rbd1 = rbds[0]
 
-    estudiantes_rbd = {re.search(r'\d{7}', str(i)).group(0)
-                       for i in rbd1.iterdir()}
+    estudiantes_rbd = {re.search(regex_estudiante, str(i)).group(1)
+                       for i in rbd1.rglob('*jpg')}
     n_files = len(list(rbd1.glob(f'{estudiantes_rbd.pop()}*')))
     n_pages = n_files * 2
 
@@ -29,8 +30,8 @@ def get_n_preguntas():
     rbds = list(dir_estudiantes.iterdir())
     rbd1 = rbds[0]
 
-    estudiantes_rbd = {re.search(r'\d{7}', str(i)).group(0)
-                       for i in rbd1.iterdir()}
+    estudiantes_rbd = {re.search(regex_estudiante, str(i)).group(1)
+                       for i in rbd1.rglob('*jpg')}
 
     total_imagenes = 0
     for file in (rbd1.glob(f'{estudiantes_rbd.pop()}*')):
@@ -44,7 +45,7 @@ def get_n_preguntas():
 
         img_p1 = img_crop[:, :punto_medio]
         img_p2 = img_crop[:, punto_medio:]
-
+        print(file)
         for p, media_img in enumerate([img_p1, img_p2]):
 
             m = get_mask_naranjo(media_img)
