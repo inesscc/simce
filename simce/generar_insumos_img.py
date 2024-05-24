@@ -22,6 +22,27 @@ import json
 
 
 def calcular_pregunta_actual(pages, p, dic_q):
+    '''Método programático para obtener pregunta del cuadernillo que se está
+    procesando. Dado que siempre una página tiene preguntas que vienen en orden
+    ascendente y la otra en orden descendente (por la lógica de cuadernillo), hubo
+    que incorporar esto en el algoritmo
+
+    Args:
+        pages (tuple): tupla que contiene la página izquierda y la página derecha de la página del
+        cuadernillo que se está procesando. Ejemplo: (10,3) para la página 2 del cuadernillo
+        estudiantes 2023
+
+        p (int): integer que toma valor 0 ó 1. Si es 0 es la primera página del cuadernillo, si es  1, es
+        la segunda.
+
+        dic_q (dict): diccionario que contiene dos llaves, q1 y q2. q1 es la pregunta actual desde el lado
+        bajo y q2 es la pregunta actual desde el lado alto del cuadernillo.
+
+    Returns:
+        q: pregunta actual siendo procesada
+        dic_q: diccionario actualizado con pregunta alta y pregunta baja
+
+    '''
 
     # si es la pág + alta del cuadernillo:
     if pages[p] > pages[1-p]:
@@ -37,25 +58,39 @@ def calcular_pregunta_actual(pages, p, dic_q):
     return q, dic_q
 
 
-def get_current_pages_cuadernillo(num_pag, pages):
-
-    # si num_pag es par y no es la primera página
-    if (num_pag % 2 == 0) & (num_pag != 0):
-        pages = (pages[1]-1, pages[0] + 1)
-    elif num_pag % 2 == 1:
-        pages = (pages[1]+1, pages[0] - 1)
-
-    return pages
-
-
 def get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes, dic_pagina=None,
                               filter_rbd=None, filter_estudiante=None,
                               filter_rbd_int=False, nivel=None):
+    '''
+    Versión de función get_subpreguntas() diseñada para obtener todas las subpreguntas de cada alumno/a
+    que recibe. Se utiliza principalmente para insumar los diccionarios automáticos, en particular, número
+    de subpreguntas por pregunta, preguntas por página del cuadernillo y preguntas por imagen del
+    cuadernillo. Función exporta imágenes para cada subpregunta de cada pregunta que procesa.
 
-    #  df99 = pd.read_csv(dir_tabla_99 / 'casos_99_compilados.csv')
+    Args:
+        n_pages (int): n° de páginas que tiene el cuestionario
 
-    #   dir_preg99 = [dir_input / Path(i) for i in df99.ruta_imagen]
+        n_pages (int): n° de preguntas que tiene el cuestionario
 
+        directorio_imagenes (pathlib.Path): directorio desde el que se recogen imágenes a procesar
+
+        dic_pagina (dict): diccionario que mapea el número de pregunta a la página específica del
+        cuadernillo a la que pertenece esa pregunta. Se utiliza para permitirle al algoritmo saber qué
+        pregunta se está procesando solo sabiendo el nombre del archivo.
+
+        p (int): integer que toma valor 0 ó 1. Si es 0 es la primera página del cuadernillo, si es  1, es
+        la segunda.
+
+        dic_q (dict): diccionario que contiene dos llaves, q1 y q2. q1 es la pregunta actual desde el lado
+        bajo y q2 es la pregunta actual desde el lado alto del cuadernillo.
+
+    Returns:
+        q: pregunta actual siendo procesada
+        dic_q: diccionario actualizado con pregunta alta y pregunta baja
+
+    '''
+
+    # TODO: eliminar parámetros de filtro de función
     # Si queremos correr función para rbd específico
     if filter_rbd:
         # Si queremos correr función desde un rbd en adelante

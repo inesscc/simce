@@ -17,16 +17,16 @@ np.random.seed(2024)
 
 
 @timing
-def get_tablas_99_total():
+def get_tablas_99_total(para_entrenamiento=True):
     print('Generando tabla estudiantes...')
 
-    get_tablas_99(tipo_cuadernillo='estudiantes')
+    get_tablas_99(tipo_cuadernillo='estudiantes', para_entrenamiento=para_entrenamiento)
     print('Generando tabla padres...')
 
-    get_tablas_99(tipo_cuadernillo='padres')
+    get_tablas_99(tipo_cuadernillo='padres', para_entrenamiento=para_entrenamiento)
 
 
-def get_tablas_99(tipo_cuadernillo, sample_no99=True):
+def get_tablas_99(tipo_cuadernillo, para_entrenamiento=True):
 
     if tipo_cuadernillo == 'estudiantes':
         from simce.config import nombre_tabla_estud_origen, nombre_tabla_estud_final
@@ -54,10 +54,9 @@ def get_tablas_99(tipo_cuadernillo, sample_no99=True):
     casos_99_origen = procesar_casos_99(Origen_DobleMarca, nombres_col, dic_cuadernillo)
 
     df_final = gen_tabla_entrenamiento(casos_99, casos_99_origen)
-    
 
     # sample no 99
-    if sample_no99:
+    if para_entrenamiento:
         # series de los casos 99 para extraer una muestra
         series = casos_99.index.get_level_values('serie')
         casos_sample = procesar_casos_sample(
@@ -66,8 +65,8 @@ def get_tablas_99(tipo_cuadernillo, sample_no99=True):
 
         # Exportando tablas:
         df_final.reset_index().to_csv(dir_tabla_99 /
-                                               f'casos_99_sample_compilados_{tipo_cuadernillo}.csv',
-                                               index=False)
+                                      f'casos_99_entrenamiento_compilados_{tipo_cuadernillo}.csv',
+                                      index=False)
     else:
         # Exportando tablas:
         df_final.reset_index().to_csv(
@@ -141,4 +140,3 @@ def procesar_casos_sample(df_rptas_fin, df_rptas_or, nombres_col, dic_cuadernill
     df_melt = df_melt.rename(columns={'respuestas': 'dm_sospecha'})
 
     return df_melt.drop(columns=['rutaImagen1']).set_index(['serie', 'preguntas'])
-

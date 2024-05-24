@@ -54,12 +54,48 @@ def select_directorio(tipo_cuadernillo):
 
 
 def get_subpreguntas(tipo_cuadernillo, filter_rbd=None, filter_estudiante=None,
-                     filter_rbd_int=False, nivel=None, muestra=False):
+                     filter_rbd_int=False, nivel=None, muestra=False, para_entrenamiento=True):
+    '''
+    Obtiene las cada una de las subpreguntas obtenidas de la función get_tablas_99(). Esto considera dos
+    casos: si es para predicción obtendrá las imágenes de todas las sospechas de doble marca de la tabla
+    de origen y si es para entrenamiento, además considerará aproximadamente un 20% extra de marcas
+    normales ()
+    que recibe. Se utiliza principalmente para insumar los diccionarios automáticos, en particular, número
+    de subpreguntas por pregunta, preguntas por página del cuadernillo y preguntas por imagen del
+    cuadernillo. Función exporta imágenes para cada subpregunta de cada pregunta que procesa.
+
+    Args:
+        n_pages (int): n° de páginas que tiene el cuestionario
+
+        n_pages (int): n° de preguntas que tiene el cuestionario
+
+        directorio_imagenes (pathlib.Path): directorio desde el que se recogen imágenes a procesar
+
+        dic_pagina (dict): diccionario que mapea el número de pregunta a la página específica del
+        cuadernillo a la que pertenece esa pregunta. Se utiliza para permitirle al algoritmo saber qué
+        pregunta se está procesando solo sabiendo el nombre del archivo.
+
+        p (int): integer que toma valor 0 ó 1. Si es 0 es la primera página del cuadernillo, si es  1, es
+        la segunda.
+
+        dic_q (dict): diccionario que contiene dos llaves, q1 y q2. q1 es la pregunta actual desde el lado
+        bajo y q2 es la pregunta actual desde el lado alto del cuadernillo.
+
+    Returns:
+        q: pregunta actual siendo procesada
+        dic_q: diccionario actualizado con pregunta alta y pregunta baja
+
+    '''
 
     directorio_imagenes = select_directorio(tipo_cuadernillo)
 
+    if para_entrenamiento:
+        nombre_tabla_casos99 = f'casos_99_entrenamiento_compilados_{tipo_cuadernillo}.csv'
+    else:
+        nombre_tabla_casos99 = f'casos_99_compilados_{tipo_cuadernillo}.csv'
+
     df99 = pd.read_csv(
-        dir_tabla_99 / f'casos_99_sample_compilados_{tipo_cuadernillo}.csv').sort_values('ruta_imagen')
+        dir_tabla_99 / nombre_tabla_casos99).sort_values('ruta_imagen')
 
     if muestra:
         df99['rbd'] = df99.ruta_imagen.str.extract(r'(\d{5})')
@@ -411,22 +447,6 @@ def get_pregunta_inicial_pagina(dic_pagina, pages, p):
     return q_base
 
 
-def calcular_pregunta_actual(pages, p, q_base):
-
-    # si es la pág + alta del cuadernillo:
-    if pages[p] > pages[1-p]:
-        q_base -= 1
-
-    # si es la pág más baja del cuardenillo
-    elif (pages[p] < pages[1-p]) & (pages[p] != 1):
-        q_base += 1
-
-    else:  # Para la portada
-        q_base = 1
-
-    return q_base
-
-
 def poblar_diccionario_preguntas(q, diccionario, nivel='cuadernillo',
                                  pag=None, page=None):
 
@@ -452,6 +472,23 @@ def partir_imagen_por_mitad(img_crop):
 
 
 def get_current_pages_cuadernillo(num_pag, pages):
+    '''Método programático para obtener páginas del cuadernillo que se están
+    procesando en la imagen actualmente abierta. Dado que siempre una página tiene preguntas
+    que vienen en orden ascendente y la otra en orden descendente (por la lógica de cuadernillo), hubo
+    que incorporar esto en el algoritmo. Se actualiza en cada iteración del loop
+
+    Args:
+        num_pag (int): número de imagen del cuadernillo que se está procesando. Parte en 0.
+
+        pages (tuple): tupla que contiene páginas del cuadernillo en la iteración anterior.
+        Ejemplo: (10,3) para la página 2 del cuadernillo estudiantes 2023
+
+
+    Returns:
+        pages (tuple): tupla actualizada con páginas del cuadernillo siendo procesadas actualmente
+
+
+    '''
 
     if num_pag == 0:
         pass
@@ -472,11 +509,7 @@ def get_contornos_grandes(mask):
     # Me quedo contornos grandes
     big_contours = [
         i for i in contours if cv2.contourArea(i) > 30000]
-    #  print([i[0][0][1] for i in big_contours] )
 
-    #  print(f'página actual: {pages[p]}')
-
-    # Revertimos orden
     big_contours = big_contours[::-1]
 
     return big_contours

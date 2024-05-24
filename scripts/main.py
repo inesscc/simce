@@ -22,17 +22,17 @@ import pandas as pd
 
 
 if __name__ == '__main__':
-
+    IS_TRAINING = True
     # 0. Creamos directorios
     crear_directorios()
     # 1.  Generar insumos para procesamiento
     generar_insumos_total()
     # 2. Generar tablas con dobles marcas
-    get_tablas_99_total()
+    get_tablas_99_total(para_entrenamiento=IS_TRAINING)
 
     # 3. Recortar subpreguntas
-    get_subpreguntas(muestra=True, tipo_cuadernillo='estudiantes')
-    get_subpreguntas(muestra=True, tipo_cuadernillo='padres')
+    get_subpreguntas(tipo_cuadernillo='estudiantes', para_entrenamiento=IS_TRAINING)
+    get_subpreguntas(tipo_cuadernillo='padres', para_entrenamiento=IS_TRAINING)
 
     # a = get_subpreguntas(filter_estudiante='4279607')
 
