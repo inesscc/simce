@@ -7,7 +7,7 @@ Created on Thu May 16 17:46:31 2024
 
 import numpy as np
 import cv2
-from simce.config import dir_estudiantes, dir_output, regex_estudiante, dir_insumos
+from simce.config import dir_estudiantes, dir_padres, dir_output, regex_estudiante, dir_insumos
 from simce.errors import anotar_error
 # from simce.apoyo_proc_imgs import get_subpreguntas_completo
 from itertools import islice
@@ -47,7 +47,8 @@ def get_current_pages_cuadernillo(num_pag, pages):
     return pages
 
 
-def get_subpreguntas_completo(n_pages, n_preguntas, dic_pagina=None, filter_rbd=None, filter_estudiante=None,
+def get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes, dic_pagina=None,
+                              filter_rbd=None, filter_estudiante=None,
                               filter_rbd_int=False, nivel=None):
 
     #  df99 = pd.read_csv(dir_tabla_99 / 'casos_99_compilados.csv')
@@ -58,15 +59,15 @@ def get_subpreguntas_completo(n_pages, n_preguntas, dic_pagina=None, filter_rbd=
     if filter_rbd:
         # Si queremos correr función desde un rbd en adelante
         if filter_rbd_int:
-            directorios = [i for i in dir_estudiantes.iterdir()
+            directorios = [i for i in directorio_imagenes.iterdir()
                            if int(i.name) >= filter_rbd]
         # Si queremos correr función solo para el rbd ingresado
         else:
             if isinstance(filter_rbd, str):
                 filter_rbd = [filter_rbd]
-            directorios = [i for i in dir_estudiantes.iterdir() if i.name in filter_rbd]
+            directorios = [i for i in directorio_imagenes.iterdir() if i.name in filter_rbd]
     else:
-        directorios = dir_estudiantes.iterdir()
+        directorios = directorio_imagenes.iterdir()
 
     # Permite armar diccionario con mapeo pregunta -> página cuadernillo (archivo input)
     if nivel:
@@ -102,16 +103,18 @@ def get_subpreguntas_completo(n_pages, n_preguntas, dic_pagina=None, filter_rbd=
                 # pregunta inicial páginas altas
                 'q2': n_preguntas + 1}
 
-            (dir_output / f'{rbd.name}').mkdir(exist_ok=True, parents=True)
+            dir_output_rbd = (dir_output / f'{directorio_imagenes.name}/{rbd.name}/')
+            dir_output_rbd.mkdir(parents=True, exist_ok=True)
             # Para cada imagen del cuadernillo de un estudiante (2 pág x img):
             for num_pag, pag in enumerate(rbd.glob(f'{estudiante}*')):
+                # Creamos directorio para guardar imágenes
 
                 # Obtenemos páginas del cuadernillo actual:
                 pages = proc.get_current_pages_cuadernillo(num_pag, pages)
 
                 # Obtengo carpeta del rbd y archivo del estudiante a
                 # partir del path:
-                folder, file = (pag.parts[-2], pag.parts[-1])
+                file = pag.parts[-1]
 
                 print(f'{file=}')
                 print(f'{num_pag=}')
@@ -120,7 +123,7 @@ def get_subpreguntas_completo(n_pages, n_preguntas, dic_pagina=None, filter_rbd=
 
                 # Leemos imagen
                 img_preg = cv2.imread(str(pag), 1)
-                img_crop = proc.recorte_imagen(img_preg, 0, 200, 50, 160)
+                img_crop = proc.recorte_imagen(img_preg, 0, 100, 50, 160)
                 # Eliminamos franjas negras en caso de existir
                 img_sin_franja = proc.eliminar_franjas_negras(img_crop)
 
@@ -134,7 +137,7 @@ def get_subpreguntas_completo(n_pages, n_preguntas, dic_pagina=None, filter_rbd=
                     mask_naranjo = get_mask_naranjo(media_img)
 
                     # Obtengo contornos
-                    big_contours = proc.get_contornos_grandes(mask_naranjo, pages, p)
+                    big_contours = proc.get_contornos_grandes(mask_naranjo)
 
                     if not nivel:
                         q_base = proc.get_pregunta_inicial_pagina(dic_pagina, pages, p)
@@ -171,25 +174,26 @@ def get_subpreguntas_completo(n_pages, n_preguntas, dic_pagina=None, filter_rbd=
                                                                 upper_color=np.array([23, 255, 255]))
                                 # img_crop_col = proc.procesamiento_color(img_pregunta_crop)
 
-                                puntoy = proc.obtener_puntos(
+                                lineas_horizontales = proc.obtener_puntos(
                                     img_crop_col, minLineLength=250)
 
-                                if puntoy is not None:
+                                if lineas_horizontales is not None:
 
-                                    n_subpreg += len(puntoy) - 1
+                                    n_subpreg += len(lineas_horizontales) - 1
 
-                                    for i in range(len(puntoy)-1):
+                                    for i in range(len(lineas_horizontales)-1):
                                         try:
 
-                                            proc.crop_and_save_subpreg(img_pregunta_crop,
-                                                                       puntoy, i, dir_output,
-                                                                       folder, estudiante, q)
+                                            file_out = str(
+                                                dir_output_rbd / f'{estudiante}_p{q}_{i+1}.jpg')
+                                            proc.crop_and_save_subpreg(img_pregunta_crop, lineas_horizontales,
+                                                                       i, file_out)
 
                                         # Si hay error en procesamiento subpregunta
                                         except Exception as e:
 
                                             preg_error = str(
-                                                dir_output / f'{folder}/{estudiante}_p{q}_{i+1}')
+                                                dir_output_rbd / f'{estudiante}_p{q}_{i+1}')
                                             anotar_error(
                                                 pregunta=preg_error,
                                                 error='Subregunta no pudo ser procesada',
@@ -199,13 +203,15 @@ def get_subpreguntas_completo(n_pages, n_preguntas, dic_pagina=None, filter_rbd=
 
                                 else:
                                     print('Pregunta no cuenta con subpreguntas, se guardará imagen')
-                                    file_out = str(dir_output / f'{rbd.name}/{estudiante}_p{q}.jpg')
+                                    file_out = str(
+                                        dir_output_rbd / f'{estudiante}_p{q}.jpg')
                                     cv2.imwrite(file_out, img_pregunta)
 
                                     # Si hay error en procesamiento pregunta
                             except Exception as e:
 
-                                preg_error = str(dir_output / f'{folder}/{estudiante}_p{q}')
+                                preg_error = str(
+                                    dir_output_rbd / f'{estudiante}_p{q}')
                                 anotar_error(
                                     pregunta=preg_error, error='Pregunta no pudo ser procesada', e=e)
 
@@ -218,7 +224,7 @@ def get_subpreguntas_completo(n_pages, n_preguntas, dic_pagina=None, filter_rbd=
         return 'Éxito!'
 
 
-def get_preg_por_hoja(n_pages, n_preguntas, nivel='cuadernillo'):
+def get_preg_por_hoja(n_pages, n_preguntas, directorio_imagenes, nivel='cuadernillo'):
 
     if nivel not in proc.VALID_INPUT:
         raise ValueError(f"nivel debe ser uno de los siguientes valores: {proc.VALID_INPUT}")
@@ -226,27 +232,30 @@ def get_preg_por_hoja(n_pages, n_preguntas, nivel='cuadernillo'):
     primer_est = re.search(
         regex_estudiante,
         # primer estudiante del primer rbd:
-        str(next(next(dir_estudiantes.iterdir()).iterdir()))).group(1)
+        str(next(next(directorio_imagenes.iterdir()).iterdir()))).group(1)
     if nivel == 'cuadernillo':
-        dic = get_subpreguntas_completo(n_pages, n_preguntas, filter_estudiante=primer_est,
+        dic = get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes, filter_estudiante=primer_est,
                                         nivel=nivel)
     elif nivel == 'pagina':
-        dic = get_subpreguntas_completo(n_pages, n_preguntas, filter_estudiante=primer_est, nivel=nivel)
+        dic = get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes,
+                                        filter_estudiante=primer_est, nivel=nivel)
     return dic
 
 
-def get_baseline(n_pages, n_preguntas, dic_pagina):
+def get_baseline(n_pages, n_preguntas, directorio_imagenes, dic_pagina):
     rbds = set()
     paths = []
 
-    for rbd in (islice(dir_estudiantes.iterdir(), 2)):
+    for rbd in (islice(directorio_imagenes.iterdir(), 2)):
         print(rbd)
         paths.extend(list(rbd.iterdir()))
         rbds.update([rbd.name])
 
-    get_subpreguntas_completo(n_pages, n_preguntas, dic_pagina=dic_pagina, filter_rbd=rbds)
+    get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes,
+                              dic_pagina=dic_pagina, filter_rbd=rbds)
 
-    rutas_output = [i for i in islice(dir_output.iterdir(), 2)]
+    dir_output_rbd = (dir_output / f'{directorio_imagenes.name}')
+    rutas_output = [i for i in islice(dir_output_rbd.iterdir(), 2)]
 
     rutas_output_total = []
 
@@ -269,20 +278,40 @@ def get_baseline(n_pages, n_preguntas, dic_pagina):
     return df_resumen
 
 
-def generar_insumos():
-    n_pages = get_n_paginas()
-    n_preguntas = get_n_preguntas()
-    dic_cuadernillo = get_preg_por_hoja(n_pages, n_preguntas, nivel='cuadernillo')
-    dic_pagina = get_preg_por_hoja(n_pages, n_preguntas, nivel='pagina')
-    subpreg_x_preg = get_baseline(n_pages, n_preguntas, dic_pagina)
+def generar_insumos(tipo_cuadernillo):
+
+    if tipo_cuadernillo == 'estudiantes':
+        directorio_imagenes = dir_estudiantes
+    elif tipo_cuadernillo == 'padres':
+        directorio_imagenes = dir_padres
+
+    n_pages = get_n_paginas(directorio_imagenes)
+    n_preguntas = get_n_preguntas(directorio_imagenes, tipo_cuadernillo=tipo_cuadernillo)
+    dic_cuadernillo = get_preg_por_hoja(n_pages, n_preguntas, directorio_imagenes, nivel='cuadernillo')
+    dic_pagina = get_preg_por_hoja(n_pages, n_preguntas, directorio_imagenes, nivel='pagina')
+    subpreg_x_preg = get_baseline(n_pages, n_preguntas, directorio_imagenes, dic_pagina)
     n_subpreg_tot = str(subpreg_x_preg.sum())
 
-    insumos = {'n_pages': n_pages,
-               'n_preguntas': n_preguntas,
-               'n_subpreg_tot': n_subpreg_tot,
-               'dic_cuadernillo': dic_cuadernillo,
-               'dic_pagina': dic_pagina,
-               'subpreg_x_preg': subpreg_x_preg.to_dict()}
+    insumos_tipo_cuadernillo = {'n_pages': n_pages,
+                                'n_preguntas': n_preguntas,
+                                'n_subpreg_tot': n_subpreg_tot,
+                                'dic_cuadernillo': dic_cuadernillo,
+                                'dic_pagina': dic_pagina,
+                                'subpreg_x_preg': subpreg_x_preg.to_dict()}
+
+    return insumos_tipo_cuadernillo
+
+
+def generar_insumos_total():
+    print('Generando insumos estudiantes...')
+
+    insumos_est = generar_insumos(tipo_cuadernillo='estudiantes')
+    print('Generando insumos padres...')
+
+    insumos_padres = generar_insumos(tipo_cuadernillo='padres')
+
+    insumos = {'estudiantes': insumos_est,
+               'padres': insumos_padres}
 
     dir_insumos.mkdir(exist_ok=True)
     with open(dir_insumos / 'insumos.json', 'w') as fp:
@@ -292,4 +321,4 @@ def generar_insumos():
 
 
 if __name__ == '__main__':
-    generar_insumos()
+    generar_insumos_total()
