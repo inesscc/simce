@@ -53,42 +53,31 @@ def select_directorio(tipo_cuadernillo):
     return directorio_imagenes
 
 
-def get_subpreguntas(tipo_cuadernillo, filter_rbd=None, filter_estudiante=None,
-                     filter_rbd_int=False, nivel=None, muestra=False, para_entrenamiento=True):
+def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None, filter_estudiante=None,
+                     filter_rbd_int=False, nivel=None, muestra=False):
     '''
     Obtiene las cada una de las subpreguntas obtenidas de la función get_tablas_99(). Esto considera dos
     casos: si es para predicción obtendrá las imágenes de todas las sospechas de doble marca de la tabla
     de origen y si es para entrenamiento, además considerará aproximadamente un 20% extra de marcas
-    normales ()
-    que recibe. Se utiliza principalmente para insumar los diccionarios automáticos, en particular, número
-    de subpreguntas por pregunta, preguntas por página del cuadernillo y preguntas por imagen del
-    cuadernillo. Función exporta imágenes para cada subpregunta de cada pregunta que procesa.
+    normales (depende de variable para_entrenamiento. Variable global IS_TRAINING define esto).
+    Función exporta imágenes para cada subpregunta de la tabla de entrenamiento o predicción.
 
     Args:
-        n_pages (int): n° de páginas que tiene el cuestionario
+        tipo_cuadernillo (str): define si se está procesando para estudiantes o padres. Esto también
+        se utiliza para definir las rutas a consultar
 
-        n_pages (int): n° de preguntas que tiene el cuestionario
+        para_entrenamiento (bool): define si el procesamiento se está realizando para generar una base de
+        entrenamiento o de predicción
 
-        directorio_imagenes (pathlib.Path): directorio desde el que se recogen imágenes a procesar
-
-        dic_pagina (dict): diccionario que mapea el número de pregunta a la página específica del
-        cuadernillo a la que pertenece esa pregunta. Se utiliza para permitirle al algoritmo saber qué
-        pregunta se está procesando solo sabiendo el nombre del archivo.
-
-        p (int): integer que toma valor 0 ó 1. Si es 0 es la primera página del cuadernillo, si es  1, es
-        la segunda.
-
-        dic_q (dict): diccionario que contiene dos llaves, q1 y q2. q1 es la pregunta actual desde el lado
-        bajo y q2 es la pregunta actual desde el lado alto del cuadernillo.
 
     Returns:
-        q: pregunta actual siendo procesada
-        dic_q: diccionario actualizado con pregunta alta y pregunta baja
+        None
 
     '''
-
+    # Obtenemos directorio de imágenes (padres o estudiantes)
     directorio_imagenes = select_directorio(tipo_cuadernillo)
 
+    # Definimos tabla a utilizar para seleccionar subpreguntas
     if para_entrenamiento:
         nombre_tabla_casos99 = f'casos_99_entrenamiento_compilados_{tipo_cuadernillo}.csv'
     else:
@@ -128,7 +117,7 @@ def get_subpreguntas(tipo_cuadernillo, filter_rbd=None, filter_estudiante=None,
 
     for num, rbd in enumerate(directorios):
 
-        pregunta_selec = re.search('p(\d{1,2})', df99.iloc[num].preguntas).group(0)
+        pregunta_selec = re.search(r'p(\d{1,2})', df99.iloc[num].preguntas).group(0)
 
         if not filter_estudiante:
             print('############################')

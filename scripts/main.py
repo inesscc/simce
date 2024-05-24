@@ -22,6 +22,7 @@ import pandas as pd
 
 
 if __name__ == '__main__':
+    # Define si estamos obteniendo datos para entrenamiento o predicción
     IS_TRAINING = True
     # 0. Creamos directorios
     crear_directorios()

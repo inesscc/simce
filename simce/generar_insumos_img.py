@@ -7,7 +7,7 @@ Created on Thu May 16 17:46:31 2024
 
 import numpy as np
 import cv2
-from simce.config import dir_estudiantes, dir_padres, dir_output, regex_estudiante, dir_insumos
+from simce.config import dir_output, regex_estudiante, dir_insumos
 from simce.errors import anotar_error
 from simce.utils import timing
 # from simce.apoyo_proc_imgs import get_subpreguntas_completo
@@ -74,19 +74,9 @@ def get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes, dic_pag
 
         directorio_imagenes (pathlib.Path): directorio desde el que se recogen imágenes a procesar
 
-        dic_pagina (dict): diccionario que mapea el número de pregunta a la página específica del
-        cuadernillo a la que pertenece esa pregunta. Se utiliza para permitirle al algoritmo saber qué
-        pregunta se está procesando solo sabiendo el nombre del archivo.
-
-        p (int): integer que toma valor 0 ó 1. Si es 0 es la primera página del cuadernillo, si es  1, es
-        la segunda.
-
-        dic_q (dict): diccionario que contiene dos llaves, q1 y q2. q1 es la pregunta actual desde el lado
-        bajo y q2 es la pregunta actual desde el lado alto del cuadernillo.
 
     Returns:
-        q: pregunta actual siendo procesada
-        dic_q: diccionario actualizado con pregunta alta y pregunta baja
+        None
 
     '''
 
@@ -222,7 +212,8 @@ def get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes, dic_pag
 
                                             file_out = str(
                                                 dir_output_rbd / f'{estudiante}_p{q}_{i+1}.jpg')
-                                            proc.crop_and_save_subpreg(img_pregunta_crop, lineas_horizontales,
+                                            proc.crop_and_save_subpreg(img_pregunta_crop,
+                                                                       lineas_horizontales,
                                                                        i, file_out)
 
                                         # Si hay error en procesamiento subpregunta
@@ -270,7 +261,8 @@ def get_preg_por_hoja(n_pages, n_preguntas, directorio_imagenes, nivel='cuaderni
         # primer estudiante del primer rbd:
         str(next(next(directorio_imagenes.iterdir()).iterdir()))).group(1)
     if nivel == 'cuadernillo':
-        dic = get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes, filter_estudiante=primer_est,
+        dic = get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes,
+                                        filter_estudiante=primer_est,
                                         nivel=nivel)
     elif nivel == 'pagina':
         dic = get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes,
