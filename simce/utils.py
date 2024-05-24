@@ -13,16 +13,30 @@ import cv2
 import numpy as np
 import pandas as pd
 import re
-from simce.config import dir_estudiantes, dir_output, regex_estudiante, dir_tabla_99, dir_input
+from simce.config import dir_estudiantes, dir_output, regex_estudiante, dir_tabla_99, dir_input, dir_padres
 from itertools import islice
+
+from functools import wraps
+from time import time
+
+
+def timing(f):
+    @wraps(f)
+    def wrap(*args, **kw):
+        ts = time()
+        result = f(*args, **kw)
+        te = time()
+        print('func:%r args:[%r, %r] took: %2.4f sec' %
+              (f.__name__, args, kw, te-ts))
+        return result
+    return wrap
 
 
 def crear_directorios():
 
-    (dir_data / 'output').mkdir(exist_ok=True, parents=True)
-
-    (dir_data / 'input/cuestionario_estudiantes').mkdir(exist_ok=True, parents=True)
-    (dir_data / 'input/cuestionario_padres').mkdir(exist_ok=True)
+    dir_tabla_99.mkdir(exist_ok=True, parents=True)
+    dir_estudiantes.mkdir(exist_ok=True, parents=True)
+    dir_padres.mkdir(exist_ok=True, parents=True)
 
 
 def ls(ruta=getcwd()):
@@ -30,7 +44,7 @@ def ls(ruta=getcwd()):
     return [abspath(arch.path) for arch in scandir(ruta) if arch.is_file()]
 
 
-def get_mask_naranjo(media_img, lower_color=np.array([13, 52, 0]), upper_color=np.array([29, 255, 255]),
+def get_mask_naranjo(media_img, lower_color=np.array([13, 40, 0]), upper_color=np.array([29, 255, 255]),
                      iters=4):
     """
     Genera una máscara binaria para una imagen dada, basada en un rango de color en el espacio de color HSV.

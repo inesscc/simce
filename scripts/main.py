@@ -6,17 +6,16 @@ Created on Tue Apr  9 10:34:05 2024
 """
 
 from simce.utils import crear_directorios
-from simce.generar_insumos_img import generar_insumos
+from simce.generar_insumos_img import generar_insumos_total
 from simce.proc_imgs import get_subpreguntas
 from simce.proc_tabla_99 import get_tablas_99
+from simce.config import dir_estudiantes, dir_padres
 import cv2
 from pathlib import Path
 import re
 import simce.proc_imgs as proc
 import pandas as pd
 
-# Creamos directorios
-crear_directorios()
 
 # %% Subpreguntas
 
@@ -24,13 +23,16 @@ crear_directorios()
 
 
 if __name__ == '__main__':
+
+    # 0. Creamos directorios
+    crear_directorios()
     # 1.  Generar insumos para procesamiento
-    generar_insumos()
+    generar_insumos_total()
     # 2. Generar tablas con dobles marcas
     get_tablas_99()
 
     # 3. Recortar subpreguntas
-    get_subpreguntas(muestra=False)
+    get_subpreguntas(muestra=True, directorio_imagenes=dir_estudiantes)
 
     # a = get_subpreguntas(filter_estudiante='4279607')
 
@@ -69,14 +71,14 @@ if __name__ == '__main__':
 
     # %%
 
-    cv2.imshow("Detected Lines", img_crop_col)
+    cv2.imshow("Detected Lines", img_pregunta)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     # %%
 
-    # hsv_img = cv2.cvtColor(im2,  cv2.COLOR_GRAY2BGR)
-    # hsv_img = cv2.drawContours(hsv_img, contours, -1, (60, 200, 200), 3)
-    cv2.imshow("Detected Lines", cv2.resize(img_p1, (900, 900)))
+    hsv_img = cv2.cvtColor(mask_naranjo,  cv2.COLOR_GRAY2BGR)
+    hsv_img = cv2.drawContours(mask_naranjo, big_contours, -1, (60, 200, 200), 3)
+    cv2.imshow("Detected Lines", cv2.resize(mask_naranjo, (900, 900)))
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 

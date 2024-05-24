@@ -7,7 +7,8 @@ Created on Thu May  2 17:22:37 2024
 import numpy as np
 import cv2
 from itertools import chain
-from simce.config import dir_output, regex_estudiante, dir_tabla_99, dir_input, n_pixeles_entre_lineas
+from simce.config import dir_output, regex_estudiante, dir_tabla_99, \
+    dir_input, n_pixeles_entre_lineas, dir_estudiantes, dir_padres
 from simce.errors import anotar_error
 # from simce.apoyo_proc_imgs import get_subpreguntas_completo
 
@@ -23,9 +24,15 @@ load_dotenv()
 VALID_INPUT = {'cuadernillo', 'pagina'}
 
 
-def get_insumos():
+def get_insumos(directorio_imagenes):
     with open(dir_insumos / 'insumos.json') as f:
         insumos = json.load(f)
+
+    # Seleccionamos insumos según directorio en el que estamos trabajando
+    if directorio_imagenes == dir_estudiantes:
+        insumos = insumos['estudiantes']
+    else:
+        insumos = insumos['padres']
 
     n_pages = insumos['n_pages']
     n_preguntas = insumos['n_preguntas']
@@ -37,7 +44,7 @@ def get_insumos():
     return n_pages, n_preguntas, subpreg_x_preg, dic_cuadernillo, dic_pagina, n_subpreg_tot
 
 
-def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
+def get_subpreguntas(directorio_imagenes, filter_rbd=None, filter_estudiante=None,
                      filter_rbd_int=False, nivel=None, muestra=False):
 
     df99 = pd.read_csv(dir_tabla_99 / 'casos_99_compilados.csv').sort_values('ruta_imagen')
@@ -50,7 +57,8 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
 
     dir_preg99 = [dir_input / i for i in df99.ruta_imagen]
 
-    n_pages, n_preguntas, subpreg_x_preg, dic_cuadernillo, dic_pagina, n_subpreg_tot = get_insumos()
+    n_pages, n_preguntas, subpreg_x_preg, dic_cuadernillo, dic_pagina, n_subpreg_tot = get_insumos(
+        directorio_imagenes)
 
     # Si queremos correr función para rbd específico
     if filter_rbd:
@@ -119,7 +127,8 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
             print(f'{num_pag=}')
 
             # Creamos directorio si no existe
-            (dir_output / f'{folder}').mkdir(exist_ok=True)
+            dir_output_rbd = (dir_output / f'{directorio_imagenes.name}/{rbd.name}')
+            dir_output_rbd.mkdir(exist_ok=True, parents=True)
 
             # Leemos imagen
             img_preg = cv2.imread(str(pag), 1)
@@ -145,7 +154,7 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
                 mask_naranjo = get_mask_naranjo(media_img)
 
                 # Obtengo contornos
-                big_contours = get_contornos_grandes(mask_naranjo, pages, p)
+                big_contours = get_contornos_grandes(mask_naranjo)
 
                 q_base = get_pregunta_inicial_pagina(dic_pagina, pages, p)
 
@@ -170,7 +179,8 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
 
                     if subpreg_x_preg[f'p{q}'] == 1:
                         print('Pregunta no cuenta con subpreguntas, se guardará imagen')
-                        file_out = str(dir_output / f'{rbd.name}/{estudiante}_p{q}.jpg')
+                        file_out = str(
+                            dir_output_rbd / f'{estudiante}_p{q}.jpg')
                         cv2.imwrite(file_out, img_pregunta)
 
                     # exportamos preguntas válidas:
@@ -200,7 +210,7 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
                                         continue
 
                                     file_out = str(
-                                        dir_output / f'{folder}/{estudiante}_p{q}_{i+1}.jpg')
+                                        dir_output_rbd / f'{estudiante}_p{q}_{i+1}.jpg')
                                     crop_and_save_subpreg(img_pregunta_crop, lineas_horizontales,
                                                           i, file_out)
 
@@ -208,7 +218,7 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
                                 except Exception as e:
 
                                     preg_error = str(
-                                        dir_output / f'{folder}/{estudiante}_p{q}_{i+1}')
+                                        dir_output_rbd / f'{estudiante}_p{q}_{i+1}')
                                     anotar_error(
                                         pregunta=preg_error,
                                         error='Subregunta no pudo ser procesada',
@@ -219,7 +229,7 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
                         # Si hay error en procesamiento pregunta
                         except Exception as e:
 
-                            preg_error = str(dir_output / f'{folder}/{estudiante}_p{q}')
+                            preg_error = str(anotar_error / f'{estudiante}_p{q}')
                             anotar_error(
                                 pregunta=preg_error, error='Pregunta no pudo ser procesada', e=e)
 
@@ -227,7 +237,7 @@ def get_subpreguntas(filter_rbd=None, filter_estudiante=None,
 
             if n_subpreg_acum != subpreg_x_preg[pregunta_selec]:
 
-                preg_error = str(dir_output / f'{folder}/{estudiante}')
+                preg_error = str(dir_output_rbd / f'{estudiante}')
 
                 dic_dif = get_subpregs_distintas(subpreg_x_preg, folder, estudiante)
 
@@ -364,17 +374,18 @@ def bound_and_crop(img, c):
     return img_crop
 
 
-def crop_and_save_subpreg(img_pregunta_crop, lineas_horizontales, i, file_out):
+def crop_and_save_subpreg(img_pregunta_crop, lineas_horizontales, i, file_out, verbose=False):
     cropped_img_sub = img_pregunta_crop[lineas_horizontales[i]:
                                         lineas_horizontales[i+1],]
 
     # print(file_out)
     cv2.imwrite(file_out, cropped_img_sub)
-    print(f'{file_out} guardado!')
+    if verbose:
+        print(f'{file_out} guardado!')
 
 
 def get_pregunta_inicial_pagina(dic_pagina, pages, p):
-    if pages[p] != 1:
+    if pages[p] != 1 and (pages[p] in dic_pagina.values()):
         q_base = min([int(re.search(r'(\d+)', k).group(0))
                       for k, v in dic_pagina.items() if v == pages[p]])
 
@@ -437,7 +448,7 @@ def get_current_pages_cuadernillo(num_pag, pages):
     return pages
 
 
-def get_contornos_grandes(mask, pages, p):
+def get_contornos_grandes(mask):
 
     # Obtengo contornos
     contours = cv2.findContours(

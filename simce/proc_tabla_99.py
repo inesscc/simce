@@ -9,8 +9,6 @@ from simce.config import dir_tabla_99, dir_input, dir_insumos
 import re
 import json
 
-tipo_cuadernillo = 'padres'
-
 
 def get_tablas_99(tipo_cuadernillo):
 
