@@ -31,8 +31,7 @@ for num, rbd in enumerate(dir_estudiantes.iterdir()):
     print(rbd)
     print(num)
     print('#################################')
-    estudiantes_rbd = {re.search('\d{7}', str(i)).group(0)
-                       for i in rbd.iterdir()}
+    estudiantes_rbd = {re.search('\d{7}', str(i)).group(0) for i in rbd.iterdir()}
 #    if rbd.name == '09963':
     for n, estudiante in enumerate(estudiantes_rbd):
 

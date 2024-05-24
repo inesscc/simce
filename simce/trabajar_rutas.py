@@ -10,7 +10,7 @@ import re
 import cv2
 import numpy as np
 from simce.utils import get_mask_naranjo
-from simce.config import regex_estudiante, n_preg_ignoradas_estudiantes, n_preg_ignoradas_padres
+from simce.config import regex_estudiante
 import simce.proc_imgs as proc
 
 
@@ -26,7 +26,7 @@ def get_n_paginas(directorio_imagenes):
     return n_pages
 
 
-def get_n_preguntas(directorio_imagenes, tipo_cuadernillo):
+def get_n_preguntas(directorio_imagenes, tipo_cuadernillo, ignorar_primera_pagina=True):
     rbds = list(directorio_imagenes.iterdir())
     rbd1 = rbds[0]
 
@@ -34,7 +34,7 @@ def get_n_preguntas(directorio_imagenes, tipo_cuadernillo):
                        for i in rbd1.rglob('*jpg')}
 
     total_imagenes = 0
-    for file in (rbd1.glob(f'{estudiantes_rbd.pop()}*')):
+    for n, file in enumerate(sorted(list(rbd1.glob(f'{estudiantes_rbd.pop()}*')))):
 
         img_preg = cv2.imread(str(file), 1)
 
@@ -44,8 +44,12 @@ def get_n_preguntas(directorio_imagenes, tipo_cuadernillo):
 
         # Divimos imagen en dos páginas del cuadernillo
         img_p1, img_p2 = proc.partir_imagen_por_mitad(img_sin_franja)
-        print(file)
+
         for p, media_img in enumerate([img_p1, img_p2]):
+
+            # Importante, nos saltamos primera página, ya que no contiene preguntas
+            if n == 0 and p == 1 and ignorar_primera_pagina:
+                continue
 
             mask_naranjo = get_mask_naranjo(media_img)
 
@@ -54,10 +58,4 @@ def get_n_preguntas(directorio_imagenes, tipo_cuadernillo):
 
             total_imagenes += len(big_contours)
 
-    # Quitamos del cálculo preguntas que son ignoradas:
-    if tipo_cuadernillo == 'estudiantes':
-        n_preg_ignoradas = n_preg_ignoradas_estudiantes
-    elif tipo_cuadernillo == 'padres':
-        n_preg_ignoradas = n_preg_ignoradas_padres
-
-    return total_imagenes - n_preg_ignoradas  # Eliminamos 2 preguntas de portada
+    return total_imagenes  # Eliminamos 2 preguntas de portada

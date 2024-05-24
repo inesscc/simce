@@ -24,41 +24,53 @@ load_dotenv()
 VALID_INPUT = {'cuadernillo', 'pagina'}
 
 
-def get_insumos(directorio_imagenes):
+def get_insumos(tipo_cuadernillo):
     with open(dir_insumos / 'insumos.json') as f:
         insumos = json.load(f)
 
-    # Seleccionamos insumos según directorio en el que estamos trabajando
-    if directorio_imagenes == dir_estudiantes:
-        insumos = insumos['estudiantes']
-    else:
-        insumos = insumos['padres']
+    # Seleccionamos insumos para el tipo de cuadernillo que estamos trabajando
+    insumos_usar = insumos[tipo_cuadernillo]
 
-    n_pages = insumos['n_pages']
-    n_preguntas = insumos['n_preguntas']
-    subpreg_x_preg = insumos['subpreg_x_preg']
-    dic_cuadernillo = insumos['dic_cuadernillo']
-    dic_pagina = insumos['dic_pagina']
-    n_subpreg_tot = insumos['n_subpreg_tot']
+    n_pages = insumos_usar['n_pages']
+    n_preguntas = insumos_usar['n_preguntas']
+    subpreg_x_preg = insumos_usar['subpreg_x_preg']
+    dic_cuadernillo = insumos_usar['dic_cuadernillo']
+    dic_pagina = insumos_usar['dic_pagina']
+    n_subpreg_tot = insumos_usar['n_subpreg_tot']
 
     return n_pages, n_preguntas, subpreg_x_preg, dic_cuadernillo, dic_pagina, n_subpreg_tot
 
 
-def get_subpreguntas(directorio_imagenes, filter_rbd=None, filter_estudiante=None,
+def select_directorio(tipo_cuadernillo):
+    '''Selecciona directorio de datos según si se está procesando el cuadernillo 
+    de padres o de estudiantes'''
+
+    if tipo_cuadernillo == 'estudiantes':
+        directorio_imagenes = dir_estudiantes
+    elif tipo_cuadernillo == 'padres':
+        directorio_imagenes = dir_padres
+
+    return directorio_imagenes
+
+
+def get_subpreguntas(tipo_cuadernillo, filter_rbd=None, filter_estudiante=None,
                      filter_rbd_int=False, nivel=None, muestra=False):
 
-    df99 = pd.read_csv(dir_tabla_99 / 'casos_99_compilados.csv').sort_values('ruta_imagen')
+    directorio_imagenes = select_directorio(tipo_cuadernillo)
+
+    df99 = pd.read_csv(
+        dir_tabla_99 / f'casos_99_sample_compilados_{tipo_cuadernillo}.csv').sort_values('ruta_imagen')
 
     if muestra:
         df99['rbd'] = df99.ruta_imagen.str.extract(r'(\d{5})')
-        from simce.config import dir_estudiantes
-        rbd_disp = {i.name for i in dir_estudiantes.iterdir()}
+
+        rbd_disp = {i.name for i in directorio_imagenes.iterdir()}
         df99 = df99[(df99.rbd.isin(rbd_disp))]
 
     dir_preg99 = [dir_input / i for i in df99.ruta_imagen]
 
     n_pages, n_preguntas, subpreg_x_preg, dic_cuadernillo, dic_pagina, n_subpreg_tot = get_insumos(
-        directorio_imagenes)
+        tipo_cuadernillo)
 
     # Si queremos correr función para rbd específico
     if filter_rbd:
@@ -80,14 +92,14 @@ def get_subpreguntas(directorio_imagenes, filter_rbd=None, filter_estudiante=Non
 
     for num, rbd in enumerate(directorios):
 
-        pregunta_selec, subpreg_selec = df99.iloc[num].preguntas.split('_')
+        pregunta_selec = re.search('p(\d{1,2})', df99.iloc[num].preguntas).group(0)
 
         if not filter_estudiante:
             print('############################')
             print(rbd)
-            print(num)
+            print(f'{num=}')
             print(f'{pregunta_selec=}')
-            print(f'{subpreg_selec=}')
+
             print('############################')
             print('\n')
         # estudiantes_rbd = {re.search(regex_estudiante, str(i)).group(1)
@@ -109,6 +121,9 @@ def get_subpreguntas(directorio_imagenes, filter_rbd=None, filter_estudiante=Non
         # páginas del cuardenillo
         pages = (n_pages, 1)
 
+        dir_output_rbd = (dir_output / f'{directorio_imagenes.name}/{rbd.parent.name}')
+        dir_output_rbd.mkdir(exist_ok=True, parents=True)
+
         # Para cada imagen del cuadernillo de un estudiante (2 pág x img):
         for num_pag, pag in enumerate(rbd.parent.glob(f'{estudiante}*')):
 
@@ -127,8 +142,6 @@ def get_subpreguntas(directorio_imagenes, filter_rbd=None, filter_estudiante=Non
             print(f'{num_pag=}')
 
             # Creamos directorio si no existe
-            dir_output_rbd = (dir_output / f'{directorio_imagenes.name}/{rbd.name}')
-            dir_output_rbd.mkdir(exist_ok=True, parents=True)
 
             # Leemos imagen
             img_preg = cv2.imread(str(pag), 1)
@@ -181,12 +194,15 @@ def get_subpreguntas(directorio_imagenes, filter_rbd=None, filter_estudiante=Non
                         print('Pregunta no cuenta con subpreguntas, se guardará imagen')
                         file_out = str(
                             dir_output_rbd / f'{estudiante}_p{q}.jpg')
+                        n_subpreg_acum += 1
                         cv2.imwrite(file_out, img_pregunta)
 
                     # exportamos preguntas válidas:
                     elif q not in [0, 1]:
 
                         try:
+                            subpreg_selec = df99.iloc[num].preguntas.split('_')[1]
+                            print(f'{subpreg_selec=}')
                             # Obtenemos subpreguntas:
                             img_pregunta_crop = recorte_imagen(
                                 img_pregunta)

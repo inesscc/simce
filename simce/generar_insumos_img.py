@@ -9,6 +9,7 @@ import numpy as np
 import cv2
 from simce.config import dir_estudiantes, dir_padres, dir_output, regex_estudiante, dir_insumos
 from simce.errors import anotar_error
+from simce.utils import timing
 # from simce.apoyo_proc_imgs import get_subpreguntas_completo
 from itertools import islice
 import pandas as pd
@@ -280,10 +281,7 @@ def get_baseline(n_pages, n_preguntas, directorio_imagenes, dic_pagina):
 
 def generar_insumos(tipo_cuadernillo):
 
-    if tipo_cuadernillo == 'estudiantes':
-        directorio_imagenes = dir_estudiantes
-    elif tipo_cuadernillo == 'padres':
-        directorio_imagenes = dir_padres
+    directorio_imagenes = proc.select_directorio(tipo_cuadernillo)
 
     n_pages = get_n_paginas(directorio_imagenes)
     n_preguntas = get_n_preguntas(directorio_imagenes, tipo_cuadernillo=tipo_cuadernillo)
@@ -302,6 +300,7 @@ def generar_insumos(tipo_cuadernillo):
     return insumos_tipo_cuadernillo
 
 
+@timing
 def generar_insumos_total():
     print('Generando insumos estudiantes...')
 

@@ -7,6 +7,15 @@ Created on Tue Apr  9 10:50:14 2024
 
 from pathlib import Path
 
+
+# Expresión regular para capturar el identificador del estudiante en nombre de archivos
+regex_estudiante = r'(\d{7,})_.*jpg'
+
+# IMPORTANTE: parámetro que define cuántos píxeles espera como
+# mínimo entre línea y línea de cada subpregunta
+n_pixeles_entre_lineas = 22
+
+
 dir_data = Path('data/')
 dir_input = dir_data / 'input'
 dir_estudiantes = dir_input / 'CE'
@@ -22,13 +31,4 @@ nombre_tabla_estud_origen = 'CE_Origen_DobleMarca.csv'
 nombre_tabla_estud_final = 'CE_Final_DobleMarca.csv'
 nombre_tabla_padres_origen = 'CP_Origen_DobleMarca.csv'
 nombre_tabla_padres_final = 'CP_Final_DobleMarca.csv'
-variables_identificadorras = ['rbd', 'dvRbd', 'codigoCurso', 'serie', 'rutaImagen1']
-
-
-regex_estudiante = r'(\d{7,})_.*jpg'
-
-# IMPORTANTE: parámetro que define cuántos píxeles espera como
-# mínimo entre línea y línea de cada subpregunta
-n_pixeles_entre_lineas = 22
-n_preg_ignoradas_estudiantes = 2
-n_preg_ignoradas_padres = 1
+variables_identificadoras = ['rbd', 'dvRbd', 'codigoCurso', 'serie', 'rutaImagen1']

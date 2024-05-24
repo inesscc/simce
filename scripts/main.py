@@ -8,8 +8,7 @@ Created on Tue Apr  9 10:34:05 2024
 from simce.utils import crear_directorios
 from simce.generar_insumos_img import generar_insumos_total
 from simce.proc_imgs import get_subpreguntas
-from simce.proc_tabla_99 import get_tablas_99
-from simce.config import dir_estudiantes, dir_padres
+from simce.proc_tabla_99 import get_tablas_99_total
 import cv2
 from pathlib import Path
 import re
@@ -29,10 +28,11 @@ if __name__ == '__main__':
     # 1.  Generar insumos para procesamiento
     generar_insumos_total()
     # 2. Generar tablas con dobles marcas
-    get_tablas_99()
+    get_tablas_99_total()
 
     # 3. Recortar subpreguntas
-    get_subpreguntas(muestra=True, directorio_imagenes=dir_estudiantes)
+    get_subpreguntas(muestra=True, tipo_cuadernillo='estudiantes')
+    get_subpreguntas(muestra=True, tipo_cuadernillo='padres')
 
     # a = get_subpreguntas(filter_estudiante='4279607')
 
