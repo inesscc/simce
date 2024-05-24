@@ -6,16 +6,16 @@ Created on Wed May  8 15:52:13 2024
 """
 
 
-from simce.config import dir_estudiantes
 import re
 import cv2
 import numpy as np
 from simce.utils import get_mask_naranjo
-from simce.config import regex_estudiante
+from simce.config import regex_estudiante, n_preg_ignoradas_estudiantes, n_preg_ignoradas_padres
+import simce.proc_imgs as proc
 
 
-def get_n_paginas():
-    rbds = list(dir_estudiantes.iterdir())
+def get_n_paginas(directorio_imagenes):
+    rbds = list(directorio_imagenes.iterdir())
     rbd1 = rbds[0]
 
     estudiantes_rbd = {re.search(regex_estudiante, str(i)).group(1)
@@ -26,8 +26,8 @@ def get_n_paginas():
     return n_pages
 
 
-def get_n_preguntas():
-    rbds = list(dir_estudiantes.iterdir())
+def get_n_preguntas(directorio_imagenes, tipo_cuadernillo):
+    rbds = list(directorio_imagenes.iterdir())
     rbd1 = rbds[0]
 
     estudiantes_rbd = {re.search(regex_estudiante, str(i)).group(1)
@@ -38,21 +38,26 @@ def get_n_preguntas():
 
         img_preg = cv2.imread(str(file), 1)
 
-        x, y = img_preg.shape[:2]
-        img_crop = img_preg[40:x - 200, 50:y-160]
+        img_crop = proc.recorte_imagen(img_preg, 0, 200, 50, 160)
+        # Eliminamos franjas negras en caso de existir
+        img_sin_franja = proc.eliminar_franjas_negras(img_crop)
 
-        punto_medio = int(np.round(img_crop.shape[1] / 2, 1))
-
-        img_p1 = img_crop[:, :punto_medio]
-        img_p2 = img_crop[:, punto_medio:]
+        # Divimos imagen en dos páginas del cuadernillo
+        img_p1, img_p2 = proc.partir_imagen_por_mitad(img_sin_franja)
         print(file)
         for p, media_img in enumerate([img_p1, img_p2]):
 
-            m = get_mask_naranjo(media_img)
+            mask_naranjo = get_mask_naranjo(media_img)
 
             # Find my contours
-            contours = cv2.findContours(m, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[0]
-            big_contours = [i for i in contours if cv2.contourArea(i) > 30000]
-            print(len(big_contours))
+            big_contours = proc.get_contornos_grandes(mask_naranjo)
+
             total_imagenes += len(big_contours)
-    return total_imagenes - 2  # Eliminamos 2 preguntas de portada
+
+    # Quitamos del cálculo preguntas que son ignoradas:
+    if tipo_cuadernillo == 'estudiantes':
+        n_preg_ignoradas = n_preg_ignoradas_estudiantes
+    elif tipo_cuadernillo == 'padres':
+        n_preg_ignoradas = n_preg_ignoradas_padres
+
+    return total_imagenes - n_preg_ignoradas  # Eliminamos 2 preguntas de portada
