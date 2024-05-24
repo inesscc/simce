@@ -9,25 +9,39 @@ from simce.config import dir_tabla_99, dir_input, dir_insumos
 import re
 import json
 
+tipo_cuadernillo = 'padres'
 
-def get_tablas_99():
+
+def get_tablas_99(tipo_cuadernillo):
+
+    if tipo_cuadernillo == 'estudiantes':
+        from simce.config import nombre_tabla_estud_origen, nombre_tabla_estud_final
+
+        tabla_origen = nombre_tabla_estud_origen
+        tabla_final = nombre_tabla_estud_final
+
+    elif tipo_cuadernillo == 'padres':
+        from simce.config import nombre_tabla_padres_origen, nombre_tabla_padres_final
+
+        tabla_origen = nombre_tabla_padres_origen
+        tabla_final = nombre_tabla_padres_final
 
     with open(dir_insumos / 'insumos.json') as f:
         insumos = json.load(f)
-    dic_cuadernillo = insumos['dic_cuadernillo']
+    dic_cuadernillo = insumos[tipo_cuadernillo]['dic_cuadernillo']
 
-    CE_Final_DobleMarca = pd.read_csv(dir_input / 'CE_Final_DobleMarca.csv', delimiter=';')
-    CE_Origen_DobleMarca = pd.read_csv(dir_input / 'CE_Origen_DobleMarca.csv', delimiter=';')
+    Origen_DobleMarca = pd.read_csv(dir_input / tabla_origen, delimiter=';')
+    Final_DobleMarca = pd.read_csv(dir_input / tabla_final, delimiter=';')
 
-    nombres_col = [i for i in CE_Final_DobleMarca.columns.to_list() if re.search(r'p\d', i)]
+    nombres_col = [i for i in Final_DobleMarca.columns.to_list() if re.search(r'p\d+', i)]
 
-    casos_99 = procesar_casos_99(CE_Final_DobleMarca, nombres_col, dic_cuadernillo)
-    casos_99_origen = procesar_casos_99(CE_Origen_DobleMarca, nombres_col, dic_cuadernillo)
+    casos_99 = procesar_casos_99(Final_DobleMarca, nombres_col, dic_cuadernillo)
+    casos_99_origen = procesar_casos_99(Origen_DobleMarca, nombres_col, dic_cuadernillo)
 
     df_final = gen_tabla_entrenamiento(casos_99, casos_99_origen)
 
     # Exportando tablas:
-    df_final.to_csv(dir_tabla_99 / 'casos_99_compilados.csv')
+    df_final.reset_index(drop=True).to_csv(dir_tabla_99 / f'casos_99_compilados_{tipo_cuadernillo}.csv')
 
     print('Tabla compilada generada exitosamente!')
 
