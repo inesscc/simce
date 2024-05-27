@@ -131,29 +131,26 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
         dir_output_rbd = (dir_output / f'{directorio_imagenes.name}/{rbd.parent.name}')
         dir_output_rbd.mkdir(exist_ok=True, parents=True)
 
-        try:
-            dir_pagina = [i for i in (rbd.parent.glob(f'{estudiante}*')) if
-                          re.search(f'_{dic_cuadernillo[pregunta_selec]}.jpg', str(i))][0]
-        except IndexError as e:
+        if not rbd.is_file():
 
             preg_error = dir_output_rbd / f'{estudiante}'
             anotar_error(pregunta=str(preg_error),
                          error=f'No existen archivos disponibles para estudiante serie {preg_error.name}',
-                         e=e, nivel_error='Estudiante')
+                         nivel_error='Estudiante')
             continue
 
         # Para cada imagen del cuadernillo de un estudiante (2 pág x img):
 
         # Obtengo carpeta del rbd y archivo del estudiante a
         # partir del path:
-        file = dir_pagina.name
+        file = rbd.name
 
         print(f'{file=}')
 
         # Creamos directorio si no existe
 
         # Leemos imagen
-        img_preg = cv2.imread(str(dir_pagina), 1)
+        img_preg = cv2.imread(str(rbd), 1)
         img_crop = recorte_imagen(img_preg, 0, 200, 50, 160)
         # Eliminamos franjas negras en caso de existir
         img_sin_franja = eliminar_franjas_negras(img_crop)
