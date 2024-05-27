@@ -186,6 +186,7 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
                     dir_output_rbd / f'{estudiante}_{pregunta_selec}.jpg')
                 n_subpreg = 1
                 cv2.imwrite(file_out, img_pregunta)
+                continue
 
         # exportamos preguntas válidas:
 
@@ -241,7 +242,7 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
                 # Si hay error en procesamiento pregunta
         except Exception as e:
 
-            preg_error = str(anotar_error / f'{estudiante}_{pregunta_selec}')
+            preg_error = str(dir_output_rbd / f'{estudiante}_{pregunta_selec}')
             anotar_error(
                 pregunta=preg_error, error='Pregunta no pudo ser procesada', e=e,
                 nivel_error='Pregunta')
