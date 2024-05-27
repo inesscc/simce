@@ -9,7 +9,7 @@ from openpyxl import load_workbook, Workbook
 from pathlib import Path
 
 
-def anotar_error(pregunta, error, e=None):
+def anotar_error(pregunta, error, nivel_error, e=None):
 
     print(error)
 
@@ -21,6 +21,7 @@ def anotar_error(pregunta, error, e=None):
         ws = wb.active
         ws['A1'] = 'Pregunta'
         ws['B1'] = 'Error'
+        ws['C1'] = 'Nivel'
         wb.save('problemas_datos.xlsx')
 
     wb = load_workbook(filename='problemas_datos.xlsx')
@@ -31,7 +32,7 @@ def anotar_error(pregunta, error, e=None):
 
     if pregunta not in pregs_con_error:
         print('ANOTANDO ERROR -----')
-        ws.append([pregunta, error])
+        ws.append([pregunta, error, nivel_error])
         wb.save('problemas_datos.xlsx')
     else:
         print('ERROR YA ANOTADO ANTERIORMENTE, no fue anotado.')

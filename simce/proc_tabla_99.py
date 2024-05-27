@@ -62,12 +62,14 @@ def get_tablas_99(tipo_cuadernillo, para_entrenamiento=True):
         casos_sample = procesar_casos_sample(
             Final_DobleMarca, Origen_DobleMarca, nombres_col, dic_cuadernillo, series)
         df_final = df_final._append(casos_sample)
+        df_final['rbd_ruta'] = df_final.ruta_imagen.astype('string').str.extract(r'\\(\d+)\\')
 
         # Exportando tablas:
         df_final.reset_index().to_csv(dir_tabla_99 /
                                       f'casos_99_entrenamiento_compilados_{tipo_cuadernillo}.csv',
                                       index=False)
     else:
+        df_final['rbd_ruta'] = df_final.ruta_imagen.astype('string').str.extract(r'\\(\d+)\\')
         # Exportando tablas:
         df_final.reset_index().to_csv(
             dir_tabla_99 / f'casos_99_compilados_{tipo_cuadernillo}.csv', index=False)

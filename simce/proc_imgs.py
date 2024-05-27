@@ -84,54 +84,42 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
         nombre_tabla_casos99 = f'casos_99_compilados_{tipo_cuadernillo}.csv'
 
     df99 = pd.read_csv(
-        dir_tabla_99 / nombre_tabla_casos99).sort_values('ruta_imagen')
+        dir_tabla_99 / nombre_tabla_casos99, dtype={'rbd_ruta': 'string'}).sort_values('ruta_imagen')
 
     if muestra:
-        df99['rbd'] = df99.ruta_imagen.str.extract(r'(\d{5})')
 
         rbd_disp = {i.name for i in directorio_imagenes.iterdir()}
-        df99 = df99[(df99.rbd.isin(rbd_disp))]
+        df99 = df99[(df99.rbd_ruta.isin(rbd_disp))]
+
+    # Si queremos correr función para rbd específico
+    if filter_rbd:
+        # Si queremos correr función desde un rbd en adelante
+        if filter_rbd_int:
+            df99 = df99[(df99.rbd_ruta.astype(int).ge(filter_rbd))]
+
+        # Si queremos correr función solo para el rbd ingresado
+        else:
+            df99 = df99[(df99.rbd_ruta.eq(filter_rbd))]
+
+    if filter_estudiante:
+        df99 = df99[df99.serie.eq(filter_estudiante)]
 
     dir_preg99 = [dir_input / i for i in df99.ruta_imagen]
 
     n_pages, n_preguntas, subpreg_x_preg, dic_cuadernillo, dic_pagina, n_subpreg_tot = get_insumos(
         tipo_cuadernillo)
 
-    # Si queremos correr función para rbd específico
-    if filter_rbd:
-        # Si queremos correr función desde un rbd en adelante
-        if filter_rbd_int:
-            directorios = [i for i in dir_preg99
-                           if int(i.name) >= filter_rbd]
-        # Si queremos correr función solo para el rbd ingresado
-        else:
-            if isinstance(filter_rbd, str):
-                filter_rbd = [filter_rbd]
-            directorios = [i for i in dir_preg99 if i.name in filter_rbd]
-    else:
-        directorios = dir_preg99
-
-    for num, rbd in enumerate(directorios):
+    for num, rbd in enumerate(dir_preg99):
 
         pregunta_selec = re.search(r'p(\d{1,2})', df99.iloc[num].preguntas).group(0)
 
-        if not filter_estudiante:
-            print('############################')
-            print(rbd)
-            print(f'{num=}')
-            print(f'{pregunta_selec=}')
+        print('############################')
+        print(rbd)
+        print(f'{num=}')
+        print(f'{pregunta_selec=}')
 
-            print('############################')
-            print('\n')
-        # estudiantes_rbd = {re.search(regex_estudiante, str(i)).group(1)
-        #                    for i in rbd.iterdir()}
-
-        # Si queremos correr función para un estudiante específico:
-        # if filter_estudiante:
-        #     if isinstance(filter_estudiante, str):
-        #         filter_estudiante = [filter_estudiante]
-        #     estudiantes_rbd = {
-        #         i for i in estudiantes_rbd if i in filter_estudiante}
+        print('############################')
+        print('\n')
 
         estudiante = re.search(regex_estudiante, str(rbd)).group(1)
 
@@ -143,8 +131,17 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
         dir_output_rbd = (dir_output / f'{directorio_imagenes.name}/{rbd.parent.name}')
         dir_output_rbd.mkdir(exist_ok=True, parents=True)
 
-        dir_pagina = [i for i in (rbd.parent.glob(f'{estudiante}*')) if
-                      re.search(f'_{dic_cuadernillo[pregunta_selec]}.jpg', str(i))][0]
+        try:
+            dir_pagina = [i for i in (rbd.parent.glob(f'{estudiante}*')) if
+                          re.search(f'_{dic_cuadernillo[pregunta_selec]}.jpg', str(i))][0]
+        except IndexError as e:
+
+            preg_error = dir_output_rbd / f'{estudiante}'
+            anotar_error(pregunta=str(preg_error),
+                         error=f'No existen archivos disponibles para estudiante serie {preg_error.name}',
+                         e=e, nivel_error='Estudiante')
+            continue
+
         # Para cada imagen del cuadernillo de un estudiante (2 pág x img):
 
         # Obtengo carpeta del rbd y archivo del estudiante a
@@ -227,30 +224,32 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
                 anotar_error(
                     pregunta=preg_error,
                     error='Subregunta no pudo ser procesada',
+                    nivel_error='Subpregunta',
                     e=e)
 
                 continue
+
+            if n_subpreg != subpreg_x_preg[pregunta_selec]:
+
+                preg_error = str(dir_output_rbd / f'{estudiante}')
+
+                dic_dif = get_subpregs_distintas(subpreg_x_preg, dir_output_rbd, estudiante)
+
+                error = f'N° de subpreguntas incorrecto para estudiante {estudiante},\
+        se encontraron {n_subpreg} subpreguntas {dic_dif}'
+
+                anotar_error(
+                    pregunta=preg_error, error=error, nivel_error='Estudiante')
 
                 # Si hay error en procesamiento pregunta
         except Exception as e:
 
             preg_error = str(anotar_error / f'{estudiante}_{pregunta_selec}')
             anotar_error(
-                pregunta=preg_error, error='Pregunta no pudo ser procesada', e=e)
+                pregunta=preg_error, error='Pregunta no pudo ser procesada', e=e,
+                nivel_error='Pregunta')
 
             continue
-
-    if n_subpreg != subpreg_x_preg[pregunta_selec]:
-
-        preg_error = str(dir_output_rbd / f'{estudiante}')
-
-        dic_dif = get_subpregs_distintas(subpreg_x_preg, dir_output_rbd, estudiante)
-
-        error = f'N° de subpreguntas incorrecto para estudiante {estudiante},\
-se encontraron {n_subpreg} subpreguntas {dic_dif}'
-
-        anotar_error(
-            pregunta=preg_error, error=error)
 
     return 'Éxito!'
 
