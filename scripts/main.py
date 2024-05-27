@@ -33,4 +33,4 @@ if __name__ == '__main__':
 
     # 3. Recortar subpreguntas
     # get_subpreguntas(tipo_cuadernillo='estudiantes', para_entrenamiento=IS_TRAINING)
-    get_subpreguntas(tipo_cuadernillo='padres', para_entrenamiento=IS_TRAINING, filter_estudiante=4001776)
+    get_subpreguntas(tipo_cuadernillo='padres', para_entrenamiento=IS_TRAINING, filter_estudiante=4075140)

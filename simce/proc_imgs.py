@@ -173,13 +173,12 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
 
         q_base = get_pregunta_inicial_pagina(dic_pagina, pagina_pregunta)
         pregunta_selec_int = int(re.search(r'\d+', pregunta_selec).group(0))
-
-        # Obtengo coordenadas de contornos y corto imagen
-        elemento_img_pregunta = big_contours[pregunta_selec_int - q_base]
-        img_pregunta = bound_and_crop(media_img, elemento_img_pregunta)
-
         try:
+            # Obtengo coordenadas de contornos y corto imagen
+            elemento_img_pregunta = big_contours[pregunta_selec_int - q_base]
+            img_pregunta = bound_and_crop(media_img, elemento_img_pregunta)
 
+            # Exportamos pregunta si no tiene subpreguntas:
             if subpreg_x_preg[pregunta_selec] == 1:
                 print('Pregunta no cuenta con subpreguntas, se guardará imagen')
                 file_out = str(
@@ -187,8 +186,6 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
                 n_subpreg = 1
                 cv2.imwrite(file_out, img_pregunta)
                 continue
-
-        # exportamos preguntas válidas:
 
             subpreg_selec = df99.iloc[num].preguntas.split('_')[1]
             print(f'{subpreg_selec=}')
