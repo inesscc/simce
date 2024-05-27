@@ -25,14 +25,14 @@ if __name__ == '__main__':
     # Define si estamos obteniendo datos para entrenamiento o predicción
     IS_TRAINING = True
     # 0. Creamos directorios
-    crear_directorios()
+  #  crear_directorios()
     # 1.  Generar insumos para procesamiento
-    generar_insumos_total()
+   # generar_insumos_total()
     # 2. Generar tablas con dobles marcas
-    get_tablas_99_total(para_entrenamiento=IS_TRAINING)
+   # get_tablas_99_total(para_entrenamiento=IS_TRAINING)
 
     # 3. Recortar subpreguntas
-    get_subpreguntas(tipo_cuadernillo='estudiantes', para_entrenamiento=IS_TRAINING)
+    get_subpreguntas(tipo_cuadernillo='estudiantes', para_entrenamiento=IS_TRAINING, muestra=True)
     get_subpreguntas(tipo_cuadernillo='padres', para_entrenamiento=IS_TRAINING)
 
     # a = get_subpreguntas(filter_estudiante='4279607')

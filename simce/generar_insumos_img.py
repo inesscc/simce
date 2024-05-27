@@ -19,6 +19,7 @@ from simce.trabajar_rutas import get_n_paginas, get_n_preguntas
 from simce.utils import get_mask_naranjo
 import simce.proc_imgs as proc
 import json
+from shutil import rmtree
 
 
 def calcular_pregunta_actual(pages, p, dic_q):
@@ -56,6 +57,19 @@ def calcular_pregunta_actual(pages, p, dic_q):
         q = 0
 
     return q, dic_q
+
+
+def poblar_diccionario_preguntas(q, diccionario, nivel='cuadernillo',
+                                 pag=None, page=None):
+
+    if nivel == 'cuadernillo':
+        print(pag)
+        hoja_cuadernillo = re.search(r'_(\d+)', pag.name).group(1)
+        diccionario[f'p{q}'] = hoja_cuadernillo
+    elif nivel == 'pagina':
+        diccionario[f'p{q}'] = page
+
+    return diccionario
 
 
 def get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes, dic_pagina=None,
@@ -136,7 +150,7 @@ def get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes, dic_pag
                 # Creamos directorio para guardar imágenes
 
                 # Obtenemos páginas del cuadernillo actual:
-                pages = proc.get_current_pages_cuadernillo(num_pag, pages)
+                pages = get_current_pages_cuadernillo(num_pag, pages)
 
                 # Obtengo carpeta del rbd y archivo del estudiante a
                 # partir del path:
@@ -166,7 +180,7 @@ def get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes, dic_pag
                     big_contours = proc.get_contornos_grandes(mask_naranjo)
 
                     if not nivel:
-                        q_base = proc.get_pregunta_inicial_pagina(dic_pagina, pages, p)
+                        q_base = proc.get_pregunta_inicial_pagina(dic_pagina, pages[p])
 
                     # Para cada contorno de pregunta:
                     for num_preg, c in enumerate(big_contours):
@@ -181,9 +195,9 @@ def get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes, dic_pag
                             q = q_base + num_preg
 
                         if nivel:
-                            diccionario_nivel = proc.poblar_diccionario_preguntas(q, diccionario_nivel,
-                                                                                  nivel=nivel,
-                                                                                  pag=pag, page=pages[p])
+                            diccionario_nivel = poblar_diccionario_preguntas(q, diccionario_nivel,
+                                                                             nivel=nivel,
+                                                                             pag=pag, page=pages[p])
                             continue
 
                         # exportamos preguntas válidas:
@@ -251,6 +265,36 @@ def get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes, dic_pag
         return 'Éxito!'
 
 
+def get_current_pages_cuadernillo(num_pag, pages):
+    '''Método programático para obtener páginas del cuadernillo que se están
+    procesando en la imagen actualmente abierta. Dado que siempre una página tiene preguntas
+    que vienen en orden ascendente y la otra en orden descendente (por la lógica de cuadernillo), hubo
+    que incorporar esto en el algoritmo. Se actualiza en cada iteración del loop
+
+    Args:
+        num_pag (int): número de imagen del cuadernillo que se está procesando. Parte en 0.
+
+        pages (tuple): tupla que contiene páginas del cuadernillo en la iteración anterior.
+        Ejemplo: (10,3) para la página 2 del cuadernillo estudiantes 2023
+
+
+    Returns:
+        pages (tuple): tupla actualizada con páginas del cuadernillo siendo procesadas actualmente
+
+
+    '''
+
+    if num_pag == 0:
+        pass
+    # si num_pag es par y no es la primera página
+    elif (num_pag % 2 == 0):
+        pages = (pages[1]-1, pages[0] + 1)
+    elif num_pag % 2 == 1:
+        pages = (pages[1]+1, pages[0] - 1)
+
+    return pages
+
+
 def get_preg_por_hoja(n_pages, n_preguntas, directorio_imagenes, nivel='cuadernillo'):
 
     if nivel not in proc.VALID_INPUT:
@@ -283,7 +327,7 @@ def get_baseline(n_pages, n_preguntas, directorio_imagenes, dic_pagina):
                               dic_pagina=dic_pagina, filter_rbd=rbds)
 
     dir_output_rbd = (dir_output / f'{directorio_imagenes.name}')
-    rutas_output = [i for i in islice(dir_output_rbd.iterdir(), 2)]
+    rutas_output = [dir_output_rbd / i for i in rbds]
 
     rutas_output_total = []
 
@@ -302,6 +346,9 @@ def get_baseline(n_pages, n_preguntas, directorio_imagenes, dic_pagina):
                   .sort_index().astype(int))
 
     df_resumen.index = 'p'+df_resumen.index.astype('string')
+
+    # Eliminamos archivos creados para generar insumos
+    [rmtree(str(i)) for i in rutas_output]
 
     return df_resumen
 

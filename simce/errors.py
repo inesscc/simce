@@ -9,7 +9,7 @@ from openpyxl import load_workbook, Workbook
 from pathlib import Path
 
 
-def anotar_error(pregunta, error, e=None, i=None):
+def anotar_error(pregunta, error, e=None):
 
     print(error)
 
