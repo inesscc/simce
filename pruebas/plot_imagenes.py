@@ -41,7 +41,7 @@ Created on Mon May 27 12:20:44 2024
 
     # %%
 
-    cv2.imshow("Detected Lines", img_crop)
+    cv2.imshow("Detected Lines", img_rptas)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     

@@ -31,4 +31,12 @@ nombre_tabla_estud_origen = 'CE_Origen_DobleMarca.csv'
 nombre_tabla_estud_final = 'CE_Final_DobleMarca.csv'
 nombre_tabla_padres_origen = 'CP_Origen_DobleMarca.csv'
 nombre_tabla_padres_final = 'CP_Final_DobleMarca.csv'
-variables_identificadoras = ['rbd', 'dvRbd', 'codigoCurso', 'serie', 'rutaImagen1']
+
+# Variables identificadoras
+id_estudiante = 'serie'
+variables_identificadoras = ['rbd', 'dvRbd', 'codigoCurso', id_estudiante, 'rutaImagen1']
+# Expresión regular para extraer rl rbd de la ruta en variable RutaImagen
+regex_extraer_rbd_de_ruta = r'\\(\d+)\\'
+
+# Diccionario que indica si la pregunta 1 debe ser ignorada al procesar datos
+dic_ignorar_p1 = {'estudiantes': True, 'padres': False}

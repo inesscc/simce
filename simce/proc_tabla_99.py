@@ -5,7 +5,8 @@ Created on Thu May  9 17:20:37 2024
 @author: jeconchao
 """
 import pandas as pd
-from simce.config import dir_tabla_99, dir_input, dir_insumos, variables_identificadoras
+from simce.config import dir_tabla_99, dir_input, dir_insumos, variables_identificadoras, id_estudiante, \
+    regex_extraer_rbd_de_ruta, dic_ignorar_p1
 from simce.utils import timing
 import re
 import json
@@ -50,40 +51,50 @@ def get_tablas_99(tipo_cuadernillo, para_entrenamiento=True):
 
     nombres_col = [i for i in Final_DobleMarca.columns.to_list() if re.search(r'p\d+', i)]
 
-    casos_99 = procesar_casos_99(Final_DobleMarca, nombres_col, dic_cuadernillo)
-    casos_99_origen = procesar_casos_99(Origen_DobleMarca, nombres_col, dic_cuadernillo)
+    casos_99 = procesar_casos_99(Final_DobleMarca, nombres_col, dic_cuadernillo,
+                                 tipo_cuadernillo,
+                                 para_entrenamiento=para_entrenamiento)
+    casos_99_origen = procesar_casos_99(Origen_DobleMarca, nombres_col, dic_cuadernillo,
+                                        tipo_cuadernillo,
+                                        para_entrenamiento=para_entrenamiento)
 
     df_final = gen_tabla_entrenamiento(casos_99, casos_99_origen)
 
-    # sample no 99
-    if para_entrenamiento:
-        # series de los casos 99 para extraer una muestra
-        series = casos_99.index.get_level_values('serie')
-        casos_sample = procesar_casos_sample(
-            Final_DobleMarca, Origen_DobleMarca, nombres_col, dic_cuadernillo, series)
-        df_final = df_final._append(casos_sample)
-        df_final['rbd_ruta'] = df_final.ruta_imagen.astype('string').str.extract(r'\\(\d+)\\')
+    df_final['rbd_ruta'] = df_final.ruta_imagen.astype('string').str.extract(r'\\(\d+)\\')
 
-        # Exportando tablas:
-        df_final.reset_index().to_csv(dir_tabla_99 /
-                                      f'casos_99_entrenamiento_compilados_{tipo_cuadernillo}.csv',
-                                      index=False)
+    # Exportando tablas:
+    if para_entrenamiento:
+
+        df_final.reset_index().to_csv(
+            dir_tabla_99 / f'casos_99_entrenamiento_compilados_{tipo_cuadernillo}.csv', index=False)
     else:
-        df_final['rbd_ruta'] = df_final.ruta_imagen.astype('string').str.extract(r'\\(\d+)\\')
-        # Exportando tablas:
+
         df_final.reset_index().to_csv(
             dir_tabla_99 / f'casos_99_compilados_{tipo_cuadernillo}.csv', index=False)
 
     print('Tabla compilada generada exitosamente!')
 
 
-def procesar_casos_99(df_rptas, nombres_col, dic_cuadernillo):
+def procesar_casos_99(df_rptas, nombres_col, dic_cuadernillo, tipo_cuadernillo, para_entrenamiento):
+
+    ignorar_p1 = dic_ignorar_p1[tipo_cuadernillo]
+
     df_melt = df_rptas.melt(id_vars=variables_identificadoras,
                             value_vars=nombres_col,
                             var_name='preguntas',
                             value_name='respuestas')
+    # Si pregunta 1 debe ser ignorada, la sacamos de la base:
+    if ignorar_p1:
+        df_melt = df_melt[df_melt.preguntas.ne(r'p1(_\d+)?$')]
 
-    casos_99 = df_melt[(df_melt['respuestas'] == 99) & (df_melt.preguntas.ne('p1'))].copy()
+    casos_99 = df_melt[(df_melt['respuestas'] == 99)].copy()
+
+    # Si queremos obtener set de entrenamiento agregamos muestra de respuestas normales:
+    if para_entrenamiento:
+
+        df_sample = df_melt[df_melt.respuestas.ne(99)].sample(round(casos_99.shape[0] * .2))
+        casos_99 = pd.concat([casos_99, df_sample])
+
     casos_99['ruta_imagen'] = (casos_99.rutaImagen1.str.replace(r'(_\d+.*)', '_', regex=True) +
                                casos_99.preguntas.str.extract(r'(p\d+)').squeeze().map(dic_cuadernillo) +
                                '.jpg')
@@ -100,45 +111,45 @@ def gen_tabla_entrenamiento(casos_99, casos_99_origen):
     return casos_99_origen
 
 
-def procesar_casos_sample(df_rptas_fin, df_rptas_or, nombres_col, dic_cuadernillo, series):
-    """
-    Seleccion aleatoria de preguntas dados las series de los casos 99
+# def procesar_casos_sample(df_rptas_fin, df_rptas_or, nombres_col, dic_cuadernillo, series):
+#     """
+#     Seleccion aleatoria de preguntas dados las series de los casos 99
 
-    """
-    # df fin
-    df_melt = df_rptas_fin.melt(id_vars=['rbd', 'dvRbd', 'codigoCurso', 'serie',
-                                         'rutaImagen1'],
-                                value_vars=nombres_col,
-                                var_name='preguntas',
-                                value_name='respuestas')
+#     """
+#     # df fin
+#     df_melt = df_rptas_fin.melt(id_vars=['rbd', 'dvRbd', 'codigoCurso', 'serie',
+#                                          'rutaImagen1'],
+#                                 value_vars=nombres_col,
+#                                 var_name='preguntas',
+#                                 value_name='respuestas')
 
-    # seleccionando aleatoriamente los cuestionarios segun num serie
-    n = len(series)
-    id_series = [random.randint(0, n) for _ in range(round(n*0.2))]
-    series = series[id_series]
+#     # seleccionando aleatoriamente los cuestionarios segun num serie
+#     n = len(series)
+#     id_series = [random.randint(0, n) for _ in range(round(n*0.2))]
+#     series = series[id_series]
 
-    df_melt = df_melt[(df_melt['respuestas'] != 99)
-                      & (df_melt['preguntas'].ne('p1'))
-                      & (df_melt['serie'].isin(series))
-                      ]
+#     df_melt = df_melt[(df_melt['respuestas'] != 99)
+#                       & (df_melt['preguntas'].ne('p1'))
+#                       & (df_melt['serie'].isin(series))
+#                       ]
 
-    random_indices = np.random.randint(0, df_melt.shape[0], size=len(series))
-    df_melt = df_melt.iloc[random_indices]
+#     random_indices = np.random.randint(0, df_melt.shape[0], size=len(series))
+#     df_melt = df_melt.iloc[random_indices]
 
-    df_melt['ruta_imagen'] = (df_melt.rutaImagen1.str.replace(r'(_\d+.*)', '_', regex=True) +
-                              df_melt.preguntas.str.extract(r'(p\d+)').squeeze().map(dic_cuadernillo) +
-                              '.jpg')
+#     df_melt['ruta_imagen'] = (df_melt.rutaImagen1.str.replace(r'(_\d+.*)', '_', regex=True) +
+#                               df_melt.preguntas.str.extract(r'(p\d+)').squeeze().map(dic_cuadernillo) +
+#                               '.jpg')
 
-    df_melt = df_melt.rename(columns={'respuestas': 'dm_final'})
+#     df_melt = df_melt.rename(columns={'respuestas': 'dm_final'})
 
-    # df origen
-    df_melt_or = df_rptas_or.melt(id_vars=['rbd', 'dvRbd', 'codigoCurso', 'serie',
-                                           'rutaImagen1'],
-                                  value_vars=nombres_col,
-                                  var_name='preguntas',
-                                  value_name='respuestas')[['serie', 'preguntas', 'respuestas']]
+#     # df origen
+#     df_melt_or = df_rptas_or.melt(id_vars=['rbd', 'dvRbd', 'codigoCurso', 'serie',
+#                                            'rutaImagen1'],
+#                                   value_vars=nombres_col,
+#                                   var_name='preguntas',
+#                                   value_name='respuestas')[['serie', 'preguntas', 'respuestas']]
 
-    df_melt = df_melt.merge(df_melt_or, how='left', on=['serie', 'preguntas'])
-    df_melt = df_melt.rename(columns={'respuestas': 'dm_sospecha'})
+#     df_melt = df_melt.merge(df_melt_or, how='left', on=['serie', 'preguntas'])
+#     df_melt = df_melt.rename(columns={'respuestas': 'dm_sospecha'})
 
-    return df_melt.drop(columns=['rutaImagen1']).set_index(['serie', 'preguntas'])
+#     return df_melt.drop(columns=['rutaImagen1']).set_index(['serie', 'preguntas'])

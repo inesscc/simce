@@ -183,7 +183,10 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
                 print('Pregunta no cuenta con subpreguntas, se guardará imagen')
                 file_out = str(
                     dir_output_rbd / f'{estudiante}_{pregunta_selec}.jpg')
-                img_rptas = mantener_solo_recuadros_respuesta(img_pregunta)
+                img_pregunta_crop = img_pregunta[70:img_pregunta.shape[0]-20,
+                                                 20:img_pregunta.shape[1]-20, :]
+
+                img_rptas = mantener_solo_recuadros_respuesta(img_pregunta_crop)
                 n_subpreg = 1
                 cv2.imwrite(file_out, img_rptas)
                 continue
