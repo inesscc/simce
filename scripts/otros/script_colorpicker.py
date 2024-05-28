@@ -7,9 +7,9 @@ Created on Wed Apr 10 15:53:22 2024
 
 import cv2
 import numpy as np
-from simce.config import dir_estudiantes, dir_padres
+from simce.config import dir_estudiantes, dir_padres, dir_output
 # path to image
-image_path = str(dir_padres / '10154/4279509_3.jpg')
+image_path = str(dir_output / 'CE/00027/4001045_p8_4.jpg')
 # resize if image is larger than 800x600
 resize = True
 
@@ -59,7 +59,7 @@ invert = False
 screen = "Control"
 cv2.namedWindow(screen, cv2.WINDOW_AUTOSIZE)
 img = cv2.imread(image_path)
-img = cv2.resize(img, (2000, 900))
+# img = cv2.resize(img, (2000, 900))
 img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 cv2.imshow('Image', img)
 createGUI()

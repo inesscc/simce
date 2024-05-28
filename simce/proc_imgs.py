@@ -16,7 +16,7 @@ import pandas as pd
 import re
 from dotenv import load_dotenv
 
-from simce.utils import get_mask_naranjo
+from simce.utils import get_mask_imagen
 import json
 from simce.config import dir_insumos
 load_dotenv()
@@ -166,7 +166,7 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
         media_img = paginas_cuadernillo[pages.index(pagina_pregunta)]
 
         # Detecto recuadros naranjos
-        mask_naranjo = get_mask_naranjo(media_img)
+        mask_naranjo = get_mask_imagen(media_img)
 
         # Obtengo contornos
         big_contours = get_contornos_grandes(mask_naranjo)
@@ -183,8 +183,9 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
                 print('Pregunta no cuenta con subpreguntas, se guardará imagen')
                 file_out = str(
                     dir_output_rbd / f'{estudiante}_{pregunta_selec}.jpg')
+                img_rptas = mantener_solo_recuadros_respuesta(img_pregunta)
                 n_subpreg = 1
-                cv2.imwrite(file_out, img_pregunta)
+                cv2.imwrite(file_out, img_rptas)
                 continue
 
             subpreg_selec = df99.iloc[num].preguntas.split('_')[1]
@@ -193,10 +194,10 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
             img_pregunta_crop = recorte_imagen(
                 img_pregunta)
             #  print(q)
-            img_crop_col = get_mask_naranjo(img_pregunta_crop,
-                                            lower_color=np.array(
-                                                [0, 114, 139]),
-                                            upper_color=np.array([23, 255, 255]))
+            img_crop_col = get_mask_imagen(img_pregunta_crop,
+                                           lower_color=np.array(
+                                               [0, 114, 139]),
+                                           upper_color=np.array([23, 255, 255]))
 
             lineas_horizontales = obtener_puntos(
                 img_crop_col, minLineLength=250)
@@ -277,14 +278,26 @@ def get_subpregs_distintas(subpreg_x_preg, dir_output_rbd, estudiante):
 
 
 def eliminar_franjas_negras(img_preg):
-    im2 = get_mask_naranjo(img_preg, lower_color=np.array([0, 0, 241]),
-                           upper_color=np.array([179, 255, 255]), iters=2)
+    im2 = get_mask_imagen(img_preg, lower_color=np.array([0, 0, 241]),
+                          upper_color=np.array([179, 255, 255]), iters=2)
     contours = cv2.findContours(
         im2, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[0]
     area_cont = [cv2.contourArea(i) for i in contours]
     c = contours[area_cont.index(max(area_cont))]
 
     img_pregunta = bound_and_crop(img_preg, c)
+    return img_pregunta
+
+
+def mantener_solo_recuadros_respuesta(cropped_img_sub):
+    im2 = get_mask_imagen(cropped_img_sub,
+                          lower_color=np.array(
+                              [0, 0, 0]),
+                          upper_color=np.array([179, 10, 255]),
+                          eliminar_manchas='vertical', iters=1)
+    nonzero = cv2.findNonZero(im2)
+
+    img_pregunta = bound_and_crop(cropped_img_sub, nonzero, buffer=5)
     return img_pregunta
 
 
@@ -370,12 +383,12 @@ def obtener_puntos(img_crop_canny, threshold=100, minLineLength=200):
         return None
 
 
-def bound_and_crop(img, c):
+def bound_and_crop(img, c, buffer=0):
 
     # Obtengo coordenadas de contorno
     x, y, w, h = cv2.boundingRect(c)
     # Recorto imagen en base a contorno
-    img_crop = img[y:y+h, x:x+w]
+    img_crop = img[y:y+h+buffer, x-buffer:x+w+buffer]
     return img_crop
 
 
@@ -383,8 +396,11 @@ def crop_and_save_subpreg(img_pregunta_crop, lineas_horizontales, i, file_out, v
     cropped_img_sub = img_pregunta_crop[lineas_horizontales[i]:
                                         lineas_horizontales[i+1],]
 
+    img_subrptas = mantener_solo_recuadros_respuesta(cropped_img_sub)
+    print(img_subrptas.shape)
+
     # print(file_out)
-    cv2.imwrite(file_out, cropped_img_sub)
+    cv2.imwrite(file_out, img_subrptas)
     if verbose:
         print(f'{file_out} guardado!')
 

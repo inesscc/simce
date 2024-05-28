@@ -16,7 +16,7 @@ import pandas as pd
 import re
 
 from simce.trabajar_rutas import get_n_paginas, get_n_preguntas
-from simce.utils import get_mask_naranjo
+from simce.utils import get_mask_imagen
 import simce.proc_imgs as proc
 import json
 from shutil import rmtree
@@ -174,7 +174,7 @@ def get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes, dic_pag
                 for p, media_img in enumerate([img_p1, img_p2]):
 
                     # Detecto recuadros naranjos
-                    mask_naranjo = get_mask_naranjo(media_img)
+                    mask_naranjo = get_mask_imagen(media_img)
 
                     # Obtengo contornos
                     big_contours = proc.get_contornos_grandes(mask_naranjo)
@@ -208,10 +208,10 @@ def get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes, dic_pag
                                 img_pregunta_crop = proc.recorte_imagen(
                                     img_pregunta)
                                 #  print(q)
-                                img_crop_col = get_mask_naranjo(img_pregunta_crop,
-                                                                lower_color=np.array(
-                                                                    [0, 114, 139]),
-                                                                upper_color=np.array([23, 255, 255]))
+                                img_crop_col = get_mask_imagen(img_pregunta_crop,
+                                                               lower_color=np.array(
+                                                                   [0, 114, 139]),
+                                                               upper_color=np.array([23, 255, 255]))
                                 # img_crop_col = proc.procesamiento_color(img_pregunta_crop)
 
                                 lineas_horizontales = proc.obtener_puntos(

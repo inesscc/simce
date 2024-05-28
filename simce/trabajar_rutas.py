@@ -9,7 +9,7 @@ Created on Wed May  8 15:52:13 2024
 import re
 import cv2
 import numpy as np
-from simce.utils import get_mask_naranjo
+from simce.utils import get_mask_imagen
 from simce.config import regex_estudiante
 import simce.proc_imgs as proc
 
@@ -51,7 +51,7 @@ def get_n_preguntas(directorio_imagenes, tipo_cuadernillo, ignorar_primera_pagin
             if n == 0 and p == 1 and ignorar_primera_pagina:
                 continue
 
-            mask_naranjo = get_mask_naranjo(media_img)
+            mask_naranjo = get_mask_imagen(media_img)
 
             # Find my contours
             big_contours = proc.get_contornos_grandes(mask_naranjo)

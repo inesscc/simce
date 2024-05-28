@@ -41,14 +41,15 @@ Created on Mon May 27 12:20:44 2024
 
     # %%
 
-    cv2.imshow("Detected Lines", img_pregunta)
-    cv2.waitKey(0)S
+    cv2.imshow("Detected Lines", img_crop)
+    cv2.waitKey(0)
     cv2.destroyAllWindows()
+    
     # %%
 
     # hsv_img = cv2.cvtColor(mask_naranjo,  cv2.COLOR_GRAY2BGR)
     # hsv_img = cv2.drawContours(mask_naranjo, big_contours, -1, (60, 200, 200), 3)
-    cv2.imshow("Detected Lines", cv2.resize(media_img, (900, 900)))
+    cv2.imshow("Detected Lines", cv2.resize(im2, (900, 900)))
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 

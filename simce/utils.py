@@ -44,8 +44,8 @@ def ls(ruta=getcwd()):
     return [abspath(arch.path) for arch in scandir(ruta) if arch.is_file()]
 
 
-def get_mask_naranjo(media_img, lower_color=np.array([13, 40, 0]), upper_color=np.array([29, 255, 255]),
-                     iters=4):
+def get_mask_imagen(media_img, lower_color=np.array([13, 40, 0]), upper_color=np.array([29, 255, 255]),
+                    iters=4, eliminar_manchas='horizontal'):
     """
     Genera una máscara binaria para una imagen dada, basada en un rango de color en el espacio de color HSV.
 
@@ -66,11 +66,24 @@ def get_mask_naranjo(media_img, lower_color=np.array([13, 40, 0]), upper_color=n
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
     mask = cv2.dilate(mask, kernel, iterations=iters)
 
-    # Calculamos la media de cada fila
-    mean_row = mask.mean(axis=1)
-    # Si la media es menor a 100, reemplazamos con 0 (negro):
-    # Esto permite eliminar manchas de color que a veces se dan
-    idx_low_rows = np.where(mean_row < 100)[0]
-    mask[idx_low_rows, :] = 0
+    if eliminar_manchas:
+        if eliminar_manchas == 'vertical':
+            axis = 0
+            # Calculamos la media de cada columna
+            mean_col = mask.mean(axis=axis)
+            # Si la media es menor a 100, reemplazamos con 0 (negro):
+            # Esto permite eliminar manchas de color que a veces se dan
+            idx_low_rows = np.where(mean_col < 50)[0]
+            mask[:, idx_low_rows] = 0
+        elif eliminar_manchas == 'horizontal':
+            axis = 1
+            # Calculamos la media de cada fila:
+            mean_row = mask.mean(axis=axis)
+            # Si la media es menor a 100, reemplazamos con 0 (negro):
+            # Esto permite eliminar manchas de color que a veces se dan
+            idx_low_rows = np.where(mean_row < 100)[0]
+            mask[idx_low_rows, :] = 0
+        else:
+            return print('Valor inválido para eliminar manchas')
 
     return mask
