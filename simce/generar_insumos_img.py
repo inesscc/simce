@@ -60,11 +60,35 @@ def calcular_pregunta_actual(pages, p, dic_q):
 
 
 def poblar_diccionario_preguntas(q, diccionario, nivel='cuadernillo',
-                                 pag=None, page=None):
+                                 dir_pag=None, page=None):
+    '''Método programático para obtener pregunta del cuadernillo que se está
+    procesando. Dado que siempre una página tiene preguntas que vienen en orden
+    ascendente y la otra en orden descendente (por la lógica de cuadernillo), hubo
+    que incorporar esto en el algoritmo
+
+    Args:
+
+        q (str): pregunta siendo poblada actualmente en el diccionario. Por ejemplo, 'p2', 'p14'
+
+        diccionario (dict): diccionario siendo poblado, puede ser a nivel de cuadernillo (imagen) o de
+        página del cuadernillo
+
+        nivel (str): nivel del diccionario que estamos poblando: cuadernillo o página.
+
+        dir_pag (pathlib.Path): directorio de imagen siendo procesada actualmente (solo se usa si es a
+                                                                                   nivel cuadernillo)
+
+        page (int): página del cuadernillo siendo procesada actualmente (solo se usa si es a nivel página)
+
+    Returns:
+        diccionario (dict): 
+
+
+    '''
 
     if nivel == 'cuadernillo':
-        print(pag)
-        hoja_cuadernillo = re.search(r'_(\d+)', pag.name).group(1)
+        print(dir_pag)
+        hoja_cuadernillo = re.search(r'_(\d+)', dir_pag.name).group(1)
         diccionario[f'p{q}'] = hoja_cuadernillo
     elif nivel == 'pagina':
         diccionario[f'p{q}'] = page
@@ -197,7 +221,7 @@ def get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes, dic_pag
                         if nivel:
                             diccionario_nivel = poblar_diccionario_preguntas(q, diccionario_nivel,
                                                                              nivel=nivel,
-                                                                             pag=pag, page=pages[p])
+                                                                             dir_pag=pag, page=pages[p])
                             continue
 
                         # exportamos preguntas válidas:

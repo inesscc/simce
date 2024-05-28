@@ -37,6 +37,7 @@ id_estudiante = 'serie'
 variables_identificadoras = ['rbd', 'dvRbd', 'codigoCurso', id_estudiante, 'rutaImagen1']
 # Expresión regular para extraer rl rbd de la ruta en variable RutaImagen
 regex_extraer_rbd_de_ruta = r'\\(\d+)\\'
-
+# Expresión regular que permite identificar variables asociadas a la pregunta 1
+regex_p1 = r'p1(_\d+)?$'
 # Diccionario que indica si la pregunta 1 debe ser ignorada al procesar datos
 dic_ignorar_p1 = {'estudiantes': True, 'padres': False}

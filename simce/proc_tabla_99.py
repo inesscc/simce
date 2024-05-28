@@ -6,7 +6,7 @@ Created on Thu May  9 17:20:37 2024
 """
 import pandas as pd
 from simce.config import dir_tabla_99, dir_input, dir_insumos, variables_identificadoras, id_estudiante, \
-    regex_extraer_rbd_de_ruta, dic_ignorar_p1
+    regex_extraer_rbd_de_ruta, dic_ignorar_p1, regex_p1
 from simce.utils import timing
 import re
 import json
@@ -60,7 +60,7 @@ def get_tablas_99(tipo_cuadernillo, para_entrenamiento=True):
 
     df_final = gen_tabla_entrenamiento(casos_99, casos_99_origen)
 
-    df_final['rbd_ruta'] = df_final.ruta_imagen.astype('string').str.extract(r'\\(\d+)\\')
+    df_final['rbd_ruta'] = df_final.ruta_imagen.astype('string').str.extract(regex_extraer_rbd_de_ruta)
 
     # Exportando tablas:
     if para_entrenamiento:
@@ -85,7 +85,7 @@ def procesar_casos_99(df_rptas, nombres_col, dic_cuadernillo, tipo_cuadernillo, 
                             value_name='respuestas')
     # Si pregunta 1 debe ser ignorada, la sacamos de la base:
     if ignorar_p1:
-        df_melt = df_melt[df_melt.preguntas.ne(r'p1(_\d+)?$')]
+        df_melt = df_melt[df_melt.preguntas.ne(regex_p1)]
 
     casos_99 = df_melt[(df_melt['respuestas'] == 99)].copy()
 
@@ -95,6 +95,7 @@ def procesar_casos_99(df_rptas, nombres_col, dic_cuadernillo, tipo_cuadernillo, 
         df_sample = df_melt[df_melt.respuestas.ne(99)].sample(round(casos_99.shape[0] * .2))
         casos_99 = pd.concat([casos_99, df_sample])
 
+    # Usamos diccionario cuadernillo para ver a qué imagen está asociada esa pregunta específica:
     casos_99['ruta_imagen'] = (casos_99.rutaImagen1.str.replace(r'(_\d+.*)', '_', regex=True) +
                                casos_99.preguntas.str.extract(r'(p\d+)').squeeze().map(dic_cuadernillo) +
                                '.jpg')
