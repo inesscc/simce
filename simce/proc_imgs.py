@@ -134,9 +134,9 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
         if not rbd.is_file():
 
             preg_error = dir_output_rbd / f'{estudiante}'
-            anotar_error(pregunta=str(preg_error),
-                         error=f'No existen archivos disponibles para estudiante serie {preg_error.name}',
-                         nivel_error='Estudiante')
+            anotar_error(pregunta = str(preg_error),
+                         error = f'No existen archivos disponibles para serie {preg_error.name}',
+                         nivel_error = tipo_cuadernillo)
             continue
 
         # Para cada imagen del cuadernillo de un estudiante (2 pág x img):
@@ -234,11 +234,11 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
 
                 dic_dif = get_subpregs_distintas(subpreg_x_preg, dir_output_rbd, estudiante)
 
-                error = f'N° de subpreguntas incorrecto para estudiante {estudiante},\
+                error = f'N° de subpreguntas incorrecto para serie {estudiante},\
         se encontraron {n_subpreg} subpreguntas {dic_dif}'
 
                 anotar_error(
-                    pregunta=preg_error, error=error, nivel_error='Estudiante')
+                    pregunta=preg_error, error=error, nivel_error = tipo_cuadernillo)
 
                 # Si hay error en procesamiento pregunta
         except Exception as e:
