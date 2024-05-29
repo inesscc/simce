@@ -300,7 +300,7 @@ def mantener_solo_recuadros_respuesta(cropped_img_sub):
                           eliminar_manchas='vertical', iters=1)
     nonzero = cv2.findNonZero(im2)
 
-    img_pregunta = bound_and_crop(cropped_img_sub, nonzero, buffer=5)
+    img_pregunta = bound_and_crop(cropped_img_sub, nonzero, buffer=10)
     return img_pregunta
 
 
@@ -391,7 +391,7 @@ def bound_and_crop(img, c, buffer=0):
     # Obtengo coordenadas de contorno
     x, y, w, h = cv2.boundingRect(c)
     # Recorto imagen en base a contorno
-    img_crop = img[y:y+h+buffer, x-buffer:x+w+buffer]
+    img_crop = img[max(y-buffer, 0):y+h+buffer, x-buffer:x+w+buffer]
     return img_crop
 
 
