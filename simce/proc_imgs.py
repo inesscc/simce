@@ -134,9 +134,9 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
         if not rbd.is_file():
 
             preg_error = dir_output_rbd / f'{estudiante}'
-            anotar_error(pregunta=str(preg_error),
-                         error=f'No existen archivos disponibles para estudiante serie {preg_error.name}',
-                         nivel_error='Estudiante')
+            anotar_error(pregunta = str(preg_error),
+                         error = f'No existen archivos disponibles para serie {preg_error.name}',
+                         nivel_error = tipo_cuadernillo)
             continue
 
         # Para cada imagen del cuadernillo de un estudiante (2 pág x img):
@@ -234,11 +234,11 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
 
                 dic_dif = get_subpregs_distintas(subpreg_x_preg, dir_output_rbd, estudiante)
 
-                error = f'N° de subpreguntas incorrecto para estudiante {estudiante},\
+                error = f'N° de subpreguntas incorrecto para serie {estudiante},\
         se encontraron {n_subpreg} subpreguntas {dic_dif}'
 
                 anotar_error(
-                    pregunta=preg_error, error=error, nivel_error='Estudiante')
+                    pregunta=preg_error, error=error, nivel_error = tipo_cuadernillo)
 
                 # Si hay error en procesamiento pregunta
         except Exception as e:
@@ -300,7 +300,7 @@ def mantener_solo_recuadros_respuesta(cropped_img_sub):
                           eliminar_manchas='vertical', iters=1)
     nonzero = cv2.findNonZero(im2)
 
-    img_pregunta = bound_and_crop(cropped_img_sub, nonzero, buffer=5)
+    img_pregunta = bound_and_crop(cropped_img_sub, nonzero, buffer=10)
     return img_pregunta
 
 
@@ -391,7 +391,7 @@ def bound_and_crop(img, c, buffer=0):
     # Obtengo coordenadas de contorno
     x, y, w, h = cv2.boundingRect(c)
     # Recorto imagen en base a contorno
-    img_crop = img[y:y+h+buffer, x-buffer:x+w+buffer]
+    img_crop = img[max(y-buffer, 0):y+h+buffer, x-buffer:x+w+buffer]
     return img_crop
 
 
