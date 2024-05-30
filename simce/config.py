@@ -15,11 +15,13 @@ regex_estudiante = r'(\d{7,})_.*jpg'
 # mínimo entre línea y línea de cada subpregunta
 n_pixeles_entre_lineas = 22
 
+carpeta_estudiantes = 'CE'
+carpeta_padres = 'CP'
 
 dir_data = Path('data/')
 dir_input = dir_data / 'input'
-dir_estudiantes = dir_input / 'CE'
-dir_padres = dir_input / 'CP'
+dir_estudiantes = dir_input / carpeta_estudiantes
+dir_padres = dir_input / carpeta_padres
 
 dir_output = Path('data/output/output_subpreg')
 dir_tabla_99 = Path('data/output/output_tabla_99/')
@@ -27,10 +29,10 @@ dir_insumos = Path('data/output/insumos/')
 
 
 # PROCESAMIENTO POSIBLES DOBLES MARCAS
-nombre_tabla_estud_origen = 'CE_Origen_DobleMarca.csv'
-nombre_tabla_estud_final = 'CE_Final_DobleMarca.csv'
-nombre_tabla_padres_origen = 'CP_Origen_DobleMarca.csv'
-nombre_tabla_padres_final = 'CP_Final_DobleMarca.csv'
+nombre_tabla_estud_origen = f'{carpeta_estudiantes}_Origen_DobleMarca.csv'
+nombre_tabla_estud_final = f'{carpeta_estudiantes}_Final_DobleMarca.csv'
+nombre_tabla_padres_origen = f'{carpeta_padres}_Origen_DobleMarca.csv'
+nombre_tabla_padres_final = f'{carpeta_padres}_Final_DobleMarca.csv'
 
 # Variables identificadoras
 id_estudiante = 'serie'

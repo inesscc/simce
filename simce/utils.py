@@ -13,7 +13,7 @@ import cv2
 import numpy as np
 import pandas as pd
 import re
-from simce.config import dir_estudiantes, dir_output, regex_estudiante, dir_tabla_99, dir_input, dir_padres
+from simce.config import dir_estudiantes, dir_output, dir_tabla_99, dir_input, dir_padres, dir_insumos
 from itertools import islice
 
 from functools import wraps
@@ -34,9 +34,12 @@ def timing(f):
 
 def crear_directorios():
 
+    dir_input.mkdir(exist_ok=True)
     dir_tabla_99.mkdir(exist_ok=True, parents=True)
     dir_estudiantes.mkdir(exist_ok=True, parents=True)
     dir_padres.mkdir(exist_ok=True, parents=True)
+    dir_output.mkdir(exist_ok=True)
+    dir_insumos.mkdir(exist_ok=True)
 
 
 def ls(ruta=getcwd()):

@@ -6,12 +6,13 @@ Created on Thu May  9 17:20:37 2024
 """
 import pandas as pd
 from simce.config import dir_tabla_99, dir_input, dir_insumos, variables_identificadoras, id_estudiante, \
-    regex_extraer_rbd_de_ruta, dic_ignorar_p1, regex_p1
+    regex_extraer_rbd_de_ruta, dic_ignorar_p1, regex_p1, dir_output
 from simce.utils import timing
 import re
 import json
 import random
 import numpy as np
+from pathlib import Path
 
 random.seed(2024)
 np.random.seed(2024)
@@ -62,14 +63,20 @@ def get_tablas_99(tipo_cuadernillo, para_entrenamiento=True):
 
     df_final['rbd_ruta'] = df_final.ruta_imagen.astype('string').str.extract(regex_extraer_rbd_de_ruta)
 
+    df_final = df_final.reset_index()
+    df_final['ruta_imagen_output'] = (dir_output / 
+                                      df_final.ruta_imagen.str.replace('\\', '/').apply(lambda x: Path(x).parent) /
+                                        (df_final.serie.astype(str) + '_' + df_final.preguntas + '.jpg') )
+
+
     # Exportando tablas:
     if para_entrenamiento:
 
-        df_final.reset_index().to_csv(
+        df_final.to_csv(
             dir_tabla_99 / f'casos_99_entrenamiento_compilados_{tipo_cuadernillo}.csv', index=False)
     else:
 
-        df_final.reset_index().to_csv(
+        df_final.to_csv(
             dir_tabla_99 / f'casos_99_compilados_{tipo_cuadernillo}.csv', index=False)
 
     print('Tabla compilada generada exitosamente!')
@@ -108,6 +115,8 @@ def gen_tabla_entrenamiento(casos_99, casos_99_origen):
     casos_99_origen['dm_final'] = casos_99.respuestas
     casos_99_origen['dm_final'] = casos_99_origen['dm_final'].fillna(0).astype(int)
     casos_99_origen = casos_99_origen.rename(columns={'respuestas': 'dm_sospecha'})
+    casos_99_origen.dm_final = (casos_99_origen.dm_final == 99).astype(int)
+
 
     return casos_99_origen
 
