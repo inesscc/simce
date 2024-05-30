@@ -28,7 +28,18 @@ dir_tabla_99 = Path('data/output/output_tabla_99/')
 dir_insumos = Path('data/output/insumos/')
 
 
-# PROCESAMIENTO POSIBLES DOBLES MARCAS
+
+# TRANSVERSALES----
+
+IGNORAR_PRIMERA_PAGINA = True
+
+
+# OBTENCIÓN DE INSUMOS ------
+
+regex_hoja_cuadernillo = r'_(\d+)'
+
+
+# PROCESAMIENTO POSIBLES DOBLES MARCAS -----
 nombre_tabla_estud_origen = f'{carpeta_estudiantes}_Origen_DobleMarca.csv'
 nombre_tabla_estud_final = f'{carpeta_estudiantes}_Final_DobleMarca.csv'
 nombre_tabla_padres_origen = f'{carpeta_padres}_Origen_DobleMarca.csv'
@@ -40,6 +51,7 @@ variables_identificadoras = ['rbd', 'dvRbd', 'codigoCurso', id_estudiante, 'ruta
 # Expresión regular para extraer rl rbd de la ruta en variable RutaImagen
 regex_extraer_rbd_de_ruta = r'\\(\d+)\\'
 # Expresión regular que permite identificar variables asociadas a la pregunta 1
+# Utilizado para obviarla de la selección de preguntas
 regex_p1 = r'p1(_\d+)?$'
 # Diccionario que indica si la pregunta 1 debe ser ignorada al procesar datos
 dic_ignorar_p1 = {'estudiantes': True, 'padres': False}
