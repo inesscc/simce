@@ -1,6 +1,5 @@
 import torch
 torch.cuda.is_available()
-torch.cuda.device_count()
 import torchvision
 import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
@@ -27,9 +26,9 @@ df99 = pd.read_csv(dir_tabla_99 / nombre_tabla_casos99)
 df99.dm_final.value_counts()
 df99.head()
 df_exist = df99[df99.ruta_imagen_output.apply(lambda x: Path(x).is_file())].reset_index()
+
 nombre_tabla_casos99 = 'prueba_torch.csv'
 df_exist.to_csv(dir_tabla_99 / 'prueba_torch.csv')
-
 
 class CustomImageDataset(Dataset):
     def __init__(self, csv_file, root_dir, transform=None):
@@ -45,6 +44,7 @@ class CustomImageDataset(Dataset):
         image = Image.open(img_path)
         label = self.labels_frame.loc[idx,  'dm_final']
         directory = self.labels_frame.loc[idx, 'ruta_imagen_output']
+
 
         if self.transform:
             image = self.transform(image)
@@ -120,20 +120,29 @@ class SimpleCNN(nn.Module):
 num_classes = 2
 model = SimpleCNN(num_classes=num_classes)
 
-# Define the loss function and optimizer
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
-
-# Move the model to GPU if available
+# Select device
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+print(f'{device=}')
+# Define the loss function and optimizer
+weights = [5.0, 1.0] 
+weights = torch.tensor(weights).to(device)
+criterion = nn.CrossEntropyLoss(weight=weights)
+#optimizer = optim.Adam(model.parameters(), lr=0.0005)
+optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9, weight_decay=.001)
+# Mover modelo a dispositivo detectado
 model = model.to(device)
 
 
+# Initialize the minimum validation loss and the patience counter
+min_val_loss = float('inf')
+patience = 8
+counter = 0
+val_loss_serie = []
+
 # Training loop
-for epoch in range(10):  # Loop over the dataset multiple times
+for epoch in range(100):  # Loop over the dataset multiple times
     running_loss = 0.0
     for i, data in enumerate(trainloader, 0):
-        print(i)
         # Get the inputs; data is a list of [inputs, labels]
         inputs, labels = data[0].to(device), data[1].to(device)
 
@@ -148,26 +157,52 @@ for epoch in range(10):  # Loop over the dataset multiple times
 
         # Print statistics
         running_loss += loss.item()
-        if i % 20 == 19:  # Print every 20 mini-batches
-            print('[%d, %5d] loss: %.3f' %
-                  (epoch + 1, i + 1, running_loss / 2000))
+        if i % 200 == 199:  # Print every 200 mini-batches
+            print('[%d, %5d] training loss: %.3f' %
+                  (epoch + 1, i + 1, running_loss / 200))
             running_loss = 0.0
 
-print('Finished Training')
-def denormalize(tensor, mean, std):
-    for t, m, s in zip(tensor, mean, std):
-        t.mul_(s).add_(m)
-    return tensor
-dirs[1]
-images_denom = image_denormalized = denormalize(images, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-imshow(torchvision.utils.make_grid(images))
-import cv2
+    # Validation loss
+    validation_loss = 0.0
+    for i, data in enumerate(testloader, 0):
+        with torch.no_grad():
+            inputs, labels = data[0].to(device), data[1].to(device)
+            outputs = model(inputs)
+            loss = criterion(outputs, labels)
+            validation_loss += loss.item()
+            
 
-## Predicciones
+    avg_val_loss = validation_loss / len(testloader)
+    val_loss_serie.append(avg_val_loss)
+    print('[%d] validation loss: %.3f' %
+          (epoch + 1, avg_val_loss))
+
+    # Check if the validation loss has improved
+    if avg_val_loss < min_val_loss:
+        print('Validation loss decreased from {:.3f} to {:.3f}. Saving model...'.format(min_val_loss, avg_val_loss))
+        torch.save(model.state_dict(), 'best_model.pt')
+        min_val_loss = avg_val_loss
+        counter = 0
+    else:
+        counter += 1
+        print('Validation loss did not improve. Patience: {}/{}'.format(counter, patience))
+        if counter >= patience:
+            print('Early stopping')
+            break
+print('Finished Training')
+
+
+
+
+## Predicciones -----------------------------------------------------
 
 
 # Set the model to evaluation mode
-model.eval()
+model_load = SimpleCNN(num_classes=2)
+# Load the model parameters from a saved state
+model_load.load_state_dict(torch.load('best_model.pt'))
+model_load = model_load.to(device)
+#model_load.eval()
 
 # Initialize lists to store predictions and true labels
 predictions = []
@@ -181,7 +216,7 @@ for images, labels, dirs in testloader:
 
     # Make predictions
     with torch.no_grad():
-        outputs = model(images)
+        outputs = model_load(images)
 
     # Get the predicted class for each image
     _, predicted = torch.max(outputs.data, 1)
@@ -192,13 +227,52 @@ for images, labels, dirs in testloader:
 
 print('Predictions:', predictions)
 print('True labels:', true_labels)
+dirs = [i[2] for i in test_dataset]
 
-a = pd.DataFrame({'pred': predictions,
-              'true': true_labels})
-a[a.true.eq(0)].pred.mean()
+preds = pd.DataFrame({'pred': predictions,
+              'true': true_labels,
+              'dirs': dirs}).set_index('dirs')
+preds[preds['true'].eq(1)].pred.mean()
+preds_tot = preds.merge(df_exist, left_on='dirs', right_on='ruta_imagen_output', how='left')
+casi_dm = preds[(preds.dm_sospecha.eq(99)) & (preds.true.eq(0))]
+preds[preds.true.eq(1) & preds.pred.eq(0)].reset_index().dirs.apply(lambda x: Path(x).name).value_counts()
+casi_dm
+preds_tot['acierto'] = preds_tot.pred == preds.true
 
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+preds.acierto.mean()
 
-########## ------------
+def get_conf_mat(df, preg):
+
+    df_filter = df[df.preguntas.eq(preg)]
+
+    cm = confusion_matrix(df_filter.pred, df_filter.true)
+    disp = ConfusionMatrixDisplay(cm, display_labels=['Marca normal', 'Doble marca'])
+    disp.plot()
+    plt.title(preg)
+    plt.show()
+    
+
+get_conf_mat(preds_tot, 'p22')
+preds_tot.groupby(['preguntas']).agg({'rbd':'count', 'acierto':'mean'}).sort_values('acierto')
+
+casi_dm.pred.value_counts()
+df_exist[df_exist.preguntas.eq('p22')]
+
+df_exist.preguntas.value_counts()
+
+########## --------------------------
+########## --------------------------
+
+def denormalize(tensor, mean, std):
+    for t, m, s in zip(tensor, mean, std):
+        t.mul_(s).add_(m)
+    return tensor
+dirs[1]
+images_denom = image_denormalized = denormalize(images, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+imshow(torchvision.utils.make_grid(images))
+import cv2
+
 
 
 transform = transforms.Compose(
@@ -218,7 +292,6 @@ testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size,
 
 classes = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
-
 
 
 
