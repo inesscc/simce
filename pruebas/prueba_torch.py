@@ -20,11 +20,13 @@ from torch.utils.data import DataLoader
 from PIL import Image
 import os.path
 
-tipo_cuadernillo = 'padres'
-nombre_tabla_casos99 = f'casos_99_entrenamiento_compilados_{tipo_cuadernillo}.csv'
-df99 = pd.read_csv(dir_tabla_99 / nombre_tabla_casos99)
-df99.dm_final.value_counts()
-df99.head()
+
+padres99 = f'casos_99_entrenamiento_compilados_padres.csv'
+est99 = f'casos_99_entrenamiento_compilados_estudiantes.csv'
+df99p = pd.read_csv(dir_tabla_99 / padres99)
+df99e = pd.read_csv(dir_tabla_99 / est99).sample(frac=.1)
+df99 = pd.concat([df99e, df99p])
+
 df_exist = df99[df99.ruta_imagen_output.apply(lambda x: Path(x).is_file())].reset_index()
 
 nombre_tabla_casos99 = 'prueba_torch.csv'
@@ -180,7 +182,7 @@ for epoch in range(100):  # Loop over the dataset multiple times
     # Check if the validation loss has improved
     if avg_val_loss < min_val_loss:
         print('Validation loss decreased from {:.3f} to {:.3f}. Saving model...'.format(min_val_loss, avg_val_loss))
-        torch.save(model.state_dict(), 'best_model.pt')
+        torch.save(model.state_dict(), 'best_model_mix.pt')
         min_val_loss = avg_val_loss
         counter = 0
     else:
