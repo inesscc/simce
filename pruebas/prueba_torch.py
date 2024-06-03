@@ -1,7 +1,7 @@
 import torch
 torch.cuda.is_available()
 import torchvision
-import torchvision.transforms as transforms
+import torchvision.transforms.v2 as transforms
 import matplotlib.pyplot as plt
 import numpy as np
 import torch.nn as nn
@@ -19,13 +19,15 @@ from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
 from PIL import Image
 import os.path
+from torchvision.models import list_models
 
-
+classification_models = list_models(module=torchvision.models)
 padres99 = f'casos_99_entrenamiento_compilados_padres.csv'
 est99 = f'casos_99_entrenamiento_compilados_estudiantes.csv'
 df99p = pd.read_csv(dir_tabla_99 / padres99)
-df99e = pd.read_csv(dir_tabla_99 / est99).sample(frac=.1)
-df99 = pd.concat([df99e, df99p])
+
+df99e = pd.read_csv(dir_tabla_99 / est99).sample(frac=.1, random_state=42)
+df99 = pd.concat([df99e, df99p]).reset_index(drop=True)
 
 df_exist = df99[df99.ruta_imagen_output.apply(lambda x: Path(x).is_file())].reset_index()
 
@@ -35,7 +37,7 @@ df_exist.to_csv(dir_tabla_99 / 'prueba_torch.csv')
 class CustomImageDataset(Dataset):
     def __init__(self, csv_file, root_dir, transform=None):
         self.labels_frame = pd.read_csv(csv_file)
-        self.root_dir = root_dir
+        self.root_dir = root_dirP
         self.transform = transform
 
     def __len__(self):
@@ -53,11 +55,20 @@ class CustomImageDataset(Dataset):
 
         return image, label, directory
     
+transformations_random = [
+    transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2),  # Randomly adjust color
+    transforms.RandomHorizontalFlip()        # Randomly flip the image horizontally
+
+
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
+    transforms.RandomApply(transformations_random, p=.1)
+    ]    
+    
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 ])
+
 
     
 dataset = CustomImageDataset(csv_file=dir_tabla_99 / nombre_tabla_casos99, root_dir='', transform=transform)
@@ -202,12 +213,13 @@ print('Finished Training')
 # Set the model to evaluation mode
 model_load = SimpleCNN(num_classes=2)
 # Load the model parameters from a saved state
-model_load.load_state_dict(torch.load('best_model.pt'))
+model_load.load_state_dict(torch.load('best_model_mix.pt'))
 model_load = model_load.to(device)
 #model_load.eval()
 
 # Initialize lists to store predictions and true labels
 predictions = []
+probs = []
 true_labels = []
 
 # Iterate over the test data
@@ -220,29 +232,37 @@ for images, labels, dirs in testloader:
     with torch.no_grad():
         outputs = model_load(images)
 
+    probabilities = torch.nn.functional.softmax(outputs.data, dim=1)
+    max_probabilities = probabilities.max(dim=1)[0]
+    
     # Get the predicted class for each image
     _, predicted = torch.max(outputs.data, 1)
 
     # Store the predictions and true labels
     predictions.extend(predicted.tolist())
     true_labels.extend(labels.tolist())
+    probs.extend(max_probabilities)
 
-print('Predictions:', predictions)
-print('True labels:', true_labels)
+print('Predicciones listas!')
+probs_float = [i.item() for i in probs]
 dirs = [i[2] for i in test_dataset]
 
 preds = pd.DataFrame({'pred': predictions,
               'true': true_labels,
-              'dirs': dirs}).set_index('dirs')
-preds[preds['true'].eq(1)].pred.mean()
+              'dirs': dirs,
+              'proba': probs_float}).set_index('dirs')
+
 preds_tot = preds.merge(df_exist, left_on='dirs', right_on='ruta_imagen_output', how='left')
+preds_tot['acierto'] = preds_tot.pred == preds_tot.true
 casi_dm = preds[(preds.dm_sospecha.eq(99)) & (preds.true.eq(0))]
 preds[preds.true.eq(1) & preds.pred.eq(0)].reset_index().dirs.apply(lambda x: Path(x).name).value_counts()
-casi_dm
-preds_tot['acierto'] = preds_tot.pred == preds.true
 
+preds_tot['deciles'] = pd.qcut(preds_tot.proba, q=10)
+preds_tot.groupby('deciles').acierto.mean().plot()
+preds_tot.acierto.mean()
+preds_tot.proba.describe()
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
-preds.acierto.mean()
+preds_tot[preds_tot.proba.ge(.95) & preds_tot.true.eq(0)].acierto.mean()
 
 def get_conf_mat(df, preg):
 
@@ -280,6 +300,8 @@ import cv2
 transform = transforms.Compose(
     [transforms.ToTensor(),
      transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+
+
 
 
 trainset = torchvision.datasets.CIFAR10(root='./data', train=True,
