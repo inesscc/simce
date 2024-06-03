@@ -201,5 +201,5 @@ with mlflow.start_run(run_name = run_name) as run:
                 mlflow.log_metric("loss", f"{loss:2f}", step=step)
                 mlflow.log_metric("accuracy", f"{accuracy:2f}", step=step)
 
-        mlflow.end_run()
+    mlflow.end_run()
 
