@@ -8,7 +8,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 import torch.optim as optim
-
+from simce.config import dir_modelos
 
 
 print('Finished Training')
@@ -30,14 +30,18 @@ df99e = pd.read_csv(dir_tabla_99 / est99).sample(frac=.1, random_state=42)
 df99 = pd.concat([df99e, df99p]).reset_index(drop=True)
 
 df_exist = df99[df99.ruta_imagen_output.apply(lambda x: Path(x).is_file())].reset_index()
-
+df_exist.dm_sospecha = (df_exist.dm_sospecha == 99).astype(int)
 nombre_tabla_casos99 = 'prueba_torch.csv'
 df_exist.to_csv(dir_tabla_99 / 'prueba_torch.csv')
 
 class CustomImageDataset(Dataset):
-    def __init__(self, csv_file, root_dir, transform=None):
+    def __init__(self, csv_file, root_dir, transform=None, filter_sospecha=False):
         self.labels_frame = pd.read_csv(csv_file)
-        self.root_dir = root_dirP
+
+        if filter_sospecha:
+            self.labels_frame = self.labels_frame[self.labels_frame['dm_sospecha'] == 1].reset_index(drop=True)
+
+        self.root_dir = root_dir
         self.transform = transform
 
     def __len__(self):
@@ -50,6 +54,7 @@ class CustomImageDataset(Dataset):
         directory = self.labels_frame.loc[idx, 'ruta_imagen_output']
 
 
+
         if self.transform:
             image = self.transform(image)
 
@@ -58,20 +63,21 @@ class CustomImageDataset(Dataset):
 transformations_random = [
     transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2),  # Randomly adjust color
     transforms.RandomHorizontalFlip()        # Randomly flip the image horizontally
+]
 
 
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
-    transforms.RandomApply(transformations_random, p=.1)
-    ]    
+    transforms.RandomApply(transformations_random, p=.1),    
     
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-])
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])]
+)
 
 
     
-dataset = CustomImageDataset(csv_file=dir_tabla_99 / nombre_tabla_casos99, root_dir='', transform=transform)
+dataset = CustomImageDataset(csv_file=dir_tabla_99 / nombre_tabla_casos99, root_dir='', transform=transform,
+                             filter_sospecha=True)
 dataloader = DataLoader(dataset, batch_size=4, shuffle=True)
 
 
@@ -137,11 +143,11 @@ model = SimpleCNN(num_classes=num_classes)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(f'{device=}')
 # Define the loss function and optimizer
-weights = [5.0, 1.0] 
+weights = [50.0, 1.0] 
 weights = torch.tensor(weights).to(device)
 criterion = nn.CrossEntropyLoss(weight=weights)
 #optimizer = optim.Adam(model.parameters(), lr=0.0005)
-optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9, weight_decay=.001)
+optimizer = optim.SGD(model.parameters(), lr=0.005, momentum=0.9, weight_decay=.001)
 # Mover modelo a dispositivo detectado
 model = model.to(device)
 
@@ -193,7 +199,7 @@ for epoch in range(100):  # Loop over the dataset multiple times
     # Check if the validation loss has improved
     if avg_val_loss < min_val_loss:
         print('Validation loss decreased from {:.3f} to {:.3f}. Saving model...'.format(min_val_loss, avg_val_loss))
-        torch.save(model.state_dict(), 'best_model_mix.pt')
+        torch.save(model.state_dict(), dir_modelos / 'best_model_mix.pt')
         min_val_loss = avg_val_loss
         counter = 0
     else:
@@ -290,7 +296,7 @@ def denormalize(tensor, mean, std):
     for t, m, s in zip(tensor, mean, std):
         t.mul_(s).add_(m)
     return tensor
-dirs[1]
+""" dirs[1]
 images_denom = image_denormalized = denormalize(images, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 imshow(torchvision.utils.make_grid(images))
 import cv2
@@ -327,9 +333,9 @@ def imshow(img):
     npimg = img.numpy()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
     plt.show()
+ """
 
-
-# get some random training images
+""" # get some random training images
 dataiter = iter(trainloader)
 images, labels = next(dataiter)
 next(dataiter)
@@ -364,4 +370,4 @@ class Net(nn.Module):
 net = Net()
 
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9) """
