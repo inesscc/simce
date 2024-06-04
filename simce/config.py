@@ -26,6 +26,7 @@ dir_padres = dir_input / carpeta_padres
 dir_output = Path('data/output/output_subpreg')
 dir_tabla_99 = Path('data/output/output_tabla_99/')
 dir_insumos = Path('data/output/insumos/')
+dir_modelos = Path('data/output/modelos/')
 
 
 
