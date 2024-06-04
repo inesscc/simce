@@ -7,7 +7,7 @@ Created on Thu May 16 17:46:31 2024
 
 import numpy as np
 import cv2
-from simce.config import dir_output, regex_estudiante, dir_insumos, regex_hoja_cuadernillo, \
+from config.proc_img import dir_output, regex_estudiante, dir_insumos, regex_hoja_cuadernillo, \
     IGNORAR_PRIMERA_PAGINA
 from simce.errors import anotar_error
 from simce.utils import timing

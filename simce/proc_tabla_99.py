@@ -5,7 +5,7 @@ Created on Thu May  9 17:20:37 2024
 @author: jeconchao
 """
 import pandas as pd
-from simce.config import dir_tabla_99, dir_input, dir_insumos, variables_identificadoras, id_estudiante, \
+from config.proc_img import dir_tabla_99, dir_input, dir_insumos, variables_identificadoras, id_estudiante, \
     regex_extraer_rbd_de_ruta, dic_ignorar_p1, regex_p1, dir_output
 from simce.utils import timing
 import re
@@ -31,13 +31,13 @@ def get_tablas_99_total(para_entrenamiento=True):
 def get_tablas_99(tipo_cuadernillo, para_entrenamiento=True):
 
     if tipo_cuadernillo == 'estudiantes':
-        from simce.config import nombre_tabla_estud_origen, nombre_tabla_estud_final
+        from config.proc_img import nombre_tabla_estud_origen, nombre_tabla_estud_final
 
         tabla_origen = nombre_tabla_estud_origen
         tabla_final = nombre_tabla_estud_final
 
     elif tipo_cuadernillo == 'padres':
-        from simce.config import nombre_tabla_padres_origen, nombre_tabla_padres_final
+        from config.proc_img import nombre_tabla_padres_origen, nombre_tabla_padres_final
 
         tabla_origen = nombre_tabla_padres_origen
         tabla_final = nombre_tabla_padres_final

@@ -10,7 +10,7 @@ import re
 import cv2
 import numpy as np
 from simce.utils import get_mask_imagen
-from simce.config import regex_estudiante
+from config.proc_img import regex_estudiante
 import simce.proc_imgs as proc
 
 

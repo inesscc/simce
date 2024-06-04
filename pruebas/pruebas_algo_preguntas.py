@@ -5,7 +5,7 @@ Created on Mon Apr 29 16:59:23 2024
 @author: jeconchao
 """
 
-from simce.config import dir_estudiantes
+from config.proc_img import dir_estudiantes
 from itertools import chain
 import numpy as np
 import cv2

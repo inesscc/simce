@@ -7,7 +7,7 @@ Created on Thu May  2 17:22:37 2024
 import numpy as np
 import cv2
 from itertools import chain
-from simce.config import dir_output, regex_estudiante, dir_tabla_99, \
+from config.proc_img import dir_output, regex_estudiante, dir_tabla_99, \
     dir_input, n_pixeles_entre_lineas, dir_estudiantes, dir_padres
 from simce.errors import anotar_error
 # from simce.apoyo_proc_imgs import get_subpreguntas_completo
@@ -18,7 +18,7 @@ from dotenv import load_dotenv
 
 from simce.utils import get_mask_imagen
 import json
-from simce.config import dir_insumos
+from config.proc_img import dir_insumos
 load_dotenv()
 
 VALID_INPUT = {'cuadernillo', 'pagina'}

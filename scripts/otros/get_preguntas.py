@@ -8,7 +8,7 @@ Created on Fri May  3 14:54:01 2024
 import pandas as pd
 from simce.proc_imgs import get_mask_naranjo, recorte_imagen
 
-from simce.config import dir_estudiantes
+from config.proc_img import dir_estudiantes
 from simce.trabajar_rutas import get_n_paginas, get_n_preguntas
 from simce.utils import crear_directorios
 import cv2

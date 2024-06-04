@@ -6,13 +6,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
-
+from torchmetrics import Accuracy
+from torchinfo import summary
 import torch.optim as optim
-from simce.config import dir_modelos
-
+from config.proc_img import dir_modelos
+import mlflow
 
 print('Finished Training')
-from simce.config import dir_tabla_99
+from config.proc_img import dir_tabla_99
 import pandas as pd
 from pathlib import Path
 from torch.utils.data import Dataset
@@ -77,7 +78,7 @@ transform = transforms.Compose([
 
     
 dataset = CustomImageDataset(csv_file=dir_tabla_99 / nombre_tabla_casos99, root_dir='', transform=transform,
-                             filter_sospecha=True)
+                             filter_sospecha=False)
 dataloader = DataLoader(dataset, batch_size=4, shuffle=True)
 
 
@@ -143,13 +144,20 @@ model = SimpleCNN(num_classes=num_classes)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(f'{device=}')
 # Define the loss function and optimizer
-weights = [50.0, 1.0] 
+weights = [5.0, 1.0] 
 weights = torch.tensor(weights).to(device)
 criterion = nn.CrossEntropyLoss(weight=weights)
 #optimizer = optim.Adam(model.parameters(), lr=0.0005)
 optimizer = optim.SGD(model.parameters(), lr=0.005, momentum=0.9, weight_decay=.001)
 # Mover modelo a dispositivo detectado
 model = model.to(device)
+
+######## TRAIN LOOP- MLFLOW
+
+experimento_nn = 'exp_general'
+run_name = 'cuestionario_aux'
+epochs = 100
+metric_fn = Accuracy(task="multiclass", num_classes=2).to(device)
 
 
 # Initialize the minimum validation loss and the patience counter
@@ -158,8 +166,27 @@ patience = 8
 counter = 0
 val_loss_serie = []
 
+with mlflow.start_run(run_name = run_name) as run:
+
+    params = {
+                "epochs": epochs,
+                "learning_rate": 0.005,
+                "batch_size": batch_size,
+                "loss_function": criterion.__class__.__name__,
+                "metric_function": metric_fn.__class__.__name__,
+                "optimizer": optimizer.__class__.__name__,
+            }
+
+    mlflow.log_params(params)
+
+    with open("model_summary.txt", "w", encoding="utf-8") as f:
+        f.write(str(summary(model)))
+        
+    mlflow.log_artifact("model_summary.txt")
+    
+
 # Training loop
-for epoch in range(100):  # Loop over the dataset multiple times
+for epoch in range(epochs):  # Loop over the dataset multiple times
     running_loss = 0.0
     for i, data in enumerate(trainloader, 0):
         # Get the inputs; data is a list of [inputs, labels]

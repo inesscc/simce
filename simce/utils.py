@@ -6,14 +6,14 @@ Created on Tue Apr  9 10:54:35 2024
 """
 
 
-from simce.config import dir_data
+from config.proc_img import dir_data
 from os import getcwd, scandir
 from os.path import abspath
 import cv2
 import numpy as np
 import pandas as pd
 import re
-from simce.config import dir_estudiantes, dir_output, dir_tabla_99, dir_input, dir_padres, dir_insumos
+from config.proc_img import dir_estudiantes, dir_output, dir_tabla_99, dir_input, dir_padres, dir_insumos
 from itertools import islice
 
 from functools import wraps

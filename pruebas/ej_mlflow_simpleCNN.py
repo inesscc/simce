@@ -14,7 +14,7 @@ from torchinfo import summary
 
 
 print('Finished Training')
-from simce.config import dir_tabla_99
+from config.proc_img import dir_tabla_99
 import pandas as pd
 from pathlib import Path
 from torch.utils.data import Dataset

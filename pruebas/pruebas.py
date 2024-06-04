@@ -5,7 +5,7 @@ Created on Tue Apr  9 10:28:56 2024
 @author: jeconchao
 """
 
-from simce.config import dir_est
+from config.proc_img import dir_est
 from itertools import chain
 import numpy as np
 import cv2
