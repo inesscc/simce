@@ -25,10 +25,9 @@ dir_padres = dir_input / carpeta_padres
 
 dir_input_proc = Path('data/input_proc/')
 dir_subpreg = dir_input_proc / 'input_subpreg'
-dir_tabla_99 = dir_subpreg / 'output_tabla_99'
-dir_insumos = dir_subpreg / 'insumos'
-dir_modelos = dir_subpreg / 'modelos'
-
+dir_tabla_99 = dir_input_proc / 'output_tabla_99'
+dir_insumos = dir_input_proc / 'insumos'
+dir_modelos = dir_input_proc / 'modelos'
 
 
 # TRANSVERSALES----
