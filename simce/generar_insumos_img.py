@@ -7,7 +7,7 @@ Created on Thu May 16 17:46:31 2024
 
 import numpy as np
 import cv2
-from config.proc_img import dir_output, regex_estudiante, dir_insumos, regex_hoja_cuadernillo, \
+from config.proc_img import dir_subpreg, regex_estudiante, dir_insumos, regex_hoja_cuadernillo, \
     IGNORAR_PRIMERA_PAGINA
 from simce.errors import anotar_error
 from simce.utils import timing
@@ -131,8 +131,8 @@ def get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes, dic_pag
                 # pregunta inicial páginas altas
                 'q2': n_preguntas + 1}
 
-            dir_output_rbd = (dir_output / f'{directorio_imagenes.name}/{rbd.name}/')
-            dir_output_rbd.mkdir(parents=True, exist_ok=True)
+            dir_subpreg_rbd = (dir_subpreg / f'{directorio_imagenes.name}/{rbd.name}/')
+            dir_subpreg_rbd.mkdir(parents=True, exist_ok=True)
             # Para cada imagen del cuadernillo de un estudiante (2 pág x img):
             for num_pag, dir_pag in enumerate(rbd.glob(f'{estudiante}*')):
                 # Creamos directorio para guardar imágenes
@@ -213,7 +213,7 @@ def get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes, dic_pag
                                     try:
 
                                         file_out = str(
-                                            dir_output_rbd / f'{estudiante}_p{q}_{i+1}.jpg')
+                                            dir_subpreg_rbd / f'{estudiante}_p{q}_{i+1}.jpg')
                                         proc.crop_and_save_subpreg(img_pregunta_crop,
                                                                    lineas_horizontales,
                                                                    i, file_out)
@@ -222,7 +222,7 @@ def get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes, dic_pag
                                     except Exception as e:
 
                                         preg_error = str(
-                                            dir_output_rbd / f'{estudiante}_p{q}_{i+1}')
+                                            dir_subpreg_rbd / f'{estudiante}_p{q}_{i+1}')
                                         anotar_error(
                                             pregunta=preg_error,
                                             error='Subregunta no pudo ser procesada',
@@ -233,14 +233,14 @@ def get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes, dic_pag
                             else:
                                 print('Pregunta no cuenta con subpreguntas, se guardará imagen')
                                 file_out = str(
-                                    dir_output_rbd / f'{estudiante}_p{q}.jpg')
+                                    dir_subpreg_rbd / f'{estudiante}_p{q}.jpg')
                                 cv2.imwrite(file_out, img_pregunta)
 
                                 # Si hay error en procesamiento pregunta
                         except Exception as e:
 
                             preg_error = str(
-                                dir_output_rbd / f'{estudiante}_p{q}')
+                                dir_subpreg_rbd / f'{estudiante}_p{q}')
                             anotar_error(
                                 pregunta=preg_error, error='Pregunta no pudo ser procesada', e=e)
 
@@ -376,8 +376,8 @@ def get_baseline(n_pages, n_preguntas, directorio_imagenes, dic_pagina):
                               dic_pagina=dic_pagina, filter_rbd=rbds,
                               ignorar_primera_pagina=IGNORAR_PRIMERA_PAGINA)
 
-    dir_output_rbd = (dir_output / f'{directorio_imagenes.name}')
-    rutas_output = [dir_output_rbd / i for i in rbds]
+    dir_subpreg_rbd = (dir_subpreg / f'{directorio_imagenes.name}')
+    rutas_output = [dir_subpreg_rbd / i for i in rbds]
 
     rutas_output_total = []
 

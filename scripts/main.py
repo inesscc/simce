@@ -9,11 +9,6 @@ from simce.utils import crear_directorios
 from simce.generar_insumos_img import generar_insumos_total
 from simce.proc_imgs import get_subpreguntas
 from simce.proc_tabla_99 import get_tablas_99_total
-import cv2
-from pathlib import Path
-import re
-import simce.proc_imgs as proc
-import pandas as pd
 
 # %% Subpreguntas
 

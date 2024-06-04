@@ -23,10 +23,11 @@ dir_input = dir_data / 'input'
 dir_estudiantes = dir_input / carpeta_estudiantes
 dir_padres = dir_input / carpeta_padres
 
-dir_output = Path('data/output/output_subpreg')
-dir_tabla_99 = Path('data/output/output_tabla_99/')
-dir_insumos = Path('data/output/insumos/')
-dir_modelos = Path('data/output/modelos/')
+dir_input_proc = Path('data/input_proc/')
+dir_subpreg = dir_input_proc / 'input_subpreg'
+dir_tabla_99 = dir_subpreg / 'output_tabla_99'
+dir_insumos = dir_subpreg / 'insumos'
+dir_modelos = dir_subpreg / 'modelos'
 
 
 

@@ -7,9 +7,9 @@ Created on Wed Apr 10 15:53:22 2024
 
 import cv2
 import numpy as np
-from config.proc_img import dir_estudiantes, dir_padres, dir_output
+from config.proc_img import dir_estudiantes, dir_padres, dir_subpreg
 # path to image
-image_path = str(dir_output / 'CE/00027/4001045_p8_4.jpg')
+image_path = str(dir_subpreg / 'CE/00027/4001045_p8_4.jpg')
 # resize if image is larger than 800x600
 resize = True
 

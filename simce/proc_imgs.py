@@ -7,7 +7,7 @@ Created on Thu May  2 17:22:37 2024
 import numpy as np
 import cv2
 from itertools import chain
-from config.proc_img import dir_output, regex_estudiante, dir_tabla_99, \
+from config.proc_img import dir_subpreg, regex_estudiante, dir_tabla_99, \
     dir_input, n_pixeles_entre_lineas, dir_estudiantes, dir_padres
 from simce.errors import anotar_error
 # from simce.apoyo_proc_imgs import get_subpreguntas_completo
@@ -128,12 +128,12 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
 
         pages = get_pages(pagina_pregunta, n_pages)
 
-        dir_output_rbd = (dir_output / f'{directorio_imagenes.name}/{rbd.parent.name}')
-        dir_output_rbd.mkdir(exist_ok=True, parents=True)
+        dir_subpreg_rbd = (dir_subpreg / f'{directorio_imagenes.name}/{rbd.parent.name}')
+        dir_subpreg_rbd.mkdir(exist_ok=True, parents=True)
 
         if not rbd.is_file():
 
-            preg_error = dir_output_rbd / f'{estudiante}'
+            preg_error = dir_subpreg_rbd / f'{estudiante}'
             anotar_error(pregunta = str(preg_error),
                          error = f'No existen archivos disponibles para serie {preg_error.name}',
                          nivel_error = tipo_cuadernillo)
@@ -182,7 +182,7 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
             if subpreg_x_preg[pregunta_selec] == 1:
                 print('Pregunta no cuenta con subpreguntas, se guardará imagen')
                 file_out = str(
-                    dir_output_rbd / f'{estudiante}_{pregunta_selec}.jpg')
+                    dir_subpreg_rbd / f'{estudiante}_{pregunta_selec}.jpg')
                 img_pregunta_crop = img_pregunta[70:img_pregunta.shape[0]-20,
                                                  20:img_pregunta.shape[1]-20, :]
 
@@ -210,7 +210,7 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
             try:
 
                 file_out = str(
-                    dir_output_rbd /
+                    dir_subpreg_rbd /
                     f'{estudiante}_{pregunta_selec}_{int(subpreg_selec)}.jpg')
                 crop_and_save_subpreg(img_pregunta_crop, lineas_horizontales,
                                       i=int(subpreg_selec)-1, file_out=file_out)
@@ -219,7 +219,7 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
             except Exception as e:
 
                 preg_error = str(
-                    dir_output_rbd / f'{estudiante}_{pregunta_selec}_{int(subpreg_selec)}')
+                    dir_subpreg_rbd / f'{estudiante}_{pregunta_selec}_{int(subpreg_selec)}')
                 anotar_error(
                     pregunta=preg_error,
                     error='Subregunta no pudo ser procesada',
@@ -230,9 +230,9 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
 
             if n_subpreg != subpreg_x_preg[pregunta_selec]:
 
-                preg_error = str(dir_output_rbd / f'{estudiante}')
+                preg_error = str(dir_subpreg_rbd / f'{estudiante}')
 
-                dic_dif = get_subpregs_distintas(subpreg_x_preg, dir_output_rbd, estudiante)
+                dic_dif = get_subpregs_distintas(subpreg_x_preg, dir_subpreg_rbd, estudiante)
 
                 error = f'N° de subpreguntas incorrecto para serie {estudiante},\
         se encontraron {n_subpreg} subpreguntas {dic_dif}'
@@ -243,7 +243,7 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
                 # Si hay error en procesamiento pregunta
         except Exception as e:
 
-            preg_error = str(dir_output_rbd / f'{estudiante}_{pregunta_selec}')
+            preg_error = str(dir_subpreg_rbd / f'{estudiante}_{pregunta_selec}')
             anotar_error(
                 pregunta=preg_error, error='Pregunta no pudo ser procesada', e=e,
                 nivel_error='Pregunta')
@@ -262,9 +262,9 @@ def get_pages(pagina_pregunta, n_pages):
     return pages
 
 
-def get_subpregs_distintas(subpreg_x_preg, dir_output_rbd, estudiante):
+def get_subpregs_distintas(subpreg_x_preg, dir_subpreg_rbd, estudiante):
     df = pd.DataFrame(
-        [str(i) for i in dir_output_rbd.iterdir() if estudiante in str(i)], columns=['ruta'])
+        [str(i) for i in dir_subpreg_rbd.iterdir() if estudiante in str(i)], columns=['ruta'])
 
     df['preg'] = df.ruta.str.extract(r'p(\d{1,2})').astype(int)
     df['subpreg'] = df.ruta.str.extract(r'p(\d{1,2}_\d{1,2})')

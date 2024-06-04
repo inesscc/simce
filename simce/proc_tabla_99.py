@@ -6,7 +6,7 @@ Created on Thu May  9 17:20:37 2024
 """
 import pandas as pd
 from config.proc_img import dir_tabla_99, dir_input, dir_insumos, variables_identificadoras, id_estudiante, \
-    regex_extraer_rbd_de_ruta, dic_ignorar_p1, regex_p1, dir_output
+    regex_extraer_rbd_de_ruta, dic_ignorar_p1, regex_p1, dir_subpreg
 from simce.utils import timing
 import re
 import json
@@ -64,7 +64,7 @@ def get_tablas_99(tipo_cuadernillo, para_entrenamiento=True):
     df_final['rbd_ruta'] = df_final.ruta_imagen.astype('string').str.extract(regex_extraer_rbd_de_ruta)
 
     df_final = df_final.reset_index()
-    df_final['ruta_imagen_output'] = (dir_output / 
+    df_final['ruta_imagen_output'] = (dir_subpreg / 
                                       df_final.ruta_imagen.str.replace('\\', '/').apply(lambda x: Path(x).parent) /
                                         (df_final.serie.astype(str) + '_' + df_final.preguntas + '.jpg') )
 

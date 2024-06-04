@@ -12,12 +12,21 @@ from os.path import abspath
 import cv2
 import numpy as np
 import pandas as pd
-import re
-from config.proc_img import dir_estudiantes, dir_output, dir_tabla_99, dir_input, dir_padres, dir_insumos
-from itertools import islice
-
+from config.proc_img import dir_estudiantes, dir_subpreg, dir_tabla_99, dir_input, dir_padres, dir_insumos
+import json
+import torch
+import pandas as pd
+from pathlib import Path
+from itertools import repeat
+from collections import OrderedDict
 from functools import wraps
 from time import time
+import json
+import torch
+import pandas as pd
+from pathlib import Path
+from itertools import repeat
+from collections import OrderedDict
 
 
 def timing(f):
@@ -38,7 +47,7 @@ def crear_directorios():
     dir_tabla_99.mkdir(exist_ok=True, parents=True)
     dir_estudiantes.mkdir(exist_ok=True, parents=True)
     dir_padres.mkdir(exist_ok=True, parents=True)
-    dir_output.mkdir(exist_ok=True)
+    dir_subpreg.mkdir(exist_ok=True)
     dir_insumos.mkdir(exist_ok=True)
 
 
@@ -90,3 +99,64 @@ def get_mask_imagen(media_img, lower_color=np.array([13, 40, 0]), upper_color=np
             return print('Valor inválido para eliminar manchas')
 
     return mask
+
+
+def ensure_dir(dirname):
+    dirname = Path(dirname)
+    if not dirname.is_dir():
+        dirname.mkdir(parents=True, exist_ok=False)
+
+def read_json(fname):
+    fname = Path(fname)
+    with fname.open('rt') as handle:
+        return json.load(handle, object_hook=OrderedDict)
+
+def write_json(content, fname):
+    fname = Path(fname)
+    with fname.open('wt') as handle:
+        json.dump(content, handle, indent=4, sort_keys=False)
+
+def inf_loop(data_loader):
+    ''' wrapper function for endless data loader. '''
+    for loader in repeat(data_loader):
+        yield from loader
+
+def prepare_device(n_gpu_use):
+    """
+    setup GPU device if available. get gpu device indices which are used for DataParallel
+    """
+    n_gpu = torch.cuda.device_count()
+    if n_gpu_use > 0 and n_gpu == 0:
+        print("Warning: There\'s no GPU available on this machine,"
+              "training will be performed on CPU.")
+        n_gpu_use = 0
+    if n_gpu_use > n_gpu:
+        print(f"Warning: The number of GPU\'s configured to use is {n_gpu_use}, but only {n_gpu} are "
+              "available on this machine.")
+        n_gpu_use = n_gpu
+    device = torch.device('cuda:0' if n_gpu_use > 0 else 'cpu')
+    list_ids = list(range(n_gpu_use))
+    return device, list_ids
+
+class MetricTracker:
+    def __init__(self, *keys, writer=None):
+        self.writer = writer
+        self._data = pd.DataFrame(index=keys, columns=['total', 'counts', 'average'])
+        self.reset()
+
+    def reset(self):
+        for col in self._data.columns:
+            self._data[col].values[:] = 0
+
+    def update(self, key, value, n=1):
+        if self.writer is not None:
+            self.writer.add_scalar(key, value)
+        self._data.total[key] += value * n
+        self._data.counts[key] += n
+        self._data.average[key] = self._data.total[key] / self._data.counts[key]
+
+    def avg(self, key):
+        return self._data.average[key]
+
+    def result(self):
+        return dict(self._data.average)
