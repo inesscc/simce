@@ -8,10 +8,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 import torch.optim as optim
-from simce.config import dir_modelos
+from config.proc_img import dir_modelos
 
 print('Finished Training')
-from simce.config import dir_tabla_99
+from config.proc_img import dir_tabla_99
 import pandas as pd
 from pathlib import Path
 from torch.utils.data import Dataset

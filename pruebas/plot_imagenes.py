@@ -87,3 +87,86 @@ Created on Mon May 27 12:20:44 2024
 
 
 # %%
+import matplotlib.pyplot as plt
+import torch
+from torchvision.utils import draw_bounding_boxes, draw_segmentation_masks
+from torchvision import tv_tensors
+def plot(imgs, row_title=None, **imshow_kwargs):
+    if not isinstance(imgs[0], list):
+        # Make a 2d grid even if there's just 1 row
+        imgs = [imgs]
+
+    num_rows = len(imgs)
+    num_cols = len(imgs[0])
+    _, axs = plt.subplots(nrows=num_rows, ncols=num_cols, squeeze=False)
+    for row_idx, row in enumerate(imgs):
+        for col_idx, img in enumerate(row):
+            boxes = None
+            masks = None
+            if isinstance(img, tuple):
+                img, target = img
+                if isinstance(target, dict):
+                    boxes = target.get("boxes")
+                    masks = target.get("masks")
+                elif isinstance(target, tv_tensors.BoundingBoxes):
+                    boxes = target
+                else:
+                    raise ValueError(f"Unexpected target type: {type(target)}")
+            img = transforms.ToImage()(img)
+            if img.dtype.is_floating_point and img.min() < 0:
+                # Poor man's re-normalization for the colors to be OK-ish. This
+                # is useful for images coming out of Normalize()
+                img -= img.min()
+                img /= img.max()
+
+            img = transforms.ToDtype(torch.uint8, scale=True)(img)
+            if boxes is not None:
+                img = draw_bounding_boxes(img, boxes, colors="yellow", width=3)
+            if masks is not None:
+                img = draw_segmentation_masks(img, masks.to(torch.bool), colors=["green"] * masks.shape[0], alpha=.65)
+
+            ax = axs[row_idx, col_idx]
+            ax.imshow(img.permute(1, 2, 0).numpy(), **imshow_kwargs)
+            ax.set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
+
+    if row_title is not None:
+        for row_idx in range(num_rows):
+            axs[row_idx, 0].set(ylabel=row_title[row_idx])
+
+    plt.tight_layout()
+
+
+import pandas as pd
+from config.proc_img import dir_tabla_99
+from PIL import Image
+import torchvision.transforms.v2 as transforms
+padres99 = f'casos_99_entrenamiento_compilados_padres.csv'
+est99 = f'casos_99_entrenamiento_compilados_estudiantes.csv'
+df99p = pd.read_csv(dir_tabla_99 / padres99)
+
+img = Image.open(df99p.ruta_imagen_output.iloc[0])
+df99p.columns
+
+def addnoise(input_image, noise_factor = 0.1):
+    """transforma la imagen agredando un ruido gausiano"""
+    inputs = transforms.ToTensor()(input_image)
+    noise = inputs + torch.rand_like(inputs) * noise_factor
+    noise = torch.clip (noise,0,1.)
+    output_image = transforms.ToPILImage()
+    image = output_image(noise)
+    return image
+def transform_img(orig_img):
+    """Transformaciones a imagen para aumento de casos de sospecha de doble marca en entrenamiento"""
+
+    trans_img = transforms.RandomHorizontalFlip(0.7)(orig_img)  # Randomly flip
+    trans_img = transforms.RandomVerticalFlip(0.7)(trans_img)
+    trans_img = transforms.ColorJitter(brightness=0.1, contrast=0.2, saturation=0.2, hue=0.01)(trans_img)
+    trans_img = addnoise(trans_img)
+    trans_img = transforms.GaussianBlur(kernel_size=(3, 5), sigma=(1, 2))(trans_img)
+
+    return trans_img
+
+
+padded_imgs = [transform_img(img) for padding in (3, 10, 30, 50)]
+plot([img] + padded_imgs)
+plt.show()

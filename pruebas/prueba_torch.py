@@ -3,9 +3,7 @@ torch.cuda.is_available()
 import torchvision
 import torchvision.transforms.v2 as transforms
 import matplotlib.pyplot as plt
-import numpy as np
 import torch.nn as nn
-import torch.nn.functional as F
 from torchmetrics import Accuracy
 from torchinfo import summary
 import torch.optim as optim
@@ -26,7 +24,6 @@ classification_models = list_models(module=torchvision.models)
 padres99 = f'casos_99_entrenamiento_compilados_padres.csv'
 est99 = f'casos_99_entrenamiento_compilados_estudiantes.csv'
 df99p = pd.read_csv(dir_tabla_99 / padres99)
-
 df99e = pd.read_csv(dir_tabla_99 / est99).sample(frac=.1, random_state=42)
 df99 = pd.concat([df99e, df99p]).reset_index(drop=True)
 
