@@ -5,7 +5,7 @@ Created on Thu May  9 17:20:37 2024
 @author: jeconchao
 """
 import pandas as pd
-from config.proc_img import dir_tabla_99, dir_input, dir_insumos, variables_identificadoras, id_estudiante, \
+from config.proc_img import dir_tabla_99, dir_input, dir_insumos, variables_identificadoras, SEED, \
     regex_extraer_rbd_de_ruta, dic_ignorar_p1, regex_p1, dir_subpreg
 from simce.utils import timing
 import re
@@ -14,8 +14,8 @@ import random
 import numpy as np
 from pathlib import Path
 
-random.seed(2024)
-np.random.seed(2024)
+random.seed(SEED)
+np.random.seed(SEED)
 
 
 @timing

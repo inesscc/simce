@@ -9,6 +9,7 @@ from simce.utils import crear_directorios
 from simce.generar_insumos_img import generar_insumos_total
 from simce.proc_imgs import get_subpreguntas
 from simce.proc_tabla_99 import get_tablas_99_total
+from simce.preparar_modelamiento import gen_train_test
 
 # %% Subpreguntas
 
@@ -28,5 +29,9 @@ if __name__ == '__main__':
     # 3. Recortar subpreguntas
     get_subpreguntas(tipo_cuadernillo='estudiantes', para_entrenamiento=IS_TRAINING)
     get_subpreguntas(tipo_cuadernillo='padres', para_entrenamiento=IS_TRAINING)
+
+    if IS_TRAINING:
+        #4. Obtener set de entrenamiento y test y aumentamos train
+        gen_train_test()
 
 # %%

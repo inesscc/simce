@@ -24,18 +24,30 @@ dir_estudiantes = dir_input / carpeta_estudiantes
 dir_padres = dir_input / carpeta_padres
 
 dir_input_proc = Path('data/input_proc/')
-dir_subpreg = dir_input_proc / 'subpreg_recortadas'
+dir_subpreg_aux = dir_input_proc / 'subpreg_recortadas'
+dir_subpreg = dir_subpreg_aux / 'base'
+dir_subpreg_aug = dir_subpreg_aux / 'augmented'
+
+
 dir_tabla_99 = dir_input_proc / 'output_tabla_99'
 dir_insumos = dir_input_proc / 'insumos'
-dir_modelos = dir_input_proc / 'modelos'
+
+dir_train_test = dir_data / 'input_modelamiento'
+
+dir_output = Path('data/output')
+dir_modelos = dir_output / 'modelos' 
 
 
-# TRANSVERSALES----
 
+# TRANSVERSALES-----------------------------------------------
+
+# Determina si se ignora la primera página del cuadernillo
 IGNORAR_PRIMERA_PAGINA = True
 
+# Semilla para componentes aleatorias del código:
+SEED = 2024
 
-# OBTENCIÓN DE INSUMOS ------
+# OBTENCIÓN DE INSUMOS ----------------------------------------
 
 regex_hoja_cuadernillo = r'_(\d+)'
 
