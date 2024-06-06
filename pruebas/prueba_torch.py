@@ -1,161 +1,79 @@
 import torch
 torch.cuda.is_available()
 import torchvision
-import torchvision.transforms.v2 as transforms
+import torchvision.transforms.v2 as v2
 import matplotlib.pyplot as plt
 import torch.nn as nn
-from torchmetrics import Accuracy
 from torchinfo import summary
-import torch.optim as optim
 from config.proc_img import dir_modelos
 import mlflow
-
 print('Finished Training')
-from config.proc_img import dir_tabla_99
+from config.proc_img import dir_train_test
 import pandas as pd
 from pathlib import Path
-from torch.utils.data import Dataset
-from torch.utils.data import DataLoader
-from PIL import Image
-import os.path
 from torchvision.models import list_models
+from config.parse_config import ConfigParser
+from simce.utils import read_json, prepare_device
+import model.model as module_arch
+import data_loader.data_loaders as module_data
+from trainer import Trainer
+import model.metric as module_metric
+
+config_dict = read_json('config/model.json')
+config = ConfigParser(config_dict)
 
 classification_models = list_models(module=torchvision.models)
-padres99 = f'casos_99_entrenamiento_compilados_padres.csv'
-est99 = f'casos_99_entrenamiento_compilados_estudiantes.csv'
-df99p = pd.read_csv(dir_tabla_99 / padres99)
-df99e = pd.read_csv(dir_tabla_99 / est99).sample(frac=.1, random_state=42)
-df99 = pd.concat([df99e, df99p]).reset_index(drop=True)
-
-df_exist = df99[df99.ruta_imagen_output.apply(lambda x: Path(x).is_file())].reset_index()
-df_exist.dm_sospecha = (df_exist.dm_sospecha == 99).astype(int)
-nombre_tabla_casos99 = 'prueba_torch.csv'
-df_exist.to_csv(dir_tabla_99 / 'prueba_torch.csv')
-
-class CustomImageDataset(Dataset):
-    def __init__(self, csv_file, root_dir, transform=None, filter_sospecha=False):
-        self.labels_frame = pd.read_csv(csv_file)
-
-        if filter_sospecha:
-            self.labels_frame = self.labels_frame[self.labels_frame['dm_sospecha'] == 1].reset_index(drop=True)
-
-        self.root_dir = root_dir
-        self.transform = transform
-
-    def __len__(self):
-        return len(self.labels_frame)
-
-    def __getitem__(self, idx):
-        img_path = os.path.join(self.root_dir, self.labels_frame.loc[idx, 'ruta_imagen_output'])
-        image = Image.open(img_path)
-        label = self.labels_frame.loc[idx,  'dm_final']
-        directory = self.labels_frame.loc[idx, 'ruta_imagen_output']
+train = pd.read_csv(dir_train_test / config['data_loader_train']['args']['data_file']) 
+train.dm_final.value_counts()
 
 
-
-        if self.transform:
-            image = self.transform(image)
-
-        return image, label, directory
-    
-transformations_random = [
-    transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2),  # Randomly adjust color
-    transforms.RandomHorizontalFlip()        # Randomly flip the image horizontally
-]
-
-
-transform = transforms.Compose([
-    transforms.Resize((224, 224)),
-    transforms.RandomApply(transformations_random, p=.1),    
-    
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])]
-)
-
-
-    
-dataset = CustomImageDataset(csv_file=dir_tabla_99 / nombre_tabla_casos99, root_dir='', transform=transform,
-                             filter_sospecha=False)
-dataloader = DataLoader(dataset, batch_size=4, shuffle=True)
-
-
-dataiter = iter(dataloader)
-images, labels, dirs = next(dataiter)
-dirs[0]
-
-
-from torch.utils.data import random_split
-
-# Let's say the total size of your dataset is `dataset_size`
-dataset_size = len(dataset)
-test_size = int(dataset_size * 0.2)  # Let's reserve 20% of the data for the test set
-train_size = dataset_size - test_size
-batch_size = 32
-
-train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
-trainloader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size,
-                                          shuffle=True, num_workers=2)
-testloader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size,
-                                          shuffle=True, num_workers=2)
-
-class SimpleCNN(nn.Module):
-    def __init__(self, num_classes):
-        super(SimpleCNN, self).__init__()
-        self.features = nn.Sequential(
-            nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=2),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=3, stride=2),
-            nn.Conv2d(64, 192, kernel_size=5, padding=2),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=3, stride=2),
-            nn.Conv2d(192, 384, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(384, 256, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(256, 256, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=3, stride=2),
-        )
-        self.avgpool = nn.AdaptiveAvgPool2d((6, 6))
-        self.classifier = nn.Sequential(
-            nn.Dropout(),
-            nn.Linear(256 * 6 * 6, 4096),
-            nn.ReLU(inplace=True),
-            nn.Dropout(),
-            nn.Linear(4096, 4096),
-            nn.ReLU(inplace=True),
-            nn.Linear(4096, num_classes),
-        )
-
-    def forward(self, x):
-        x = self.features(x)
-        x = self.avgpool(x)
-        x = torch.flatten(x, 1)
-        x = self.classifier(x)
-        return x
-
+logger = config.get_logger('train')
 num_classes = 2
-model = SimpleCNN(num_classes=num_classes)
+
+model  = config.init_obj('arch', module_arch, num_classes=num_classes)
+trainloader = config.init_obj('data_loader_train', module_data)
+valid_data_loader = trainloader.split_validation()
+testloader = config.init_obj('data_loader_test', module_data)
+
 
 # Select device
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device, device_ids = prepare_device(config['n_gpu'])
 print(f'{device=}')
-# Define the loss function and optimizer
-weights = [5.0, 1.0] 
-weights = torch.tensor(weights).to(device)
-criterion = nn.CrossEntropyLoss(weight=weights)
-#optimizer = optim.Adam(model.parameters(), lr=0.0005)
-optimizer = optim.SGD(model.parameters(), lr=0.005, momentum=0.9, weight_decay=.001)
-# Mover modelo a dispositivo detectado
 model = model.to(device)
+# Si hay más de una GPU, paraleliza el trabajo:
+if len(device_ids) > 1:
+    model = torch.nn.DataParallel(model, device_ids=device_ids)
 
+
+# Define the loss function and optimizer
+weight = config['class_weights'] 
+weight = torch.tensor(weight).to(device)
+criterion = config.init_obj('loss', nn, weight=weight)
+metrics = [getattr(module_metric, met) for met in config['metrics']]
+
+#optimizer = optim.Adam(model.parameters())
+#optimizer = optim.SGD(model.parameters(), lr=0.004, momentum=0.9, weight_decay=.001)
+# Mover modelo a dispositivo detectado
+trainable_params = filter(lambda p: p.requires_grad, model.parameters())
+optimizer = config.init_obj('optimizer_sgd', torch.optim, trainable_params)
+lr_scheduler = config.init_obj('lr_scheduler', torch.optim.lr_scheduler, optimizer)
+
+trainer = Trainer(model, criterion, metrics, optimizer,
+                      config=config,
+                      device=device,
+                      data_loader=trainloader,
+                      valid_data_loader=valid_data_loader,
+                      lr_scheduler=lr_scheduler)
+
+trainer.train()
 ######## TRAIN LOOP- MLFLOW
 
 experimento_nn = 'exp_general'
 run_name = 'cuestionario_aux'
 epochs = 100
-metric_fn = Accuracy(task="multiclass", num_classes=2).to(device)
 
+# armar optimizer y learning rate scheduler. Si se quiere eliminar scheduler hay que borrar todas las líneas
+# que mencionen lr_scheduler
 
 # Initialize the minimum validation loss and the patience counter
 min_val_loss = float('inf')
@@ -241,10 +159,10 @@ print('Finished Training')
 
 
 # Set the model to evaluation mode
-model_load = SimpleCNN(num_classes=2)
+model_load = SimpleCNN(num_classes=2).to(device)
 # Load the model parameters from a saved state
-model_load.load_state_dict(torch.load('best_model_mix.pt'))
-model_load = model_load.to(device)
+model_load.load_state_dict(torch.load(dir_modelos / 'best_model_mix.pt'))
+
 #model_load.eval()
 
 # Initialize lists to store predictions and true labels
@@ -275,37 +193,39 @@ for images, labels, dirs in testloader:
 
 print('Predicciones listas!')
 probs_float = [i.item() for i in probs]
-dirs = [i[2] for i in test_dataset]
+
+test = pd.read_csv(dir_train_test / 'test.csv')
+
 
 preds = pd.DataFrame({'pred': predictions,
               'true': true_labels,
-              'dirs': dirs,
-              'proba': probs_float}).set_index('dirs')
+              'proba': probs_float})
+preds['dirs'] = test.ruta_imagen_output
 
-preds_tot = preds.merge(df_exist, left_on='dirs', right_on='ruta_imagen_output', how='left')
+preds_tot = preds.merge(test, left_on='dirs', right_on='ruta_imagen_output', how='left')
 preds_tot['acierto'] = preds_tot.pred == preds_tot.true
-casi_dm = preds[(preds.dm_sospecha.eq(99)) & (preds.true.eq(0))]
 preds[preds.true.eq(1) & preds.pred.eq(0)].reset_index().dirs.apply(lambda x: Path(x).name).value_counts()
 
-preds_tot['deciles'] = pd.qcut(preds_tot.proba, q=10)
+preds_tot['deciles'] = pd.qcut(preds_tot.proba, q=20)
 preds_tot.groupby('deciles').acierto.mean().plot()
+plt.show()
 preds_tot.acierto.mean()
 preds_tot.proba.describe()
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 preds_tot[preds_tot.proba.ge(.95) & preds_tot.true.eq(0)].acierto.mean()
 
-def get_conf_mat(df, preg):
+def get_conf_mat(df, preg=None):
+    if preg:
+        df = df[df.preguntas.eq(preg)]
 
-    df_filter = df[df.preguntas.eq(preg)]
-
-    cm = confusion_matrix(df_filter.pred, df_filter.true)
+    cm = confusion_matrix(df.pred, df.true)
     disp = ConfusionMatrixDisplay(cm, display_labels=['Marca normal', 'Doble marca'])
     disp.plot()
     plt.title(preg)
     plt.show()
     
 
-get_conf_mat(preds_tot, 'p22')
+get_conf_mat(preds_tot)
 preds_tot.groupby(['preguntas']).agg({'rbd':'count', 'acierto':'mean'}).sort_values('acierto')
 
 casi_dm.pred.value_counts()

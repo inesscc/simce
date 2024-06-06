@@ -22,18 +22,21 @@ def get_img_existentes():
     df_exist.dm_sospecha = (df_exist.dm_sospecha == 99).astype(int)
     df_exist['falsa_sospecha'] = ((df_exist['dm_sospecha'] == 1) & (df_exist['dm_final'] == 0))
 
-    return df_exist
+    df_sampleado = df_exist[df_exist.dm_sospecha.eq(0)]
+    df_sospecha = df_exist[df_exist.dm_sospecha.ne(0)]
+
+    return df_sospecha, df_sampleado
 
 
 def gen_train_test():
 
-    df_exist = get_img_existentes()
+    df_exist, df_sampleado = get_img_existentes()
 
     train, test = train_test_split(df_exist, stratify=df_exist['falsa_sospecha'], test_size=.2)
 
     df_aug = gen_df_aumentado(train)
 
-    export_train_test(train, df_aug, test)
+    export_train_test(train, df_aug, test, df_sampleado)
 
 
 ############# generando imagenes #############
@@ -44,6 +47,7 @@ def gen_df_aumentado(train):
 
 
     df_aug = train[train.falsa_sospecha.eq(1)].copy()
+
 
     
     rutas = []
@@ -74,13 +78,14 @@ def gen_df_aumentado(train):
 
     return df_aug_final
 
-def export_train_test(train, df_aug, test):
+def export_train_test(train, df_aug, test, df_sampleado):
     dir_train_test.mkdir(parents=True, exist_ok=True)
     # save .csv
-    (pd.concat([train, df_aug]).reset_index()
+    (pd.concat([train, df_aug, df_sampleado]).reset_index()
     .rename(columns={'level_0': 'indice_original'})
     .drop('index', axis= 1).to_csv(dir_train_test / 'train.csv'))
-    test.reset_index().rename(columns={'level_0': 'indice_original'}).drop('index', axis= 1).to_csv(dir_train_test / 'test.csv')
+
+    test[test.dm_sospecha.eq(1)].reset_index().rename(columns={'level_0': 'indice_original'}).drop('index', axis= 1).to_csv(dir_train_test / 'test.csv')
     print('Tablas de entrenamiento y test exportadas exitosamente!')
 
 #### funciones aux para generar transformaciones
