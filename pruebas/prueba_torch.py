@@ -31,7 +31,7 @@ logger = config.get_logger('train')
 num_classes = 2
 
 model  = config.init_obj('arch', module_arch, num_classes=num_classes)
-trainloader = config.init_obj('data_loader_train', module_data)
+trainloader = config.init_obj('data_loader_train', module_data, validation_split=.1)
 valid_data_loader = trainloader.split_validation()
 testloader = config.init_obj('data_loader_test', module_data)
 

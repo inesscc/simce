@@ -1,5 +1,5 @@
 {
-    "name": "Mnist_LeNet",
+    "name": "AlexNet_modelo_base",
     "n_gpu": 1,
     "class_weights": [3.0, 1.0],
     "arch": {
