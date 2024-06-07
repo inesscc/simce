@@ -2,7 +2,7 @@ import torch
 from abc import abstractmethod
 from numpy import inf
 from logger import TensorboardWriter
-
+from pathlib import Path
 
 class BaseTrainer:
     """
@@ -116,6 +116,16 @@ class BaseTrainer:
             'config': self.config
         }
         filename = str(self.checkpoint_dir / 'checkpoint-epoch{}.pt'.format(epoch))
+
+        if len(list(self.checkpoint_dir.glob('*checkpoint*'))) >= 10:
+            print('Borrando checkpoint más antiguo')
+            file_borrar = sorted(self.checkpoint_dir.glob('*checkpoint*'), key=os.path.getmtime)[0]
+            file_borrar.unlink()
+
+            
+            import os
+               
+
         torch.save(state, filename)
         self.logger.info("Saving checkpoint: {} ...".format(filename))
         if save_best:
