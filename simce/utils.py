@@ -35,7 +35,7 @@ def timing(f):
 
 def crear_directorios():
 
-    dir_input.mkdir(exist_ok=True)
+    dir_input.mkdir(exist_ok=True, parents=True)
     dir_tabla_99.mkdir(exist_ok=True, parents=True)
     dir_estudiantes.mkdir(exist_ok=True, parents=True)
     dir_padres.mkdir(exist_ok=True, parents=True)

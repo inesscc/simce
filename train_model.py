@@ -30,7 +30,7 @@ def main(config):
     model  = config.init_obj('arch', module_arch, num_classes=num_classes)
     logger.info(model)
 
-    trainloader = config.init_obj('data_loader_train', module_data, validation_split=.1)
+    trainloader = config.init_obj('data_loader_train', module_data)
     valid_data_loader = trainloader.split_validation()
 
 
@@ -54,7 +54,7 @@ def main(config):
     #optimizer = optim.SGD(model.parameters(), lr=0.004, momentum=0.9, weight_decay=.001)
     # Mover modelo a dispositivo detectado
     trainable_params = filter(lambda p: p.requires_grad, model.parameters())
-    optimizer = config.init_obj('optimizer_sgd', torch.optim, trainable_params)
+    optimizer = config.init_obj('optimizer', torch.optim, trainable_params)
     lr_scheduler = config.init_obj('lr_scheduler', torch.optim.lr_scheduler, optimizer)
 
     trainer = Trainer(model, criterion, metrics, optimizer,
