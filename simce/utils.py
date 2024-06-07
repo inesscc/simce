@@ -39,8 +39,8 @@ def crear_directorios():
     dir_tabla_99.mkdir(exist_ok=True, parents=True)
     dir_estudiantes.mkdir(exist_ok=True, parents=True)
     dir_padres.mkdir(exist_ok=True, parents=True)
-    dir_subpreg.mkdir(exist_ok=True)
-    dir_insumos.mkdir(exist_ok=True)
+    dir_subpreg.mkdir(exist_ok=True, parents=True)
+    dir_insumos.mkdir(exist_ok=True, parents=True)
 
 
 def ls(ruta=getcwd()):
