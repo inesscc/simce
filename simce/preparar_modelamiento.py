@@ -14,11 +14,16 @@ def get_img_existentes():
     padres99 = f'casos_99_entrenamiento_compilados_padres.csv'
     est99 = f'casos_99_entrenamiento_compilados_estudiantes.csv'
     df99p = pd.read_csv(dir_tabla_99 / padres99)
-
-    df99e = pd.read_csv(dir_tabla_99 / est99).sample(frac=.1, random_state=42)
-    df99 = pd.concat([df99e, df99p]).reset_index(drop=True)
+    
+    df99e = pd.read_csv(dir_tabla_99 / est99)
+    df99e['falsa_sospecha'] = ((df99e['dm_sospecha'] == 1) & (df99e['dm_final'] == 0))
+    est_falsa_sospecha = df99e[df99e.falsa_sospecha.eq(1)]
+    otros_est = df99e[df99e.falsa_sospecha.eq(0)].sample(frac=.1, random_state=42)
+    df99 = pd.concat([est_falsa_sospecha, otros_est, df99p]).reset_index(drop=True)
 
     df_exist = df99[df99.ruta_imagen_output.apply(lambda x: Path(x).is_file())].reset_index()
+    print(f'{df_exist.shape=}')
+    print(f'{df99.shape=}')
     df_exist.dm_sospecha = (df_exist.dm_sospecha == 99).astype(int)
     df_exist['falsa_sospecha'] = ((df_exist['dm_sospecha'] == 1) & (df_exist['dm_final'] == 0))
 
