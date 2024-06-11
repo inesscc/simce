@@ -16,7 +16,7 @@
         "type": "TrainTestDataLoader",
         "args":{
             "data_file": "train.csv",
-            "batch_size": 32,
+            "batch_size": 16,
             "shuffle": true,
             "num_workers": 2,
             "validation_split": 0.15
