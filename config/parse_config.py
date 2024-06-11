@@ -6,8 +6,8 @@ from operator import getitem
 from datetime import datetime
 from logger import setup_logging
 from simce.utils import read_json, write_json
-
-
+import enum
+import inspect 
 class ConfigParser:
     def __init__(self, config, resume=None, modification=None, run_id=None):
         """
@@ -92,7 +92,18 @@ class ConfigParser:
         module_args = dict(self[name]['args'])
         assert all([k not in module_args for k in kwargs]), 'Overwriting kwargs given in config file is not allowed'
         module_args.update(kwargs)
-        return getattr(module, module_name)(*args, **module_args)
+        # Get the target class or enum type
+        target = getattr(module, module_name)
+        
+        # Handle Enum subclass separately
+        if inspect.isclass(target) and issubclass(target, enum.Enum):
+            # Here we assume you want the DEFAULT member of the enum
+            return target['DEFAULT']
+        # Check if the target is a class or a callable (function/method)
+        elif inspect.isclass(target) or inspect.isfunction(target) or inspect.ismethod(target):
+            return target(*args, **module_args)
+        else:
+            raise TypeError(f"The target `{module_name}` is not a class, enum, or callable.")
 
     def init_ftn(self, name, module, *args, **kwargs):
         """

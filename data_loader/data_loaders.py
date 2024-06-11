@@ -9,7 +9,8 @@ class TrainTestDataLoader(BaseDataLoader):
 
     def __init__(self, data_file, batch_size, shuffle=True, validation_split=0.0, num_workers=2):
         transform = v2.Compose([
-                    v2.Resize((224, 224)), 
+                    v2.Resize((232, 232)),
+                    v2.CenterCrop(224),
                     v2.Compose([v2.ToImage(), v2.ToDtype(torch.float32, scale=True)]),
                     v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])]
                 )

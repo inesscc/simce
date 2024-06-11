@@ -156,12 +156,15 @@ print('Finished Training')
 
 
 ## Predicciones -----------------------------------------------------
+config_dict = read_json('config/model.json')
+config = ConfigParser(config_dict)
+ruta_modelo = 'saved/models/AlexNet_modelo_base/mejor_modelo_actual/model_best.pt'
+model_load  = config.init_obj('arch', module_arch, num_classes=num_classes)
+checkpoint = torch.load(ruta_modelo)
+state_dict = checkpoint['state_dict']
+model_load.load_state_dict(state_dict)
+model_load.to(device)
 
-
-# Set the model to evaluation mode
-model_load = SimpleCNN(num_classes=2).to(device)
-# Load the model parameters from a saved state
-model_load.load_state_dict(torch.load(dir_modelos / 'best_model_mix.pt'))
 
 #model_load.eval()
 
@@ -171,7 +174,7 @@ probs = []
 true_labels = []
 
 # Iterate over the test data
-for images, labels, dirs in testloader:
+for images, labels in testloader:
     # Move the images and labels to the same device as the model
     images = images.to(device)
     labels = labels.to(device)
