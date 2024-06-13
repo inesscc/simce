@@ -1,6 +1,7 @@
 import argparse
 import collections
 import torch
+torch.cuda.is_available()
 import torch.nn as nn
 from config.proc_img import SEED
 from config.parse_config import ConfigParser
@@ -29,7 +30,7 @@ def main(config):
     logger = config.get_logger('train')
     num_classes = 2
     weights = config.init_obj('weights', models)
-    model = config.init_obj('arch', models, weights=weights)
+    model = config.init_obj('arch', models, weights=None)
 
     num_features = model.fc.in_features
     model.fc = nn.Sequential(
