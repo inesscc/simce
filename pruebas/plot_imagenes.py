@@ -4,7 +4,7 @@ Created on Mon May 27 12:20:44 2024
 
 @author: jeconchao
 """
-
+from PIL import Image
 
 # %%
   folder = '09954'
@@ -91,13 +91,15 @@ import matplotlib.pyplot as plt
 import torch
 from torchvision.utils import draw_bounding_boxes, draw_segmentation_masks
 from torchvision import tv_tensors
-def plot(imgs, row_title=None, **imshow_kwargs):
+def plot(imgs, col_title=None, titles=None, **imshow_kwargs):
     if not isinstance(imgs[0], list):
         # Make a 2d grid even if there's just 1 row
         imgs = [imgs]
 
     num_rows = len(imgs)
     num_cols = len(imgs[0])
+    print(f'{num_rows=}')
+    print(f'{num_cols=}')
     _, axs = plt.subplots(nrows=num_rows, ncols=num_cols, squeeze=False)
     for row_idx, row in enumerate(imgs):
         for col_idx, img in enumerate(row):
@@ -128,10 +130,12 @@ def plot(imgs, row_title=None, **imshow_kwargs):
             ax = axs[row_idx, col_idx]
             ax.imshow(img.permute(1, 2, 0).numpy(), **imshow_kwargs)
             ax.set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
+ 
 
-    if row_title is not None:
-        for row_idx in range(num_rows):
-            axs[row_idx, 0].set(ylabel=row_title[row_idx])
+    if col_title is not None:
+        for col_idx in range(num_cols):
+            print(col_title[col_idx])
+            axs[0, col_idx].set_title(col_title[col_idx])
 
     plt.tight_layout()
 
@@ -140,11 +144,13 @@ import pandas as pd
 from config.proc_img import dir_tabla_99
 from PIL import Image
 import torchvision.transforms.v2 as transforms
+import matplotlib.pyplot as plt
 padres99 = f'casos_99_entrenamiento_compilados_padres.csv'
 est99 = f'casos_99_entrenamiento_compilados_estudiantes.csv'
 df99p = pd.read_csv(dir_tabla_99 / padres99)
+import cv2
+img = Image.open(train[train.falsa_sospecha.eq(1)].ruta_imagen_output.iloc[4])
 
-img = Image.open(df99p.ruta_imagen_output.iloc[0])
 df99p.columns
 
 def addnoise(input_image, noise_factor = 0.1):
@@ -168,5 +174,12 @@ def transform_img(orig_img):
 
 
 padded_imgs = [transform_img(img) for padding in (3, 10, 30, 50)]
-plot([img] + padded_imgs)
-plt.show()
+train[train.falsa_sospecha.eq(1)].iloc[11]
+Path(dir_input / 'CP/01508/4039962_3.jpg').is_file()
+for i in range(30,35):
+    row = train[train.falsa_sospecha.eq(1)].iloc[i]
+    img = Image.open(row.ruta_imagen_output)
+    img2 = Image.open((dir_input / row.ruta_imagen.replace('\\', '/')))
+    plot([img, img2], col_title=[row.ruta_imagen_output,  row.ruta_imagen] )
+    #plt.title(train[train.falsa_sospecha.eq(1)].ruta_imagen_output.iloc[i])
+    plt.show()

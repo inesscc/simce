@@ -24,9 +24,12 @@ config = ConfigParser(config_dict)
 
 classification_models = list_models(module=torchvision.models)
 train = pd.read_csv(dir_train_test / config['data_loader_train']['args']['data_file']) 
+train[train.falsa_sospecha.eq(1)].ruta_imagen_output.iloc[4]
+train[train.falsa_sospecha.eq(1)].iloc[0]
 train.dm_final.value_counts()
-
-
+origen = pd.read_csv(dir_input / 'CE_Origen_DobleMarca.csv', delimiter=';')
+final = pd.read_csv(dir_input / 'CE_Final_DobleMarca.csv', delimiter=';')
+final[final.serie.eq(4051426)].p24_1
 logger = config.get_logger('train')
 num_classes = 2
 
