@@ -13,10 +13,11 @@ def preprocess_image(image_paths):
     """
     transform = v2.Compose([
                     v2.Resize((224, 224)),
-                    v2.Grayscale(num_output_channels=3),  # transformacion blanco negro
+                    #v2.Grayscale(num_output_channels=3),  # transformacion blanco negro
                     #v2.CenterCrop(224),
                     v2.Compose([v2.ToImage(), v2.ToDtype(torch.float32, scale=True)]), 
-                    v2.Normalize(mean=[0.485, 0.485, 0.485], std=[0.229, 0.229, 0.229])
+                    v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+                    #v2.Normalize(mean=[0.485, 0.485, 0.485], std=[0.229, 0.229, 0.229])
                 ])
     image = Image.open(image_paths)
     return transform(image).unsqueeze(0)
@@ -113,3 +114,17 @@ print(total_time)
 
 # save 
 pd.concat([data_test, pd.DataFrame(predicciones)], axis = 1).to_csv('test_pred.csv')
+
+
+#import pandas as pd
+#from sklearn.metrics import classification_report, confusion_matrix
+#
+#rev_metricas = pd.read_csv('test_pred.csv')
+#
+#rev_metricas[['dm_final', 'falsa_sospecha', 'pred_label']]
+#
+#rev_metricas['dm_final']
+#rev_metricas['falsa_sospecha'] = rev_metricas['falsa_sospecha']*1
+#print(classification_report(rev_metricas['dm_final'] , rev_metricas['pred_label']))
+#mat = confusion_matrix(rev_metricas['dm_final'] , rev_metricas['pred_label'])
+#mat
