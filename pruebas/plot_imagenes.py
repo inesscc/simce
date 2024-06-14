@@ -141,15 +141,16 @@ def plot(imgs, col_title=None, titles=None, **imshow_kwargs):
 
 
 import pandas as pd
-from config.proc_img import dir_tabla_99
+from config.proc_img import dir_tabla_99, dir_input
 from PIL import Image
 import torchvision.transforms.v2 as transforms
 import matplotlib.pyplot as plt
+
 padres99 = f'casos_99_entrenamiento_compilados_padres.csv'
 est99 = f'casos_99_entrenamiento_compilados_estudiantes.csv'
 df99p = pd.read_csv(dir_tabla_99 / padres99)
 import cv2
-img = Image.open(train[train.falsa_sospecha.eq(1)].ruta_imagen_output.iloc[4])
+img = Image.open('data/input_proc/subpreg_recortadas/base/CP/01790/4051000_p8.jpg')
 
 df99p.columns
 
@@ -174,12 +175,11 @@ def transform_img(orig_img):
 
 
 padded_imgs = [transform_img(img) for padding in (3, 10, 30, 50)]
-train[train.falsa_sospecha.eq(1)].iloc[11]
-Path(dir_input / 'CP/01508/4039962_3.jpg').is_file()
-for i in range(30,35):
+
+for i in range(10):
     row = train[train.falsa_sospecha.eq(1)].iloc[i]
     img = Image.open(row.ruta_imagen_output)
-    img2 = Image.open((dir_input / row.ruta_imagen.replace('\\', '/')))
-    plot([img, img2], col_title=[row.ruta_imagen_output,  row.ruta_imagen] )
+    #img2 = Image.open((dir_input / row.ruta_imagen.replace('\\', '/')))
+    plot([img], col_title=[row.ruta_imagen_output] )
     #plt.title(train[train.falsa_sospecha.eq(1)].ruta_imagen_output.iloc[i])
     plt.show()
