@@ -9,6 +9,7 @@ from torchvision.utils import draw_bounding_boxes, draw_segmentation_masks
 import torch
 from torchvision import tv_tensors
 import numpy as np
+from simce.utils import get_mask_imagen
 def plot(imgs, col_title=None, **imshow_kwargs):
     if not isinstance(imgs[0], list):
         # Make a 2d grid even if there's just 1 row
@@ -80,43 +81,52 @@ from config.proc_img import dir_input
 a = pd.read_csv(dir_input / 'CP_Final_DobleMarca.csv', sep=';')
 a[a.serie.eq(4031281)].p27_1
 row = train[train.falsa_sospecha.eq(1)].iloc[i]
-ruta = problemas.ruta_imagen_output.iloc[9]
+ruta = 'data/input_proc/subpreg_recortadas/base/CP/07265/4197534_p22.jpg'
 
-ruta
 def get_indices_tinta(ruta):
 
     bgr_img = cv2.imread(ruta)
+    mask_color = get_mask_imagen(bgr_img, lower_color=np.array([0,31,0]),
+                                  upper_color=np.array([179, 255, 255]), iters=1, eliminar_manchas=False)
+    
+
+    #kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2,2))
+    #morph2 = cv2.morphologyEx(mask_color, cv2.MORPH_CLOSE, kernel, iterations=3)
+
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5,5))
+    morph1 = cv2.morphologyEx(mask_color, cv2.MORPH_OPEN, kernel, iterations=3)
+
+    axis = 1
+    # Calculamos la media de cada fila:
+    sum_negro = np.sum(morph1 == 0, axis=axis)
+    
+    # Si la media es menor a 100, reemplazamos con 0 (negro):
+    # Esto permite eliminar manchas de color que a veces se dan
+    idx_low_rows = np.where(sum_negro < 15)[0]
+    morph1[idx_low_rows, :] = 255
+
+    # Define the border width in pixels
+    top, bottom, left, right = [3]*4
+
+    # Create a border around the image
+    bordered_mask = cv2.copyMakeBorder(morph1, top, bottom, left, right, cv2.BORDER_CONSTANT, value=255)
     img = cv2.cvtColor(bgr_img,cv2.COLOR_BGR2GRAY) /255
 
-    mask = img.copy()
-    idx_blanco = np.where(mask > 0.95)
-    mask[idx_blanco] = 1
-    mask[mask != 1] = 0 
-    mask = 1 - mask
 
-    kernel2 = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
-    morph2 = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel2, iterations=1)
- 
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5,5))
-    morph1 = cv2.morphologyEx(morph2, cv2.MORPH_OPEN, kernel, iterations=3)
-
-
-
-
-    mask_final = ((1 - morph1)* 255).astype(np.uint8)
-
-    contours, _ = cv2.findContours(mask_final, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(bordered_mask.astype(np.uint8), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
     big_contours = [
-        i for i in contours if  cv2.contourArea(i) > 250 ]
+        i for i in contours if 250 < cv2.contourArea(i) < 2000 ]
     len(big_contours)
     rect_img = img.copy()
+    bordered_rect_img = cv2.copyMakeBorder(rect_img, top, bottom, left, right, cv2.BORDER_CONSTANT, value=255)
     indices = []
 
     for contour in big_contours:
         x, y, w, h = cv2.boundingRect(contour)
-        cv2.rectangle(rect_img, (x, y), (x+w, y+h), (0, 0, 0), 3)
-        img_crop = bound_and_crop(rect_img, contour, buffer=-3)
+        
+        cv2.rectangle(bordered_rect_img, (x, y), (x+w, y+h), (0, 0, 0), 3)
+        img_crop = bound_and_crop(bordered_rect_img, contour, buffer=-3)
         idx_blanco = np.where(img_crop > 0.9)
         img_crop[idx_blanco] = 1
         indice = 1 - img_crop.mean()
@@ -129,10 +139,10 @@ def get_indices_tinta(ruta):
     return indices_relevantes
 
 pd.set_option("display.max_colwidth", None)
-t = train.sample(2000, random_state=42).reset_index(drop=True)
+t = train.sample(3000, random_state=42).reset_index(drop=True)
 t['indices_tinta'] = t.ruta_imagen_output.apply(lambda x: get_indices_tinta(x))
 
-train['indices_tinta'] = train.ruta_imagen_output.apply(lambda x: get_indices_tinta(x))
+#train['indices_tinta'] = train.ruta_imagen_output.apply(lambda x: get_indices_tinta(x))
 
 split = pd.DataFrame(t['indices_tinta'].tolist(), columns = ['indice_top1', 'indice_top2'])
 train_final = pd.concat([t, split], axis = 1)
@@ -141,7 +151,8 @@ train_final['ratio_indices'] = train_final.indice_top1 / train_final.indice_top2
 train_final[['ratio_indices', 'indice_top1', 'indice_top2']]
 train_final.ratio_indices = train_final.ratio_indices.replace(np.inf, -1)
 problemas  = train_final[train_final.dm_sospecha.eq(1) & train_final.ratio_indices.eq(-1) & train_final.dm_final.eq(1)]
-
+train_final.ratio_indices.describe()
+train_final[train_final.ratio_indices.ge(1.5)].ruta_imagen_output.iloc[0]
 
 train_filter = train_final[train_final.ratio_indices.ne(-1)]
 train_final.ratio_indices.eq(-1).sum()
@@ -149,9 +160,9 @@ train_filter[train_filter.ratio_indices.le(1.3) & train_filter.dm_final.eq(0)].r
 train_filter.dm_final.value_counts()
 train_final[train_final.ratio_indices.notnull()]
 train_final.iloc[0]
-img_crop.mean()
+
 # Show the resulting contours on the image
-cv2.imshow('Contours', rect_img)
+cv2.imshow('Contours', bordered_rect_img)
 cv2.waitKey(10) 
 cv2.destroyAllWindows()
 

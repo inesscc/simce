@@ -81,12 +81,13 @@ from PIL import Image
 
     # %%
 
-    cv2.imshow("Detected Lines", cv2.resize(cropped_img, (900, 900)))
+    cv2.imshow("Detected Lines", cv2.resize(cropped_img_sub, (900, 900)))
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
 
 # %%
+
 import matplotlib.pyplot as plt
 import torch
 from torchvision.utils import draw_bounding_boxes, draw_segmentation_masks
@@ -176,10 +177,14 @@ def transform_img(orig_img):
 
 padded_imgs = [transform_img(img) for padding in (3, 10, 30, 50)]
 
-for i in range(10):
-    row = train[train.falsa_sospecha.eq(1)].iloc[i]
-    img = Image.open(row.ruta_imagen_output)
-    #img2 = Image.open((dir_input / row.ruta_imagen.replace('\\', '/')))
-    plot([img], col_title=[row.ruta_imagen_output] )
-    #plt.title(train[train.falsa_sospecha.eq(1)].ruta_imagen_output.iloc[i])
-    plt.show()
+for i in range(15,20):
+    row = problemas.iloc[i]
+    try:
+        img = Image.open(row.ruta_imagen_output)
+        img2 = Image.open((dir_input / row.ruta_imagen.replace('\\', '/')))
+    
+        plot([img, img2], col_title=[row.ruta_imagen_output, row.ruta_imagen] )
+        #plt.title(train[train.falsa_sospecha.eq(1)].ruta_imagen_output.iloc[i])
+        plt.show()
+    except:
+        pass
