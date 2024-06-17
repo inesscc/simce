@@ -6,18 +6,18 @@
         1.0
     ],
     "arch": {
-        "type": "wide_resnet101_2",
+        "type": "resnet18",
         "args": {}
     },
     "weights": {
-        "type": "Wide_ResNet101_2_Weights",
+        "type": "ResNet18_Weights",
         "args": {}
     },
     "data_loader_train": {
         "type": "TrainTestDataLoader",
         "args": {
             "data_file": "train.csv",
-            "batch_size": 32,
+            "batch_size": 64,
             "shuffle": true,
             "num_workers": 2,
             "validation_split": 0.15
@@ -52,8 +52,13 @@
     "optimizer": {
         "type": "SGD",
         "args": {
+<<<<<<< HEAD
             "lr": 0.005,
             "weight_decay": 0.001,
+=======
+            "lr": 0.004,
+            "weight_decay": 0.005,
+>>>>>>> 3cd59b21e213b03387d662d9d08ec88b9861bc25
             "momentum": 0.9
         }
     },
