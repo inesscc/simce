@@ -30,12 +30,7 @@ def main(config):
     logger = config.get_logger('train')
     num_classes = 2
     weights = config.init_obj('weights', models)
-<<<<<<< HEAD
     model = config.init_obj('arch', models, weights=weights)
-=======
-    model = config.init_obj('arch', models, weights=None)
-
->>>>>>> 3cd59b21e213b03387d662d9d08ec88b9861bc25
     num_features = model.fc.in_features
     # model.fc = nn.Sequential(
     # nn.Linear(num_features, 256),  # Additional linear layer with 256 output features
