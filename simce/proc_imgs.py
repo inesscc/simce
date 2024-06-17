@@ -103,7 +103,7 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
 
     if filter_estudiante:
         df99 = df99[df99.serie.eq(filter_estudiante)]
-
+    df99.ruta_imagen = df99.ruta_imagen.str.replace('\\', '/')
     dir_preg99 = [dir_input / i for i in df99.ruta_imagen]
 
     n_pages, n_preguntas, subpreg_x_preg, dic_cuadernillo, dic_pagina, n_subpreg_tot = get_insumos(
@@ -391,7 +391,7 @@ def bound_and_crop(img, c, buffer=0):
     # Obtengo coordenadas de contorno
     x, y, w, h = cv2.boundingRect(c)
     # Recorto imagen en base a contorno
-    img_crop = img[max(y-buffer, 0):y+h+buffer, x-buffer:x+w+buffer]
+    img_crop = img[max(y-buffer, 0):y+h+buffer, x-buffer-20:x+w+buffer]
     return img_crop
 
 
