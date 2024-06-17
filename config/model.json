@@ -52,13 +52,8 @@
     "optimizer": {
         "type": "SGD",
         "args": {
-<<<<<<< HEAD
             "lr": 0.005,
             "weight_decay": 0.001,
-=======
-            "lr": 0.004,
-            "weight_decay": 0.005,
->>>>>>> 3cd59b21e213b03387d662d9d08ec88b9861bc25
             "momentum": 0.9
         }
     },
