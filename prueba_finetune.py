@@ -30,14 +30,14 @@ def main(config):
     num_classes = 2
     weights = config.init_obj('weights', models)
     model = config.init_obj('arch', models, weights=weights)
-
     num_features = model.fc.in_features
-    model.fc = nn.Sequential(
-    nn.Linear(num_features, 256),  # Additional linear layer with 256 output features
-    nn.ReLU(inplace=True),         # Activation function (you can choose other activation functions too)
-    nn.Dropout(0.5),               # Dropout layer with 50% probability
-    nn.Linear(256, num_classes)    # Final prediction fc layer
-    )
+    # model.fc = nn.Sequential(
+    # nn.Linear(num_features, 256),  # Additional linear layer with 256 output features
+    # nn.ReLU(inplace=True),         # Activation function (you can choose other activation functions too)
+    # nn.Dropout(0.5),               # Dropout layer with 50% probability
+    # 
+    # )
+    model.fc = nn.Linear(num_features, num_classes)
     logger.info(model)
 
     trainloader = config.init_obj('data_loader_train', module_data)
