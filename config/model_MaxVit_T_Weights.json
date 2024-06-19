@@ -1,7 +1,7 @@
 {
     "name": "maxvit_t",
     "n_gpu": 1,
-    "class_weights": [3.0, 1.0],
+    "class_weights": [1.5, 1.0],
     "arch": {
         "type": "maxvit_t",
         "args": {
@@ -26,7 +26,7 @@
         "type": "TrainTestDataLoader",
         "args":{
             "data_file": "test.csv",
-            "batch_size": 512,
+            "batch_size": 16,
             "shuffle": false,
             "num_workers": 2,
             "validation_split": 0.0
