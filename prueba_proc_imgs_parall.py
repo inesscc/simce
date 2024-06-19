@@ -92,16 +92,16 @@ def eliminar_franjas_negras(img_preg):
     return img_pregunta
 
 
-def mantener_solo_recuadros_respuesta(cropped_img_sub):
-    im2 = get_mask_imagen(cropped_img_sub,
-                          lower_color=np.array(
-                              [0, 0, 0]),
-                          upper_color=np.array([179, 10, 255]),
-                          eliminar_manchas='vertical', iters=1)
-    nonzero = cv2.findNonZero(im2)
+# def mantener_solo_recuadros_respuesta(cropped_img_sub):
+#     im2 = get_mask_imagen(cropped_img_sub,
+#                           lower_color=np.array(
+#                               [0, 0, 0]),
+#                           upper_color=np.array([179, 10, 255]),
+#                           eliminar_manchas='vertical', iters=1)
+#     nonzero = cv2.findNonZero(im2)
 
-    img_pregunta = bound_and_crop(cropped_img_sub, nonzero, buffer=10)
-    return img_pregunta
+#     img_pregunta = bound_and_crop(cropped_img_sub, nonzero, buffer=10)
+#     return img_pregunta
 
 
 def recorte_imagen(img_preg, x0=110, x1=20, y0=50, y1=50):
@@ -162,7 +162,7 @@ def obtener_puntos(img_crop_canny, threshold=100, minLineLength=200):
         return None
 
 
-def bound_and_crop(img, c, buffer=0, buffer_extra_lados=20):
+def bound_and_crop(img, c, buffer=0, buffer_extra_lados=0):
 
     # Obtengo coordenadas de contorno
     x, y, w, h = cv2.boundingRect(c)
@@ -172,10 +172,9 @@ def bound_and_crop(img, c, buffer=0, buffer_extra_lados=20):
 
 
 def crop_and_save_subpreg(img_pregunta_crop, lineas_horizontales, i, file_out, verbose=False):
-    cropped_img_sub = img_pregunta_crop[lineas_horizontales[i]:
-                                        lineas_horizontales[i+1],]
-
-    img_subrptas = mantener_solo_recuadros_respuesta(cropped_img_sub)
+    img_subrptas = img_pregunta_crop[max(0, lineas_horizontales[i]-20):
+                                        lineas_horizontales[i+1]+20,]
+    print(file_out)
     print(img_subrptas.shape)
 
     # print(file_out)
@@ -206,20 +205,29 @@ def partir_imagen_por_mitad(img_crop):
     return img_p1, img_p2
 
 
-def get_contornos_grandes(mask):
+def get_contornos_grandes(mask, limit_area=30000):
 
     # Obtengo contornos
     contours = cv2.findContours(
         mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[0]
     # Me quedo contornos grandes
     big_contours = [
-        i for i in contours if cv2.contourArea(i) > 30000]
+        i for i in contours if cv2.contourArea(i) > limit_area]
 
     big_contours = big_contours[::-1]
 
     return big_contours
 
 
+def dejar_solo_recuadros_subpregunta(mask_naranjo, img_pregunta, elemento_img_pregunta):
+    mask_selec = cv2.bitwise_not(bound_and_crop(mask_naranjo,elemento_img_pregunta))[80:-10, 40:-20]
+    kernel = np.ones((3, 3), np.uint8)
+    morph_cleaned = cv2.morphologyEx(mask_selec, cv2.MORPH_OPEN, kernel, iterations=2)
+
+    nonzero = cv2.findNonZero(morph_cleaned)
+
+    img_recuadro = bound_and_crop(img_pregunta[80:-10, 40:-20], nonzero, buffer=60)
+    return img_recuadro
 
 ## procesamiento imagen ----------------------------------
 
@@ -255,7 +263,7 @@ def process_single_image(df99, num, rbd, directorio_imagenes, dic_pagina, n_page
     print(f'{file=}')
     # Leemos imagen
     img_preg = cv2.imread(str(rbd), 1) 
-    img_crop = recorte_imagen(img_preg, 0, 200, 50, 160)
+    img_crop = recorte_imagen(img_preg, 0, 150, 50, 160)
     
     # Eliminamos franjas negras en caso de existir
     img_sin_franja = eliminar_franjas_negras(img_crop)
@@ -291,14 +299,16 @@ def process_single_image(df99, num, rbd, directorio_imagenes, dic_pagina, n_page
                 elemento_img_pregunta = big_contours[pregunta_selec_int - q_base]
                 img_pregunta = bound_and_crop(media_img, elemento_img_pregunta)
 
+                img_pregunta_recuadros = dejar_solo_recuadros_subpregunta(mask_naranjo, img_pregunta, elemento_img_pregunta)
+                
                 # Exportamos pregunta si no tiene subpreguntas:
                 if subpreg_x_preg[pregunta_selec] == 1:
                     print('Pregunta no cuenta con subpreguntas, se guardará imagen')
-                    file_out = str(dir_subpreg_rbd / f'{estudiante}_{pregunta_selec}.jpg')
-                    img_pregunta_crop = img_pregunta[70:img_pregunta.shape[0]-20,
-                                                    20:img_pregunta.shape[1]-20, :]
-                    img_rptas = mantener_solo_recuadros_respuesta(img_pregunta_crop)
-                    cv2.imwrite(file_out, img_rptas)
+                    file_out = str(
+                        dir_subpreg_rbd / f'{estudiante}_{pregunta_selec}.jpg')
+
+                    n_subpreg = 1
+                    cv2.imwrite(file_out, img_pregunta_recuadros)
                     
                     return 'Éxito!'
 
@@ -306,8 +316,8 @@ def process_single_image(df99, num, rbd, directorio_imagenes, dic_pagina, n_page
                 print(f'{subpreg_selec=}')
                 
                 # Obtenemos subpreguntas:
-                img_pregunta_crop = recorte_imagen(img_pregunta)
-                img_crop_col = get_mask_imagen(img_pregunta_crop, 
+                #img_pregunta_crop = recorte_imagen(img_pregunta)
+                img_crop_col = get_mask_imagen(img_pregunta_recuadros, 
                                             lower_color=np.array([0, 114, 139]),
                                             upper_color=np.array([23, 255, 255]))
                 
@@ -317,8 +327,8 @@ def process_single_image(df99, num, rbd, directorio_imagenes, dic_pagina, n_page
 
                 try:
                     file_out = str(dir_subpreg_rbd / f'{estudiante}_{pregunta_selec}_{int(subpreg_selec)}.jpg')
-                    crop_and_save_subpreg(img_pregunta_crop, lineas_horizontales,
-                                        i=int(subpreg_selec)-1, file_out=file_out)
+                    crop_and_save_subpreg(img_pregunta_recuadros, lineas_horizontales,
+                                          i=int(subpreg_selec)-1, file_out=file_out)
                 
                 # Si hay error en procesamiento subpregunta
                 except Exception as e:
