@@ -57,5 +57,6 @@ def get_n_preguntas(directorio_imagenes, tipo_cuadernillo, ignorar_primera_pagin
             big_contours = proc.get_contornos_grandes(mask_naranjo)
 
             total_imagenes += len(big_contours)
+            print(total_imagenes)
 
     return total_imagenes  # Eliminamos 2 preguntas de portada

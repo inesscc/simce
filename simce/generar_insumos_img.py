@@ -134,7 +134,7 @@ def get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes, dic_pag
             dir_subpreg_rbd = (dir_subpreg / f'{directorio_imagenes.name}/{rbd.name}/')
             dir_subpreg_rbd.mkdir(parents=True, exist_ok=True)
             # Para cada imagen del cuadernillo de un estudiante (2 pág x img):
-            for num_pag, dir_pag in enumerate(rbd.glob(f'{estudiante}*')):
+            for num_pag, dir_pag in enumerate(sorted(list(rbd.glob(f'{estudiante}*')))):
                 # Creamos directorio para guardar imágenes
 
                 # Obtenemos páginas del cuadernillo actual:

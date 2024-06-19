@@ -22,7 +22,7 @@ if __name__ == '__main__':
     # 0. Creamos directorios
     crear_directorios()
     # 1.  Generar insumos para procesamiento
-   # generar_insumos_total() # TODO: función está calculando mal insumos. Debuggear
+    generar_insumos_total() # TODO: función está calculando mal insumos. Debuggear
     # 2. Generar tablas con dobles marcas
     #get_tablas_99_total(para_entrenamiento=IS_TRAINING)
 
