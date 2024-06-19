@@ -4,23 +4,27 @@ from tqdm import tqdm
 import data_loader.data_loaders as module_data
 import model.loss as module_loss
 import model.metric as module_metric
-import model.model as module_arch
+
 from config.parse_config import ConfigParser
 from simce.utils import read_json
 import torch.nn as nn
-
+import torchvision.models as models
+#config_dict = read_json('config/model_MaxVit_T_Weights.json')
+#config = ConfigParser(config_dict)
 def main(config):
-    config_dict = read_json('config/model.json')
-    config = ConfigParser(config_dict)
+
     logger = config.get_logger('test')
 
     # setup data_loader instances
     data_loader = config.init_obj('data_loader_test', module_data)
-
+    num_classes = 2
     # build model architecture
-    model = config.init_obj('arch', module_arch)
+    model = config.init_obj('arch', models)
+    num_features = model.classifier[5].in_features
+    model.classifier[5] = nn.Linear(num_features, num_classes)
     logger.info(model)
 
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # get function handles of loss and metrics
     weight = config['class_weights'] 
     weight = torch.tensor(weight).to(device)
@@ -30,12 +34,12 @@ def main(config):
     logger.info('Loading checkpoint: {} ...'.format(config.resume))
     checkpoint = torch.load(config.resume)
     state_dict = checkpoint['state_dict']
+
     if config['n_gpu'] > 1:
         model = torch.nn.DataParallel(model)
     model.load_state_dict(state_dict)
 
     # prepare model for testing
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = model.to(device)
     model.eval()
 
