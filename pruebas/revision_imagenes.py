@@ -54,10 +54,9 @@ def plot(imgs, col_title=None, **imshow_kwargs):
 rev = pd.read_excel('data/otros/datos_a_revisar.xlsx')
 nombre_encargado = 'juane'
 mi_rev = rev[rev.encargado.eq(nombre_encargado)]
-s = mi_rev[mi_rev.origen.eq('falsa_sospecha')]
-for i in range(len(s)):
+for i in range(len(mi_rev)):
     print(i)
-    row = s.iloc[i]
+    row = mi_rev.iloc[i]
     try:
         img = Image.open(row.ruta_imagen_output)
         
