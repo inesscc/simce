@@ -177,8 +177,8 @@ def transform_img(orig_img):
 
 padded_imgs = [transform_img(img) for padding in (3, 10, 30, 50)]
 
-for i in range(15,20):
-    row = problemas.iloc[i]
+for i in range(0,10):
+    row = est[est.dm_final.eq(0)].iloc[i]
     try:
         img = Image.open(row.ruta_imagen_output)
         img2 = Image.open((dir_input / row.ruta_imagen.replace('\\', '/')))
@@ -188,3 +188,5 @@ for i in range(15,20):
         plt.show()
     except:
         pass
+
+

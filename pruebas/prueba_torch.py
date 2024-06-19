@@ -7,7 +7,6 @@ import torch.nn as nn
 from torchinfo import summary
 from config.proc_img import dir_modelos
 import mlflow
-print('Finished Training')
 from config.proc_img import dir_train_test
 import pandas as pd
 from pathlib import Path
@@ -24,7 +23,7 @@ config = ConfigParser(config_dict)
 
 classification_models = list_models(module=torchvision.models)
 train = pd.read_csv(dir_train_test / config['data_loader_train']['args']['data_file']) 
-train[train.falsa_sospecha.eq(1)].ruta_imagen_output.iloc[4]
+train[train.falsa_sospecha.eq(0)].ruta_imagen_output.iloc[4]
 train[train.falsa_sospecha.eq(1)].iloc[0]
 train.dm_final.value_counts()
 origen = pd.read_csv(dir_input / 'CE_Origen_DobleMarca.csv', delimiter=';')
@@ -157,12 +156,19 @@ print('Finished Training')
 
 
 
-
+ 
 ## Predicciones -----------------------------------------------------
-config_dict = read_json('config/model.json')
+from torchvision import models
+import data_loader.data_loaders as module_data
+device, device_ids = prepare_device(config['n_gpu'])
+config_dict = read_json('saved/models/maxvit_t/0618_161749/config.json')
 config = ConfigParser(config_dict)
-ruta_modelo = 'saved/models/AlexNet_modelo_base/mejor_modelo_actual/model_best.pt'
-model_load  = config.init_obj('arch', module_arch, num_classes=num_classes)
+ruta_modelo = 'saved/models/maxvit_t/0618_161749/model_best.pt'
+testloader = config.init_obj('data_loader_test', module_data)
+num_classes = 2
+model_load  = config.init_obj('arch', models, num_classes=num_classes)
+num_features = model_load.classifier[5].in_features
+model_load.classifier[5] = nn.Linear(num_features, num_classes)
 checkpoint = torch.load(ruta_modelo)
 state_dict = checkpoint['state_dict']
 model_load.load_state_dict(state_dict)
@@ -201,11 +207,13 @@ print('Predicciones listas!')
 probs_float = [i.item() for i in probs]
 
 test = pd.read_csv(dir_train_test / 'test.csv')
-
+train = pd.read_csv(dir_train_test / 'train.csv')
+train.dm_final.value_counts()
 
 preds = pd.DataFrame({'pred': predictions,
               'true': true_labels,
               'proba': probs_float})
+
 preds['dirs'] = test.ruta_imagen_output
 
 preds_tot = preds.merge(test, left_on='dirs', right_on='ruta_imagen_output', how='left')
@@ -224,7 +232,7 @@ def get_conf_mat(df, preg=None):
     if preg:
         df = df[df.preguntas.eq(preg)]
 
-    cm = confusion_matrix(df.pred, df.true)
+    cm = confusion_matrix(df.true, df.pred )
     disp = ConfusionMatrixDisplay(cm, display_labels=['Marca normal', 'Doble marca'])
     disp.plot()
     plt.title(preg)
