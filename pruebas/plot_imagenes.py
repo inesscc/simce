@@ -81,7 +81,7 @@ from PIL import Image
 
     # %%
 
-    cv2.imshow("Detected Lines", cv2.resize(cropped_img_sub, (900, 900)))
+    cv2.imshow("Detected Lines", cv2.resize(mask_naranjo, (900, 900)))
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
