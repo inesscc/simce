@@ -162,7 +162,7 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
 
         # Leemos imagen
         img_preg = cv2.imread(str(rbd), 1)
-        img_crop = recorte_imagen(img_preg, 0, 200, 50, 160)
+        img_crop = recorte_imagen(img_preg, 0, 150, 50, 160)
         # Eliminamos franjas negras en caso de existir
         img_sin_franja = eliminar_franjas_negras(img_crop)
 

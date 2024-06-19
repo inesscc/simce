@@ -54,7 +54,7 @@ def plot(imgs, col_title=None, **imshow_kwargs):
 rev = pd.read_excel('data/otros/datos_a_revisar.xlsx')
 nombre_encargado = 'juane'
 mi_rev = rev[rev.encargado.eq(nombre_encargado)]
-for i in range(len(mi_rev))[:2]:
+for i in range(len(mi_rev)):
     print(i)
     row = mi_rev.iloc[i]
     try:
