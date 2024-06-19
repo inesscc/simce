@@ -27,7 +27,6 @@ def get_tablas_99_total(para_entrenamiento=True):
 
     get_tablas_99(tipo_cuadernillo='padres', para_entrenamiento=para_entrenamiento)
 
-
 def get_tablas_99(tipo_cuadernillo, para_entrenamiento=True):
 
     if tipo_cuadernillo == 'estudiantes':
@@ -116,6 +115,7 @@ def gen_tabla_entrenamiento(casos_99, casos_99_origen):
     casos_99_origen['dm_final'] = casos_99_origen['dm_final'].fillna(0).astype(int)
     casos_99_origen = casos_99_origen.rename(columns={'respuestas': 'dm_sospecha'})
     casos_99_origen.dm_final = (casos_99_origen.dm_final == 99).astype(int)
+    casos_99_origen.dm_sospecha = (casos_99_origen.dm_sospecha == 99).astype(int)
 
 
     return casos_99_origen

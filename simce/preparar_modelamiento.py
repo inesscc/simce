@@ -16,16 +16,20 @@ def get_img_existentes():
     df99p = pd.read_csv(dir_tabla_99 / padres99)
     
     df99e = pd.read_csv(dir_tabla_99 / est99)
+
     df99e['falsa_sospecha'] = ((df99e['dm_sospecha'] == 1) & (df99e['dm_final'] == 0))
+    
     est_falsa_sospecha = df99e[df99e.falsa_sospecha.eq(1)]
     otros_est = df99e[df99e.falsa_sospecha.eq(0)].sample(frac=.1, random_state=42)
     df99 = pd.concat([est_falsa_sospecha, otros_est, df99p]).reset_index(drop=True)
-
+    
     df_exist = df99[df99.ruta_imagen_output.apply(lambda x: Path(x).is_file())].reset_index()
+
     print(f'{df_exist.shape=}')
     print(f'{df99.shape=}')
-    df_exist.dm_sospecha = (df_exist.dm_sospecha == 99).astype(int)
+
     df_exist['falsa_sospecha'] = ((df_exist['dm_sospecha'] == 1) & (df_exist['dm_final'] == 0))
+
 
     df_sampleado = df_exist[df_exist.dm_sospecha.eq(0)]
     df_sospecha = df_exist[df_exist.dm_sospecha.ne(0)]
@@ -36,12 +40,11 @@ def get_img_existentes():
 def gen_train_test():
 
     df_exist, df_sampleado = get_img_existentes()
-
     train, test = train_test_split(df_exist, stratify=df_exist['falsa_sospecha'], test_size=.2)
 
     df_aug = gen_df_aumentado(train)
 
-    export_train_test(train, df_aug, test, df_sampleado)
+    export_train_test(train, df_aug, test, df_sampleado=None)
 
 
 ############# generando imagenes #############
@@ -83,10 +86,15 @@ def gen_df_aumentado(train):
 
     return df_aug_final
 
-def export_train_test(train, df_aug, test, df_sampleado):
+def export_train_test(train, df_aug, test, df_sampleado=None):
     dir_train_test.mkdir(parents=True, exist_ok=True)
-    # save .csv
-    (pd.concat([train, df_aug, df_sampleado]).reset_index()
+
+    if df_sampleado:
+        dfs_concat = [train, df_aug, df_sampleado]
+    else:
+        dfs_concat = [train, df_aug]
+
+    (pd.concat(dfs_concat).reset_index()
     .rename(columns={'level_0': 'indice_original'})
     .drop('index', axis= 1).to_csv(dir_train_test / 'train.csv'))
 

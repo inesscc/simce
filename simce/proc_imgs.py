@@ -386,12 +386,12 @@ def obtener_puntos(img_crop_canny, threshold=100, minLineLength=200):
         return None
 
 
-def bound_and_crop(img, c, buffer=0):
+def bound_and_crop(img, c, buffer=0, buffer_extra_lados=20):
 
     # Obtengo coordenadas de contorno
     x, y, w, h = cv2.boundingRect(c)
     # Recorto imagen en base a contorno
-    img_crop = img[max(y-buffer, 0):y+h+buffer, x-buffer-20:x+w+buffer]
+    img_crop = img[max(y-buffer, 0):y+h+buffer, max(0, x-buffer-buffer_extra_lados):x+w+buffer]
     return img_crop
 
 
