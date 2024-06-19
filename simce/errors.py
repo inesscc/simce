@@ -36,3 +36,29 @@ def anotar_error(pregunta, error, nivel_error, e=None):
         wb.save('problemas_datos.xlsx')
     else:
         print('ERROR YA ANOTADO ANTERIORMENTE, no fue anotado.')
+
+
+def agregar_error(queue, pregunta, error, nivel_error):
+    """agrega la dupla a la fila para añadir el error al finalizar el multi-procesamiento"""
+    queue.put((pregunta, error, nivel_error))
+
+
+def escribir_errores(queue):
+    """une todos los errores generados en las iteraciones de los diferentes procesos"""
+    if not Path('problemas_datos.xlsx').is_file():
+        wb = Workbook()
+        ws = wb.active
+        ws['A1'] = 'Pregunta'
+        ws['B1'] = 'Error'
+        ws['C1'] = 'Nivel'
+        wb.save('problemas_datos.xlsx')
+
+    wb = load_workbook(filename='problemas_datos.xlsx')
+    ws = wb.active
+
+    while not queue.empty():
+        pregunta, error, nivel_error = queue.get()
+        ws.append([pregunta, error, nivel_error])
+
+    wb.save('problemas_datos.xlsx')
+    
