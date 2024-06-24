@@ -139,7 +139,7 @@ def obtener_lineas_horizontales(img_crop_canny, threshold=100, minLineLength=200
 
     mask_lineas_rellenas = eliminar_o_rellenar_manchas(img_crop_canny, 
                                                        orientacion='horizontal',
-                                                         limite=110, rellenar=True)[:-20, :-20]
+                                                         limite=110, rellenar=True)[:-10, :-10]
     lines = cv2.HoughLinesP(mask_lineas_rellenas, 1, np.pi/180,
                             threshold=threshold, minLineLength=minLineLength)
     
@@ -329,8 +329,8 @@ def process_single_image(df99, num, rbd, directorio_imagenes, dic_pagina, n_page
                 # Obtenemos subpreguntas:
                 #img_pregunta_crop = recorte_imagen(img_pregunta)
                 img_crop_col = get_mask_imagen(img_pregunta_recuadros, 
-                                            lower_color=np.array([0, 114, 139]),
-                                            upper_color=np.array([23, 255, 255]))
+                                            lower_color=np.array([0, 95, 139]),
+                                           upper_color=np.array([26, 255, 255]))
                 
                 lineas_horizontales = obtener_lineas_horizontales(img_crop_col,
                                                                   minLineLength=250)
