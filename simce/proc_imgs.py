@@ -62,7 +62,32 @@ def dejar_solo_recuadros_subpregunta(mask_naranjo, img_pregunta, elemento_img_pr
     img_recuadro = bound_and_crop(img_pregunta[80:-10, 40:-20], nonzero, buffer=60)
     return img_recuadro
 
+def get_mascara_lineas_horizontales(img_pregunta_recuadros):
 
+    gray = cv2.cvtColor(img_pregunta_recuadros, cv2.COLOR_BGR2GRAY)
+    mean_value = np.mean(gray)
+    gray2 = gray.copy()
+
+    # Replace values above the mean with 255
+    gray[(gray2 > mean_value*.9)] = 255
+
+    # Replace values below the mean with 0
+    gray[(gray2 < mean_value*.9)] = 0
+
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+
+    gray_eroded = cv2.erode(gray, kernel, iterations=2)
+
+    gray_limpio = eliminar_o_rellenar_manchas(gray_eroded, 
+                                                       orientacion='horizontal',
+                                                         limite=100, rellenar=True)[:-10, :-10]
+
+
+
+
+    mask_lineas_horizontales = cv2.bitwise_not(gray_limpio)
+
+    return mask_lineas_horizontales
 
 def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None, filter_estudiante=None,
                      filter_rbd_int=False, muestra=False):
@@ -113,7 +138,9 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
             df99 = df99[(df99.rbd_ruta.eq(filter_rbd))]
 
     if filter_estudiante:
-        df99 = df99[df99.serie.eq(filter_estudiante)]
+        if isinstance(filter_estudiante, int):
+            filter_estudiante = [filter_estudiante]
+        df99 = df99[df99.serie.isin(filter_estudiante)]
     df99.ruta_imagen = df99.ruta_imagen.str.replace('\\', '/')
     dir_preg99 = [dir_input / i for i in df99.ruta_imagen]
 
@@ -206,10 +233,13 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
             # Obtenemos subpreguntas:
 
             #  print(q)
-            img_crop_col = get_mask_imagen(img_pregunta_recuadros,
-                                           lower_color=np.array(
-                                               [0, 95, 139]),
-                                           upper_color=np.array([26, 255, 255]))
+
+            # img_crop_col = get_mask_imagen(img_pregunta_recuadros,
+            #                                lower_color=np.array(
+            #                                    [0, 111, 109]),
+            #                                upper_color=np.array([18, 255, 255]))
+
+            img_crop_col = get_mascara_lineas_horizontales(img_pregunta_recuadros)
 
             lineas_horizontales = obtener_lineas_horizontales(
                 img_crop_col, minLineLength=250)
@@ -352,7 +382,7 @@ def procesamiento_color(img_crop):
 
 # Procesamiento sub-pregunta
 
-def obtener_lineas_horizontales(img_crop_canny, threshold=100, minLineLength=200):
+def obtener_lineas_horizontales(mask_lineas_rellenas, threshold=100, minLineLength=200):
     """
     Funcion que identifica lineas para obtener puntos en el eje "y" para realizar el recorte a
     subpreguntas
@@ -365,9 +395,7 @@ def obtener_lineas_horizontales(img_crop_canny, threshold=100, minLineLength=200
     """
     # obteniendo lineas
 
-    mask_lineas_rellenas = eliminar_o_rellenar_manchas(img_crop_canny, 
-                                                       orientacion='horizontal',
-                                                         limite=100, rellenar=True)[:-10, :-10]
+
     lines = cv2.HoughLinesP(mask_lineas_rellenas, 1, np.pi/180,
                             threshold=threshold, minLineLength=minLineLength)
     
