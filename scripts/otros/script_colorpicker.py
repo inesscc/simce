@@ -9,7 +9,8 @@ import cv2
 import numpy as np
 from config.proc_img import dir_estudiantes, dir_padres, dir_subpreg
 # path to image
-image_path = str(dir_subpreg / 'CE/00027/4001045_p8_4.jpg')
+
+image_path = str(dir_subpreg / 'CP/07338/4199910_7.jpg')
 # resize if image is larger than 800x600
 resize = True
 
@@ -65,7 +66,7 @@ cv2.imshow('Image', img)
 createGUI()
 
 
-cv2.waitKey(0)
+cv2.waitKey(10)
 cv2.destroyAllWindows()
 
 

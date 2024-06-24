@@ -55,17 +55,18 @@ rev = pd.read_excel('data/otros/datos_a_revisar.xlsx')
 nombre_encargado = 'juane'
 mi_rev = rev[rev.encargado.eq(nombre_encargado)]
 for i in range(len(mi_rev)):
-    print(i)
-    row = mi_rev.iloc[i]
-    try:
-        img = Image.open(row.ruta_imagen_output)
+    if i >= 56:
+        print(i)
+        row = mi_rev.iloc[i]
+        try:
+            img = Image.open(row.ruta_imagen_output)
+            
+            img2 = Image.open((dir_input / row.ruta_imagen.replace('\\', '/')))
         
-        img2 = Image.open((dir_input / row.ruta_imagen.replace('\\', '/')))
-    
-        plot([img, img2], col_title=[row.ruta_imagen_output, row.ruta_imagen] )
-        #plt.title(train[train.falsa_sospecha.eq(1)].ruta_imagen_output.iloc[i])
-        plt.show()
-    except:
-        pass
+            plot([img, img2], col_title=[row.ruta_imagen_output, row.ruta_imagen] )
+            #plt.title(train[train.falsa_sospecha.eq(1)].ruta_imagen_output.iloc[i])
+            plt.show()
+        except:
+            pass
 
 
