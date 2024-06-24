@@ -62,30 +62,51 @@ def dejar_solo_recuadros_subpregunta(mask_naranjo, img_pregunta, elemento_img_pr
     img_recuadro = bound_and_crop(img_pregunta[80:-10, 40:-20], nonzero, buffer=60)
     return img_recuadro
 
+def borrar_texto_oscuro(gray):
+    gray_mean = gray.mean(axis=1) 
+    gray_mean_mul10 = np.append(gray_mean, [gray_mean.mean()]* (10 - gray.shape[0] % 10))
+    dark_areas = gray_mean_mul10.reshape(-1, 10).mean(axis=1)
+    pixeles_borrar = np.where(dark_areas< 200)[0] * 10
+
+    for p in pixeles_borrar:
+        gray[p:p+10] = 255
+    return gray
+
 def get_mascara_lineas_horizontales(img_pregunta_recuadros):
 
     gray = cv2.cvtColor(img_pregunta_recuadros, cv2.COLOR_BGR2GRAY)
-    mean_value = np.mean(gray)
-    gray2 = gray.copy()
+
+    gray_sin_texto = borrar_texto_oscuro(gray)
+
+
+    mean_value = np.mean(gray_sin_texto)
+    gray2 = gray_sin_texto.copy()
 
     # Replace values above the mean with 255
-    gray[(gray2 > mean_value*.9)] = 255
+    gray2[(gray2 > mean_value*.93) ] = 255
 
     # Replace values below the mean with 0
-    gray[(gray2 < mean_value*.9)] = 0
+    gray2[(gray2 < mean_value*.93) ] = 0
+
+    gray_limpio = eliminar_o_rellenar_manchas(gray2, 
+                                                       orientacion='horizontal',
+                                                         limite=100, rellenar=False)[:-10, :-10]
 
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
 
-    gray_eroded = cv2.erode(gray, kernel, iterations=2)
+    gray_eroded = cv2.erode(gray_limpio, kernel, iterations=2)
 
-    gray_limpio = eliminar_o_rellenar_manchas(gray_eroded, 
+    gray_limpio2 = eliminar_o_rellenar_manchas(gray_eroded, 
                                                        orientacion='horizontal',
-                                                         limite=100, rellenar=True)[:-10, :-10]
+                                                         limite=100, rellenar=True)
 
 
 
 
-    mask_lineas_horizontales = cv2.bitwise_not(gray_limpio)
+
+    mask_lineas_horizontales = cv2.bitwise_not(gray_limpio2)
+
+    
 
     return mask_lineas_horizontales
 
@@ -240,9 +261,9 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
             #                                upper_color=np.array([18, 255, 255]))
 
             img_crop_col = get_mascara_lineas_horizontales(img_pregunta_recuadros)
-
+            
             lineas_horizontales = obtener_lineas_horizontales(
-                img_crop_col, minLineLength=250)
+                img_crop_col, minLineLength=np.round(img_crop_col.shape[1] * .6))
 
             n_subpreg = len(lineas_horizontales) - 1
 

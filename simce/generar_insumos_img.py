@@ -151,7 +151,7 @@ def get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes, dic_pag
 
                 # Leemos imagen
                 img_preg = cv2.imread(str(dir_pag), 1)
-                img_crop = proc.recorte_imagen(img_preg, 0, 100, 50, 160)
+                img_crop = proc.recorte_imagen(img_preg, 0, 150, 50, 160)
                 # Eliminamos franjas negras en caso de existir
                 img_sin_franja = proc.eliminar_franjas_negras(img_crop)
 
@@ -178,6 +178,7 @@ def get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes, dic_pag
                         # Obtengo coordenadas de contornos y corto imagen
                         img_pregunta = proc.bound_and_crop(media_img, c)
 
+
                         if nivel:
                             # Obtengo n° de pregunta en base a lógica de cuadernillo:
                             q, dic_q = calcular_pregunta_actual(pages, p, dic_q)
@@ -196,14 +197,12 @@ def get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes, dic_pag
                             img_pregunta_crop = proc.recorte_imagen(
                                 img_pregunta)
                             #  print(q)
-                            img_crop_col = get_mask_imagen(img_pregunta_crop,
-                                                           lower_color=np.array(
-                                                               [0, 114, 139]),
-                                                           upper_color=np.array([23, 255, 255]))
-                            # img_crop_col = proc.procesamiento_color(img_pregunta_crop)
 
-                            lineas_horizontales = proc.obtener_puntos(
-                                img_crop_col, minLineLength=250)
+                            img_crop_col = proc.get_mascara_lineas_horizontales(img_pregunta_crop)
+            
+                            lineas_horizontales = proc.obtener_lineas_horizontales(
+                                img_crop_col[:-10, :-10],
+                                  minLineLength=np.round(img_crop_col.shape[1] * .6))
 
                             if lineas_horizontales is not None:
 
@@ -214,7 +213,7 @@ def get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes, dic_pag
 
                                         file_out = str(
                                             dir_subpreg_rbd / f'{estudiante}_p{q}_{i+1}.jpg')
-                                        proc.crop_and_save_subpreg(img_pregunta_crop,
+                                        proc.crop_and_save_subpreg(img_pregunta_crop[:-10, :-10],
                                                                    lineas_horizontales,
                                                                    i, file_out)
 

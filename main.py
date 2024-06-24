@@ -27,7 +27,7 @@ if __name__ == '__main__':
     #get_tablas_99_total(para_entrenamiento=IS_TRAINING)
 
     # 3. Recortar subpreguntas
-    #get_subpreguntas(tipo_cuadernillo='estudiantes', para_entrenamiento=IS_TRAINING, filter_estudiante=4039682)
+    #get_subpreguntas(tipo_cuadernillo='estudiantes', para_entrenamiento=IS_TRAINING, filter_estudiante=4026404)
     
     # df = pd.read_excel('prob2.xlsx')
     # rbds = df[df.Error.str.contains('N° de subpreguntas')].Error.str.extract('(\d{7})').squeeze().to_list()
