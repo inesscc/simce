@@ -13,7 +13,7 @@ from config.proc_img import dir_subpreg, regex_estudiante, dir_tabla_99, \
     dir_input, n_pixeles_entre_lineas, dir_estudiantes, dir_padres, regex_extraer_rbd_de_ruta
 
 from simce.errors import agregar_error, escribir_errores
-from simce.utils import get_mask_imagen
+from simce.utils import get_mask_imagen, eliminar_o_rellenar_manchas
 
 import json
 from config.proc_img import dir_insumos
@@ -124,15 +124,26 @@ def procesamiento_color(img_crop):
     return Canny
 
 
-def obtener_puntos(img_crop_canny, threshold=100, minLineLength=200):
+def obtener_lineas_horizontales(img_crop_canny, threshold=100, minLineLength=200):
     """
     Funcion que identifica lineas para obtener puntos en el eje "y" para realizar el recorte a
     subpreguntas
-    
+
+    Args:
+        img_crop_canny (_type_): _description_
+
+    Returns:
+        lines: _description_
     """
     # obteniendo lineas
-    lines = cv2.HoughLinesP(img_crop_canny, 1, np.pi/180,
+
+    mask_lineas_rellenas = eliminar_o_rellenar_manchas(img_crop_canny, 
+                                                       orientacion='horizontal',
+                                                         limite=110, rellenar=True)[:-20, :-20]
+    lines = cv2.HoughLinesP(mask_lineas_rellenas, 1, np.pi/180,
                             threshold=threshold, minLineLength=minLineLength)
+    
+
 
     if lines is not None:
 
@@ -140,7 +151,7 @@ def obtener_puntos(img_crop_canny, threshold=100, minLineLength=200):
         lines_sorted = lines[indices_ordenados]
 
         puntoy = list(set(chain.from_iterable(lines_sorted[:, :, 1].tolist())))
-        puntoy.append(img_crop_canny.shape[0])
+        puntoy.append(mask_lineas_rellenas.shape[0])
         puntoy = sorted(puntoy)
 
         # print(puntoy)
@@ -321,8 +332,8 @@ def process_single_image(df99, num, rbd, directorio_imagenes, dic_pagina, n_page
                                             lower_color=np.array([0, 114, 139]),
                                             upper_color=np.array([23, 255, 255]))
                 
-                lineas_horizontales = obtener_puntos(img_crop_col,
-                                                    minLineLength=250)
+                lineas_horizontales = obtener_lineas_horizontales(img_crop_col,
+                                                                  minLineLength=250)
                 n_subpreg = len(lineas_horizontales) - 1
 
                 try:
