@@ -16,7 +16,7 @@ import pandas as pd
 import re
 from dotenv import load_dotenv
 
-from simce.utils import get_mask_imagen
+from simce.utils import get_mask_imagen, eliminar_o_rellenar_manchas
 import json
 from config.proc_img import dir_insumos
 load_dotenv()
@@ -211,7 +211,7 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
                                                [0, 114, 139]),
                                            upper_color=np.array([23, 255, 255]))
 
-            lineas_horizontales = obtener_puntos(
+            lineas_horizontales = obtener_lineas_horizontales(
                 img_crop_col, minLineLength=250)
 
             n_subpreg = len(lineas_horizontales) - 1
@@ -352,7 +352,7 @@ def procesamiento_color(img_crop):
 
 # Procesamiento sub-pregunta
 
-def obtener_puntos(img_crop_canny, threshold=100, minLineLength=200):
+def obtener_lineas_horizontales(img_crop_canny, threshold=100, minLineLength=200):
     """
     Funcion que identifica lineas para obtener puntos en el eje "y" para realizar el recorte a
     subpreguntas
@@ -364,8 +364,14 @@ def obtener_puntos(img_crop_canny, threshold=100, minLineLength=200):
         lines: _description_
     """
     # obteniendo lineas
-    lines = cv2.HoughLinesP(img_crop_canny, 1, np.pi/180,
+
+    mask_lineas_rellenas = eliminar_o_rellenar_manchas(img_crop_canny, 
+                                                       orientacion='horizontal',
+                                                         limite=110, rellenar=True)[:-20, :-20]
+    lines = cv2.HoughLinesP(mask_lineas_rellenas, 1, np.pi/180,
                             threshold=threshold, minLineLength=minLineLength)
+    
+
 
     if lines is not None:
 
@@ -373,7 +379,7 @@ def obtener_puntos(img_crop_canny, threshold=100, minLineLength=200):
         lines_sorted = lines[indices_ordenados]
 
         puntoy = list(set(chain.from_iterable(lines_sorted[:, :, 1].tolist())))
-        puntoy.append(img_crop_canny.shape[0])
+        puntoy.append(mask_lineas_rellenas.shape[0])
         puntoy = sorted(puntoy)
 
         # print(puntoy)

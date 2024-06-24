@@ -71,26 +71,59 @@ def get_mask_imagen(media_img, lower_color=np.array([13, 40, 0]), upper_color=np
     mask = cv2.dilate(mask, kernel, iterations=iters)
 
     if eliminar_manchas:
+        
         if eliminar_manchas == 'vertical':
-            axis = 0
-            # Calculamos la media de cada columna
-            mean_col = mask.mean(axis=axis)
-            # Si la media es menor a 100, reemplazamos con 0 (negro):
-            # Esto permite eliminar manchas de color que a veces se dan
-            idx_low_rows = np.where(mean_col < 50)[0]
-            mask[:, idx_low_rows] = 0
+            mask = eliminar_o_rellenar_manchas(mask, orientacion='vertical', limite=50)
         elif eliminar_manchas == 'horizontal':
-            axis = 1
-            # Calculamos la media de cada fila:
-            mean_row = mask.mean(axis=axis)
-            # Si la media es menor a 100, reemplazamos con 0 (negro):
-            # Esto permite eliminar manchas de color que a veces se dan
-            idx_low_rows = np.where(mean_row < 100)[0]
-            mask[idx_low_rows, :] = 0
+
+            mask = eliminar_o_rellenar_manchas(mask, orientacion='horizontal', limite=100)
+
         else:
             return print('Valor inválido para eliminar manchas')
 
     return mask
+
+
+def eliminar_o_rellenar_manchas(mask, orientacion, limite, rellenar=False):
+        
+        mask = mask.copy()
+        
+        if rellenar:
+            val_replace = 255
+        else:
+            val_replace = 0
+
+    
+        if orientacion == 'vertical':
+            axis = 0
+            # Calculamos la media de cada columna
+            mean_col = mask.mean(axis=axis)
+
+            if rellenar:
+                comparison = mean_col > limite
+            else:
+                comparison = mean_col < limite
+            # Si la media es menor a 100, reemplazamos con 0 (negro):
+            # Esto permite eliminar manchas de color que a veces se dan
+            idx_low_rows = np.where(comparison)[0]
+            mask[:, idx_low_rows] = val_replace
+        elif orientacion == 'horizontal':
+            axis = 1
+            # Calculamos la media de cada fila:
+            mean_row = mask.mean(axis=axis)
+
+            if rellenar:
+                comparison = mean_row > limite
+            else:
+                comparison = mean_row < limite
+            # Si la media es menor a 100, reemplazamos con 0 (negro):
+            # Esto permite eliminar manchas de color que a veces se dan
+            idx_low_rows = np.where(comparison)[0]
+            mask[idx_low_rows, :] = val_replace
+        else:
+            return print('Valor inválido para eliminar manchas')
+        
+        return mask
 
 
 def ensure_dir(dirname):
