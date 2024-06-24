@@ -13,7 +13,11 @@ from config.proc_img import dir_subpreg, regex_estudiante, dir_tabla_99, \
     dir_input, n_pixeles_entre_lineas, dir_estudiantes, dir_padres, regex_extraer_rbd_de_ruta
 
 from simce.errors import agregar_error, escribir_errores
-from simce.utils import get_mask_imagen, eliminar_o_rellenar_manchas
+from simce.utils import get_mask_imagen
+
+from simce.proc_imgs import select_directorio, get_insumos, get_pages, get_subpregs_distintas, eliminar_franjas_negras, recorte_imagen, \
+    obtener_lineas_horizontales, bound_and_crop, crop_and_save_subpreg, get_pregunta_inicial_pagina, \
+    partir_imagen_por_mitad, get_contornos_grandes, dejar_solo_recuadros_subpregunta, get_mascara_lineas_horizontales
 
 import json
 from config.proc_img import dir_insumos
@@ -22,223 +26,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 VALID_INPUT = {'cuadernillo', 'pagina'}
-
-## funciones aux -----------------------------------
-
-def select_directorio(tipo_cuadernillo):
-    '''Selecciona directorio de datos según si se está procesando el cuadernillo
-    de padres o de estudiantes'''
-
-    if tipo_cuadernillo == 'estudiantes':
-        directorio_imagenes = dir_estudiantes
-    elif tipo_cuadernillo == 'padres':
-        directorio_imagenes = dir_padres
-
-    return directorio_imagenes
-
-
-def get_insumos(tipo_cuadernillo):
-    with open(dir_insumos / 'insumos.json') as f:
-        insumos = json.load(f)
-
-    # Seleccionamos insumos para el tipo de cuadernillo que estamos trabajando
-    insumos_usar = insumos[tipo_cuadernillo]
-
-    n_pages = insumos_usar['n_pages']
-    n_preguntas = insumos_usar['n_preguntas']
-    subpreg_x_preg = insumos_usar['subpreg_x_preg']
-    dic_cuadernillo = insumos_usar['dic_cuadernillo']
-    dic_pagina = insumos_usar['dic_pagina']
-    n_subpreg_tot = insumos_usar['n_subpreg_tot']
-
-    return n_pages, n_preguntas, subpreg_x_preg, dic_cuadernillo, dic_pagina, n_subpreg_tot
-
-
-def get_pages(pagina_pregunta, n_pages):
-    pages_original = n_pages, 1
-    pages = (pages_original[0] - (pagina_pregunta - 1), pages_original[1] + (pagina_pregunta - 1))
-    if pagina_pregunta % 2 == 0:
-        pages = pages[1], pages[0]
-
-    return pages
-
-def get_subpregs_distintas(subpreg_x_preg, dir_subpreg_rbd, estudiante):
-    df = pd.DataFrame(
-        [str(i) for i in dir_subpreg_rbd.iterdir() if estudiante in str(i)], columns=['ruta'])
-
-    df['preg'] = df.ruta.str.extract(r'p(\d{1,2})').astype(int)
-    df['subpreg'] = df.ruta.str.extract(r'p(\d{1,2}_\d{1,2})')
-
-    df_resumen = pd.DataFrame(df.preg.value_counts().sort_values()
-                              .sort_index().astype(int))
-
-    df_resumen.index = 'p'+df_resumen.index.astype('string')
-
-    df_resumen['baseline'] = subpreg_x_preg
-    df_resumen = df_resumen.rename(columns={'count': 'origen'})
-    dic_dif = df_resumen[df_resumen['origen'].ne(df_resumen.baseline)].to_dict()
-    return dic_dif
-
-
-def eliminar_franjas_negras(img_preg):
-    im2 = get_mask_imagen(img_preg, lower_color=np.array([0, 0, 241]),
-                          upper_color=np.array([179, 255, 255]), iters=2)
-    contours = cv2.findContours(
-        im2, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[0]
-    area_cont = [cv2.contourArea(i) for i in contours]
-    c = contours[area_cont.index(max(area_cont))]
-
-    img_pregunta = bound_and_crop(img_preg, c)
-    return img_pregunta
-
-
-# def mantener_solo_recuadros_respuesta(cropped_img_sub):
-#     im2 = get_mask_imagen(cropped_img_sub,
-#                           lower_color=np.array(
-#                               [0, 0, 0]),
-#                           upper_color=np.array([179, 10, 255]),
-#                           eliminar_manchas='vertical', iters=1)
-#     nonzero = cv2.findNonZero(im2)
-
-#     img_pregunta = bound_and_crop(cropped_img_sub, nonzero, buffer=10)
-#     return img_pregunta
-
-
-def recorte_imagen(img_preg, x0=110, x1=20, y0=50, y1=50):
-    """Funcion para recortar margenes de las imagenes
-    """
-
-    x, y = img_preg.shape[:2]
-    img_crop = img_preg[x0:x-x1, y0:y-y1]
-    return img_crop
-
-def procesamiento_color(img_crop):
-    """
-    Funcion que procesa el color de la imagen
-    """
-    # transformando color
-    gray = cv2.cvtColor(img_crop, cv2.COLOR_BGR2GRAY)
-    # blur = cv2.GaussianBlur(gray, (5, 5), 0)
-    Canny = cv2.Canny(gray, 50, 150, apertureSize=3)
-
-    return Canny
-
-
-def obtener_lineas_horizontales(img_crop_canny, threshold=100, minLineLength=200):
-    """
-    Funcion que identifica lineas para obtener puntos en el eje "y" para realizar el recorte a
-    subpreguntas
-
-    Args:
-        img_crop_canny (_type_): _description_
-
-    Returns:
-        lines: _description_
-    """
-    # obteniendo lineas
-
-    mask_lineas_rellenas = eliminar_o_rellenar_manchas(img_crop_canny, 
-                                                       orientacion='horizontal',
-                                                         limite=110, rellenar=True)[:-10, :-10]
-    lines = cv2.HoughLinesP(mask_lineas_rellenas, 1, np.pi/180,
-                            threshold=threshold, minLineLength=minLineLength)
-    
-
-
-    if lines is not None:
-
-        indices_ordenados = np.argsort(lines[:, :, 1].flatten())
-        lines_sorted = lines[indices_ordenados]
-
-        puntoy = list(set(chain.from_iterable(lines_sorted[:, :, 1].tolist())))
-        puntoy.append(mask_lineas_rellenas.shape[0])
-        puntoy = sorted(puntoy)
-
-        # print(puntoy)
-
-        y = []
-        for i in range(len(puntoy)-1):
-            if puntoy[i+1] - puntoy[i] < n_pixeles_entre_lineas:
-                y.append(i+1)
-
-        # print(puntoy)
-        # print(y)
-
-        for index in sorted(y, reverse=True):
-            del puntoy[index]
-
-        return puntoy
-    else:
-        # Pregunta no cuenta con subpreguntas
-        return None
-
-
-def bound_and_crop(img, c, buffer=0, buffer_extra_lados=0):
-
-    # Obtengo coordenadas de contorno
-    x, y, w, h = cv2.boundingRect(c)
-    # Recorto imagen en base a contorno
-    img_crop = img[max(y-buffer, 0):y+h+buffer, max(0, x-buffer-buffer_extra_lados):x+w+buffer]
-    return img_crop
-
-
-def crop_and_save_subpreg(img_pregunta_crop, lineas_horizontales, i, file_out, verbose=False):
-    img_subrptas = img_pregunta_crop[max(0, lineas_horizontales[i]-20):
-                                        lineas_horizontales[i+1]+20,]
-    print(file_out)
-    print(img_subrptas.shape)
-
-    # print(file_out)
-    cv2.imwrite(file_out, img_subrptas)
-    if verbose:
-        print(f'{file_out} guardado!')
-
-
-def get_pregunta_inicial_pagina(dic_pagina, pagina_pregunta):
-    if pagina_pregunta != 1 and (pagina_pregunta in dic_pagina.values()):
-        q_base = min([int(re.search(r'\d+', k).group(0))
-                      for k, v in dic_pagina.items() if v == pagina_pregunta])
-
-    else:  # Para la portada
-        q_base = 0
-
-    return q_base
-
-
-def partir_imagen_por_mitad(img_crop):
-    # Buscamos punto medio de imagen para dividirla en las dos
-    # páginas del cuadernillo
-    punto_medio = int(np.round(img_crop.shape[1] / 2, 1))
-
-    img_p1 = img_crop[:, :punto_medio]  # página izquierda
-    img_p2 = img_crop[:, punto_medio:]  # página derecha
-
-    return img_p1, img_p2
-
-
-def get_contornos_grandes(mask, limit_area=30000):
-
-    # Obtengo contornos
-    contours = cv2.findContours(
-        mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[0]
-    # Me quedo contornos grandes
-    big_contours = [
-        i for i in contours if cv2.contourArea(i) > limit_area]
-
-    big_contours = big_contours[::-1]
-
-    return big_contours
-
-
-def dejar_solo_recuadros_subpregunta(mask_naranjo, img_pregunta, elemento_img_pregunta):
-    mask_selec = cv2.bitwise_not(bound_and_crop(mask_naranjo,elemento_img_pregunta))[80:-10, 40:-20]
-    kernel = np.ones((3, 3), np.uint8)
-    morph_cleaned = cv2.morphologyEx(mask_selec, cv2.MORPH_OPEN, kernel, iterations=2)
-
-    nonzero = cv2.findNonZero(morph_cleaned)
-
-    img_recuadro = bound_and_crop(img_pregunta[80:-10, 40:-20], nonzero, buffer=60)
-    return img_recuadro
 
 ## procesamiento imagen ----------------------------------
 
@@ -328,12 +115,16 @@ def process_single_image(df99, num, rbd, directorio_imagenes, dic_pagina, n_page
                 
                 # Obtenemos subpreguntas:
                 #img_pregunta_crop = recorte_imagen(img_pregunta)
-                img_crop_col = get_mask_imagen(img_pregunta_recuadros, 
-                                            lower_color=np.array([0, 95, 139]),
-                                           upper_color=np.array([26, 255, 255]))
+                # img_crop_col = get_mask_imagen(img_pregunta_recuadros,
+                #                                lower_color=np.array(
+                #                                    [0, 111, 109]),
+                #                                upper_color=np.array([18, 255, 255]))
+
+                img_crop_col = get_mascara_lineas_horizontales(img_pregunta_recuadros)
                 
-                lineas_horizontales = obtener_lineas_horizontales(img_crop_col,
-                                                                  minLineLength=250)
+                lineas_horizontales = obtener_lineas_horizontales(
+                    img_crop_col, minLineLength=np.round(img_crop_col.shape[1] * .6))
+                
                 n_subpreg = len(lineas_horizontales) - 1
 
                 try:
@@ -407,7 +198,9 @@ def process_general(directorio_imagenes, tipo_cuadernillo, para_entrenamiento,
             df99 = df99[(df99.rbd_ruta.eq(filter_rbd))]
 
     if filter_estudiante:
-        df99 = df99[df99.serie.eq(filter_estudiante)]
+        if isinstance(filter_estudiante, int):
+            filter_estudiante = [filter_estudiante]
+        df99 = df99[df99.serie.isin(filter_estudiante)]
         
     df99.ruta_imagen = df99.ruta_imagen.str.replace('\\', '/')
     dir_preg99 = [dir_input / i for i in df99.ruta_imagen]
@@ -415,7 +208,7 @@ def process_general(directorio_imagenes, tipo_cuadernillo, para_entrenamiento,
     n_pages, n_preguntas, subpreg_x_preg, dic_cuadernillo, dic_pagina, n_subpreg_tot = get_insumos(tipo_cuadernillo)
 
     # Dividir en bloques para procesamiento paralelo
-    num_workers = cpu_count() -1
+    num_workers = 1 #20 #cpu_count() -1
     print('###########')
     print(num_workers)
     print('###########')
@@ -441,7 +234,7 @@ if __name__ == "__main__":
     muestra = False  
     filter_rbd = None  
     filter_rbd_int = None 
-    filter_estudiante = None  
+    filter_estudiante = 4110386  
     regex_estudiante = regex_estudiante 
     dir_tabla_99 = dir_tabla_99
     dir_input = dir_input
