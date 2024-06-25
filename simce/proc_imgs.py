@@ -59,12 +59,17 @@ def dejar_solo_recuadros_subpregunta(img_pregunta):
                            upper_color=np.array([179, 11, 255]),
                            eliminar_manchas=None, iters=0, revert=False)
 
-    # Si hay mucho espacio negro, hacemos procesamiento adicional:
-    if mask_recuadro.mean() < 5:
-        morph_vert = eliminar_o_rellenar_manchas(mask_recuadro, orientacion='vertical', limite=10, rellenar=False )
-        mask_recuadro = eliminar_o_rellenar_manchas(morph_vert, orientacion='horizontal', limite=9, rellenar=False )
+    # Si existen columnas blancas, las eliminamos:
+    mean_col = mask_recuadro.mean(axis=0)
+    mask_recuadro[:, np.where(mean_col > 200)] = 0
 
-    nonzero = cv2.findNonZero(mask_recuadro)
+    # Eliminamos manchas verticales y horizontales:
+    lim_vert = mask_recuadro.shape[0] / 150
+    morph_vert = eliminar_o_rellenar_manchas(mask_recuadro, orientacion='vertical', limite=lim_vert, rellenar=False )
+    lim_hor = mask_recuadro.shape[1] / 225
+    morph_hor = eliminar_o_rellenar_manchas(morph_vert, orientacion='horizontal', limite=lim_hor, rellenar=False )
+
+    nonzero = cv2.findNonZero(morph_hor)
 
     img_recuadro = bound_and_crop(img_pregunta_crop, nonzero, buffer=70)
 
@@ -83,6 +88,12 @@ def borrar_texto_oscuro(gray, limite=200):
 
 def get_mascara_lineas_horizontales(img_pregunta_recuadros):
 
+    px_naranjo = get_mask_imagen(img_pregunta_recuadros,
+                                   lower_color=np.array(
+                                       [0, 111, 109]),
+                                   upper_color=np.array([18, 255, 255]),
+                                   iters=2, revert=True)
+
     px_azul = get_mask_imagen(img_pregunta_recuadros, 
                                    lower_color=np.array([0, 0, 0]),
                                      upper_color=np.array([114, 255, 255]),
@@ -93,13 +104,15 @@ def get_mascara_lineas_horizontales(img_pregunta_recuadros):
                                     upper_color=np.array([179, 255, 255]),
                                     eliminar_manchas=None, iters=0)
     
-
+    idx_naranjo = np.where(px_naranjo == 0)
     idx_azul = np.where(px_azul == 0)
     idx_negro =  np.where(px_negro == 0)
 
     gray = cv2.cvtColor(img_pregunta_recuadros, cv2.COLOR_BGR2GRAY)
     gray[idx_azul ] = 255
     gray[idx_negro] = 255
+    gray[idx_naranjo ] = 0
+
 
 
 
