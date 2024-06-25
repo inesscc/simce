@@ -48,8 +48,8 @@ def ls(ruta=getcwd()):
     return [abspath(arch.path) for arch in scandir(ruta) if arch.is_file()]
 
 
-def get_mask_imagen(media_img, lower_color=np.array([13, 40, 0]), upper_color=np.array([29, 255, 255]),
-                    iters=4, eliminar_manchas='horizontal'):
+def get_mask_imagen(media_img, lower_color=np.array([13, 11, 0]), upper_color=np.array([29, 255, 255]),
+                    iters=4, eliminar_manchas='horizontal', revert=False):
     """
     Genera una máscara binaria para una imagen dada, basada en un rango de color en el espacio de color HSV.
 
@@ -80,6 +80,8 @@ def get_mask_imagen(media_img, lower_color=np.array([13, 40, 0]), upper_color=np
 
         else:
             return print('Valor inválido para eliminar manchas')
+    if revert:
+        mask = cv2.bitwise_not(mask)
 
     return mask
 

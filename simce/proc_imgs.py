@@ -52,21 +52,30 @@ def select_directorio(tipo_cuadernillo):
 
     return directorio_imagenes
 
-def dejar_solo_recuadros_subpregunta(mask_naranjo, img_pregunta, elemento_img_pregunta):
-    mask_selec = cv2.bitwise_not(bound_and_crop(mask_naranjo,elemento_img_pregunta))[80:-10, 40:-20]
-    kernel = np.ones((3, 3), np.uint8)
-    morph_cleaned = cv2.morphologyEx(mask_selec, cv2.MORPH_OPEN, kernel, iterations=2)
+def dejar_solo_recuadros_subpregunta(img_pregunta):
+    img_pregunta_crop = img_pregunta[60:-30, 30:-30]
+    mask_recuadro = get_mask_imagen(img_pregunta_crop,
+                           lower_color=np.array([0, 0, 224]),
+                           upper_color=np.array([179, 11, 255]),
+                           eliminar_manchas=None, iters=0, revert=False)
 
-    nonzero = cv2.findNonZero(morph_cleaned)
+    # Si hay mucho espacio negro, hacemos procesamiento adicional:
+    if mask_recuadro.mean() < 5:
+        morph_vert = eliminar_o_rellenar_manchas(mask_recuadro, orientacion='vertical', limite=10, rellenar=False )
+        mask_recuadro = eliminar_o_rellenar_manchas(morph_vert, orientacion='horizontal', limite=9, rellenar=False )
 
-    img_recuadro = bound_and_crop(img_pregunta[80:-10, 40:-20], nonzero, buffer=60)
+    nonzero = cv2.findNonZero(mask_recuadro)
+
+    img_recuadro = bound_and_crop(img_pregunta_crop, nonzero, buffer=70)
+
+
     return img_recuadro
 
-def borrar_texto_oscuro(gray):
+def borrar_texto_oscuro(gray, limite=200):
     gray_mean = gray.mean(axis=1) 
     gray_mean_mul10 = np.append(gray_mean, [gray_mean.mean()]* (10 - gray.shape[0] % 10))
     dark_areas = gray_mean_mul10.reshape(-1, 10).mean(axis=1)
-    pixeles_borrar = np.where(dark_areas< 200)[0] * 10
+    pixeles_borrar = np.where(dark_areas< limite)[0] * 10
 
     for p in pixeles_borrar:
         gray[p:p+10] = 255
@@ -74,37 +83,70 @@ def borrar_texto_oscuro(gray):
 
 def get_mascara_lineas_horizontales(img_pregunta_recuadros):
 
+    px_azul = get_mask_imagen(img_pregunta_recuadros, 
+                                   lower_color=np.array([0, 0, 0]),
+                                     upper_color=np.array([114, 255, 255]),
+                                     eliminar_manchas=None, iters=0)
+    
+    px_negro = get_mask_imagen(img_pregunta_recuadros, 
+                                lower_color=np.array([0, 0, 227]),
+                                    upper_color=np.array([179, 255, 255]),
+                                    eliminar_manchas=None, iters=0)
+    
+
+    idx_azul = np.where(px_azul == 0)
+    idx_negro =  np.where(px_negro == 0)
+
     gray = cv2.cvtColor(img_pregunta_recuadros, cv2.COLOR_BGR2GRAY)
+    gray[idx_azul ] = 255
+    gray[idx_negro] = 255
 
-    gray_sin_texto = borrar_texto_oscuro(gray)
 
 
-    mean_value = np.mean(gray_sin_texto)
-    gray2 = gray_sin_texto.copy()
+    gray2 = gray.copy() 
 
+    mean_value = np.mean(gray)
+
+    
     # Replace values above the mean with 255
-    gray2[(gray2 > mean_value*.93) ] = 255
+    gray2[(gray2 > mean_value*.95) ] = 255
 
     # Replace values below the mean with 0
-    gray2[(gray2 < mean_value*.93) ] = 0
+    gray2[(gray2 < mean_value*.95) ] = 0
 
     gray_limpio = eliminar_o_rellenar_manchas(gray2, 
                                                        orientacion='horizontal',
                                                          limite=100, rellenar=False)[:-10, :-10]
+    
+    
+
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 1))
+
+    gray_dilated = cv2.dilate(gray_limpio, kernel, iterations=2)
+
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 2))
+
+    gray_dilated2 = cv2.dilate(gray_dilated, kernel, iterations=1)
 
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
 
-    gray_eroded = cv2.erode(gray_limpio, kernel, iterations=2)
+    gray_eroded = cv2.erode(gray_dilated2, kernel, iterations=2)
+
 
     gray_limpio2 = eliminar_o_rellenar_manchas(gray_eroded, 
                                                        orientacion='horizontal',
                                                          limite=100, rellenar=True)
+    
+
+    gray_limpio3 = eliminar_o_rellenar_manchas(gray_limpio2, 
+                                                       orientacion='horizontal',
+                                                         limite=220, rellenar=False)
 
 
 
 
 
-    mask_lineas_horizontales = cv2.bitwise_not(gray_limpio2)
+    mask_lineas_horizontales = cv2.bitwise_not(gray_limpio3)
 
     
 
@@ -237,7 +279,7 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
             elemento_img_pregunta = big_contours[pregunta_selec_int - q_base]
             img_pregunta = bound_and_crop(media_img, elemento_img_pregunta)
             
-            img_pregunta_recuadros = dejar_solo_recuadros_subpregunta(mask_naranjo, img_pregunta, elemento_img_pregunta)
+            img_pregunta_recuadros = dejar_solo_recuadros_subpregunta(img_pregunta)
 
             # Exportamos pregunta si no tiene subpreguntas:
             if subpreg_x_preg[pregunta_selec] == 1:
@@ -302,6 +344,7 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
 
                 # Si hay error en procesamiento pregunta
         except Exception as e:
+            print(e)
 
             preg_error = str(dir_subpreg_rbd / f'{estudiante}_{pregunta_selec}')
             anotar_error(
