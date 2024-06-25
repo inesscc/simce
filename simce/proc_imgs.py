@@ -62,10 +62,12 @@ def dejar_solo_recuadros_subpregunta(img_pregunta):
     # Si existen columnas blancas, las eliminamos:
     mean_col = mask_recuadro.mean(axis=0)
     mask_recuadro[:, np.where(mean_col > 200)] = 0
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 1))
+    mask_dilate = cv2.dilate(mask_recuadro, kernel, iterations=2)
 
     # Eliminamos manchas verticales y horizontales:
     lim_vert = mask_recuadro.shape[0] / 150
-    morph_vert = eliminar_o_rellenar_manchas(mask_recuadro, orientacion='vertical', limite=lim_vert, rellenar=False )
+    morph_vert = eliminar_o_rellenar_manchas(mask_dilate, orientacion='vertical', limite=lim_vert, rellenar=False )
     lim_hor = mask_recuadro.shape[1] / 225
     morph_hor = eliminar_o_rellenar_manchas(morph_vert, orientacion='horizontal', limite=lim_hor, rellenar=False )
 
@@ -100,7 +102,7 @@ def get_mascara_lineas_horizontales(img_pregunta_recuadros):
                                      eliminar_manchas=None, iters=0)
     
     px_negro = get_mask_imagen(img_pregunta_recuadros, 
-                                lower_color=np.array([0, 0, 227]),
+                                lower_color=np.array([0, 0, 204]),
                                     upper_color=np.array([179, 255, 255]),
                                     eliminar_manchas=None, iters=0)
     
@@ -148,7 +150,7 @@ def get_mascara_lineas_horizontales(img_pregunta_recuadros):
 
     gray_limpio2 = eliminar_o_rellenar_manchas(gray_eroded, 
                                                        orientacion='horizontal',
-                                                         limite=100, rellenar=True)
+                                                         limite=140, rellenar=True)
     
 
     gray_limpio3 = eliminar_o_rellenar_manchas(gray_limpio2, 
