@@ -97,7 +97,7 @@ def process_single_image(df99, num, rbd, directorio_imagenes, dic_pagina, n_page
                 elemento_img_pregunta = big_contours[pregunta_selec_int - q_base]
                 img_pregunta = bound_and_crop(media_img, elemento_img_pregunta)
 
-                img_pregunta_recuadros = dejar_solo_recuadros_subpregunta(mask_naranjo, img_pregunta, elemento_img_pregunta)
+                img_pregunta_recuadros = dejar_solo_recuadros_subpregunta(img_pregunta)
                 
                 # Exportamos pregunta si no tiene subpreguntas:
                 if subpreg_x_preg[pregunta_selec] == 1:
@@ -208,7 +208,7 @@ def process_general(directorio_imagenes, tipo_cuadernillo, para_entrenamiento,
     n_pages, n_preguntas, subpreg_x_preg, dic_cuadernillo, dic_pagina, n_subpreg_tot = get_insumos(tipo_cuadernillo)
 
     # Dividir en bloques para procesamiento paralelo
-    num_workers = 1 #20 #cpu_count() -1
+    num_workers = 20 #cpu_count() -1
     print('###########')
     print(num_workers)
     print('###########')
@@ -228,13 +228,13 @@ def process_general(directorio_imagenes, tipo_cuadernillo, para_entrenamiento,
 
 if __name__ == "__main__":
     
-    tipo_cuadernillo = 'padres'
+    tipo_cuadernillo = 'estudiantes'
     directorio_imagenes = select_directorio(tipo_cuadernillo)
     para_entrenamiento = True  
     muestra = False  
     filter_rbd = None  
     filter_rbd_int = None 
-    filter_estudiante = 4110386  
+    filter_estudiante = None  
     regex_estudiante = regex_estudiante 
     dir_tabla_99 = dir_tabla_99
     dir_input = dir_input
