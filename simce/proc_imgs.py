@@ -94,7 +94,7 @@ def get_mascara_lineas_horizontales(img_pregunta_recuadros):
                                    lower_color=np.array(
                                        [0, 111, 109]),
                                    upper_color=np.array([18, 255, 255]),
-                                   iters=2, revert=True)
+                                   iters=1, revert=True)
 
     px_azul = get_mask_imagen(img_pregunta_recuadros, 
                                    lower_color=np.array([0, 0, 0]),
@@ -324,6 +324,18 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
 
             n_subpreg = len(lineas_horizontales) - 1
 
+            if n_subpreg != subpreg_x_preg[pregunta_selec]:
+
+                preg_error = str(dir_subpreg_rbd / f'{estudiante}')
+
+                dic_dif = get_subpregs_distintas(subpreg_x_preg, dir_subpreg_rbd, estudiante)
+
+                error = f'N° de subpreguntas incorrecto para serie {estudiante},\
+        se encontraron {n_subpreg} subpreguntas {dic_dif}'
+
+                anotar_error(
+                    pregunta=preg_error, error=error, nivel_error = tipo_cuadernillo)
+
             try:
 
                 file_out = str(
@@ -345,17 +357,7 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
 
                 continue
 
-            if n_subpreg != subpreg_x_preg[pregunta_selec]:
 
-                preg_error = str(dir_subpreg_rbd / f'{estudiante}')
-
-                dic_dif = get_subpregs_distintas(subpreg_x_preg, dir_subpreg_rbd, estudiante)
-
-                error = f'N° de subpreguntas incorrecto para serie {estudiante},\
-        se encontraron {n_subpreg} subpreguntas {dic_dif}'
-
-                anotar_error(
-                    pregunta=preg_error, error=error, nivel_error = tipo_cuadernillo)
 
                 # Si hay error en procesamiento pregunta
         except Exception as e:
