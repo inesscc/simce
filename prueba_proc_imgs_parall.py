@@ -127,6 +127,13 @@ def process_single_image(df99, num, rbd, directorio_imagenes, dic_pagina, n_page
                 
                 n_subpreg = len(lineas_horizontales) - 1
 
+                if n_subpreg != subpreg_x_preg[pregunta_selec]:
+                    preg_error = str(dir_subpreg_rbd / f'{estudiante}')
+                    dic_dif = get_subpregs_distintas(subpreg_x_preg, dir_subpreg_rbd, estudiante)
+                    error = f'N° de subpreguntas incorrecto para serie {estudiante}, se encontraron {n_subpreg} subpreguntas {dic_dif}'
+                    agregar_error(queue= queue, pregunta=preg_error, error=error, nivel_error=tipo_cuadernillo)
+            
+
                 try:
                     file_out = str(dir_subpreg_rbd / f'{estudiante}_{pregunta_selec}_{int(subpreg_selec)}.jpg')
                     crop_and_save_subpreg(img_pregunta_recuadros, lineas_horizontales,
@@ -142,12 +149,7 @@ def process_single_image(df99, num, rbd, directorio_imagenes, dic_pagina, n_page
                                 )
                     return 'Ups, ocurrio un error en la subpregunta'
 
-                if n_subpreg != subpreg_x_preg[pregunta_selec]:
-                    preg_error = str(dir_subpreg_rbd / f'{estudiante}')
-                    dic_dif = get_subpregs_distintas(subpreg_x_preg, dir_subpreg_rbd, estudiante)
-                    error = f'N° de subpreguntas incorrecto para serie {estudiante}, se encontraron {n_subpreg} subpreguntas {dic_dif}'
-                    agregar_error(queue= queue, pregunta=preg_error, error=error, nivel_error=tipo_cuadernillo)
-            
+
             except Exception as e:
                 preg_error = str(dir_subpreg_rbd / f'{estudiante}_{pregunta_selec}')
                 agregar_error(queue= queue, pregunta=preg_error, error='Pregunta no pudo ser procesada', nivel_error='Pregunta')
