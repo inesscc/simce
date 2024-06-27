@@ -32,7 +32,7 @@ if __name__ == '__main__':
     df = pd.read_excel('prob7.xlsx')
     rbds = df.Pregunta.str.extract('(\d{7})').squeeze().to_list()
     rbds = [int(i) for i in rbds]
-    get_subpreguntas(tipo_cuadernillo='estudiantes', para_entrenamiento=IS_TRAINING, filter_estudiante=rbds)
+    get_subpreguntas(tipo_cuadernillo='estudiantes', para_entrenamiento=IS_TRAINING, filter_estudiante=4008188)
     #get_subpreguntas(tipo_cuadernillo='padres', para_entrenamiento=IS_TRAINING, filter_estudiante=4096037)
 
     #if IS_TRAINING:

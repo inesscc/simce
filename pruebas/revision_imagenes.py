@@ -21,8 +21,8 @@ def plot(imgs, col_title=None, **imshow_kwargs):
 
     num_rows = len(imgs)
     num_cols = len(imgs[0])
-    print(f'{num_rows=}')
-    print(f'{num_cols=}')
+    # print(f'{num_rows=}')
+    # print(f'{num_cols=}')
     _, axs = plt.subplots(nrows=num_rows, ncols=num_cols, squeeze=False)
     for row_idx, row in enumerate(imgs):
         for col_idx, img in enumerate(row):
@@ -48,25 +48,34 @@ def plot(imgs, col_title=None, **imshow_kwargs):
 
     plt.tight_layout()
 
+from config.proc_img import nombre_tabla_padres_final
 
-
-
-rev = pd.read_excel('data/otros/datos_a_revisar.xlsx')
+#rev = pd.read_excel('data/otros/datos_a_revisar.xlsx')
+rev = pd.read_excel('data/otros/datos_revisados.xlsx')
+rev.origen.value_counts()
+rev['diferente'] = rev.etiqueta_original != rev.etiqueta_final
+rev.groupby('origen').diferente.sum().div(rev.groupby('origen').diferente.count()).sort_values(ascending=False)
 nombre_encargado = 'juane'
-mi_rev = rev[rev.encargado.eq(nombre_encargado)]
+#mi_rev = rev[rev.encargado.eq(nombre_encargado)]
+#mi_rev = rev[rev.comentarios.notnull()]
+mi_rev = rev[rev.origen.eq('ratio_tinta') & rev.etiqueta_final.eq(0)]
+#mi_rev2 = mi_rev[mi_rev.etiqueta_final.eq('-')]
 for i in range(len(mi_rev)):
-    if i >= 56:
+    if i >= 0:
         print(i)
+        
         row = mi_rev.iloc[i]
+        print(row.origen)
         try:
             img = Image.open(row.ruta_imagen_output)
             
             img2 = Image.open((dir_input / row.ruta_imagen.replace('\\', '/')))
         
             plot([img, img2], col_title=[row.ruta_imagen_output, row.ruta_imagen] )
-            #plt.title(train[train.falsa_sospecha.eq(1)].ruta_imagen_output.iloc[i])
+            #plt.title(train[tr-ain.falsa_sospecha.eq(1)].ruta_imagen_output.iloc[i])
             plt.show()
-        except:
+        except Exception as e:
+            print(e)
             pass
 
 

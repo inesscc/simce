@@ -34,6 +34,13 @@ df99p = pd.read_csv(dir_tabla_99 / padres99)
 
 df99e = pd.read_csv(dir_tabla_99 / est99).sample(frac=.1, random_state=42)
 df99 = pd.concat([df99e, df99p]).reset_index(drop=True)
+from pathlib import Path
+from config import dir_input
+faltantes = df99e[~df99e.ruta_imagen.str.replace('\\', '/').apply(lambda x: (dir_input / Path(x)).is_file())].ruta_imagen.to_list()
+import pickle
+with open("files_faltantes", "wb") as fp:   #Pickling
+   pickle.dump(faltantes, fp)
+
 
 df_exist = df99[df99.ruta_imagen_output.apply(lambda x: Path(x).is_file())].reset_index()
 df_exist.dm_sospecha = (df_exist.dm_sospecha == 99).astype(int)
