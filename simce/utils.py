@@ -19,7 +19,8 @@ from itertools import repeat
 from collections import OrderedDict
 from functools import wraps
 from time import time
-
+from PIL import Image
+import random
 
 def timing(f):
     @wraps(f)
@@ -115,9 +116,9 @@ def eliminar_o_rellenar_manchas(mask, orientacion, limite, rellenar=False):
             mean_row = mask.mean(axis=axis)
 
             if rellenar:
-                comparison = mean_row > limite
+                comparison = mean_row >= limite
             else:
-                comparison = mean_row < limite
+                comparison = mean_row <= limite
             # Si la media es menor a 100, reemplazamos con 0 (negro):
             # Esto permite eliminar manchas de color que a veces se dan
             idx_low_rows = np.where(comparison)[0]
@@ -127,6 +128,20 @@ def eliminar_o_rellenar_manchas(mask, orientacion, limite, rellenar=False):
         
         return mask
 
+class RandomRotation:
+    def __init__(self, degrees, p):
+        self.degrees = degrees
+        self.p = p
+
+    def __call__(self, x):
+        if random.random() < self.p:
+            if self.degrees % 90 == 0:  # Only handle multiples of 90 degrees
+                rotations = (self.degrees // 90) % 4
+                for _ in range(rotations):
+                    x = x.transpose(Image.ROTATE_90)
+            else:
+                print("This implementation only supports rotations that are multiples of 90 degrees.")
+        return x
 
 def ensure_dir(dirname):
     dirname = Path(dirname)

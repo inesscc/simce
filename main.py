@@ -30,10 +30,10 @@ if __name__ == '__main__':
     # 3. Recortar subpreguntas
 
     
-    # df = pd.read_excel('prob7.xlsx')
-    # rbds = df.Pregunta.str.extract('(\d{7})').squeeze().to_list()
-    # rbds = [int(i) for i in rbds]
-    get_subpreguntas(tipo_cuadernillo='estudiantes', para_entrenamiento=IS_TRAINING, filter_estudiante=4001053)
+    df = pd.read_excel('prob8.xlsx')
+    rbds = df.Pregunta.str.extract('(\d{7})').squeeze().to_list()
+    rbds = [int(i) for i in rbds]
+    get_subpreguntas(tipo_cuadernillo='estudiantes', para_entrenamiento=IS_TRAINING, filter_estudiante=4183814)
     #get_subpreguntas(tipo_cuadernillo='padres', para_entrenamiento=IS_TRAINING, filter_estudiante=4001776)
 
     #if IS_TRAINING:

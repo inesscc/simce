@@ -11,7 +11,6 @@ from config.proc_img import dir_subpreg, regex_estudiante, dir_tabla_99, \
     dir_input, n_pixeles_entre_lineas, dir_estudiantes, dir_padres
 from simce.errors import anotar_error
 # from simce.apoyo_proc_imgs import get_subpreguntas_completo
-
 import pandas as pd
 import re
 from dotenv import load_dotenv
@@ -167,6 +166,20 @@ def get_mascara_lineas_horizontales(img_pregunta_recuadros):
 
     return mask_lineas_horizontales
 
+
+def save_pregunta_completa(img_pregunta_recuadros, dir_subpreg_rbd, estudiante, pregunta_selec):
+    print('Pregunta no cuenta con subpreguntas, se guardará imagen')
+    file_out = str(
+        dir_subpreg_rbd / f'{estudiante}_{pregunta_selec}.jpg')
+    
+    # Si la pregunta es más larga que ancha, la dejamos a lo ancho:
+    if img_pregunta_recuadros.shape[0] > img_pregunta_recuadros.shape[1]:
+        img_pregunta_recuadros = cv2.rotate(img_pregunta_recuadros, cv2.ROTATE_90_CLOCKWISE)
+
+    n_subpreg = 1
+    cv2.imwrite(file_out, img_pregunta_recuadros)
+    
+
 def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None, filter_estudiante=None,
                      filter_rbd_int=False, muestra=False):
     '''
@@ -298,13 +311,9 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
 
             # Exportamos pregunta si no tiene subpreguntas:
             if subpreg_x_preg[pregunta_selec] == 1:
-                print('Pregunta no cuenta con subpreguntas, se guardará imagen')
-                file_out = str(
-                    dir_subpreg_rbd / f'{estudiante}_{pregunta_selec}.jpg')
-
-                n_subpreg = 1
-                cv2.imwrite(file_out, img_pregunta_recuadros)
+                save_pregunta_completa(img_pregunta_recuadros, dir_subpreg_rbd, estudiante, pregunta_selec)
                 continue
+
 
             subpreg_selec = df99.iloc[num].preguntas.split('_')[1]
             print(f'{subpreg_selec=}')
@@ -403,6 +412,14 @@ def get_subpregs_distintas(subpreg_x_preg, dir_subpreg_rbd, estudiante):
 def eliminar_franjas_negras(img_preg):
     im2 = get_mask_imagen(img_preg, lower_color=np.array([0, 0, 241]),
                           upper_color=np.array([179, 255, 255]), iters=2)
+
+    im2[:,:100] = 255
+    im2[:,-100:] = 255
+    
+    # mean_row = im2.mean(axis=1)
+    # idx_low_rows = np.where(mean_row == 0)[0]
+    # im2[idx_low_rows, :] = 255
+
     contours = cv2.findContours(
         im2, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[0]
     area_cont = [cv2.contourArea(i) for i in contours]
@@ -524,6 +541,9 @@ def crop_and_save_subpreg(img_pregunta_crop, lineas_horizontales, i, file_out, v
                                         lineas_horizontales[i+1]+20,]
     print(file_out)
     print(img_subrptas.shape)
+     # Si la subpregunta es más larga que ancha, la rotamos a lo ancho:
+    if img_subrptas.shape[0] > img_subrptas.shape[1]:
+        img_subrptas = cv2.rotate(img_subrptas, cv2.ROTATE_90_CLOCKWISE)
 
     # print(file_out)
     cv2.imwrite(file_out, img_subrptas)

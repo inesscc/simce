@@ -112,20 +112,7 @@ def addnoise(input_image, noise_factor = 0.1):
     image = output_image(noise)
     return image
 
-class RandomRotation:
-    def __init__(self, degrees, p):
-        self.degrees = degrees
-        self.p = p
 
-    def __call__(self, x):
-        if random.random() < self.p:
-            if self.degrees % 90 == 0:  # Only handle multiples of 90 degrees
-                rotations = (self.degrees // 90) % 4
-                for _ in range(rotations):
-                    x = x.transpose(Image.ROTATE_90)
-            else:
-                print("This implementation only supports rotations that are multiples of 90 degrees.")
-        return x
 
 
 def transform_img(path_img):
@@ -134,7 +121,7 @@ def transform_img(path_img):
 
     trans_img = v2.RandomHorizontalFlip(0.7)(orig_img)               # Randomly flip
     trans_img = v2.RandomVerticalFlip(0.7)(trans_img) 
-    trans_img = RandomRotation(degrees=90, p=.5 )(trans_img)
+    #trans_img = RandomRotation(degrees=90, p=.5 )(trans_img)
     trans_img = v2.ColorJitter(brightness=0.1, contrast=0.2, saturation=0.2, hue=0.01)(trans_img)
     trans_img = addnoise(trans_img)
     trans_img = v2.GaussianBlur(kernel_size = (3, 5), sigma = (1, 2)) (trans_img)
