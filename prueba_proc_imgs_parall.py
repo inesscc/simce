@@ -16,7 +16,7 @@ from simce.errors import agregar_error, escribir_errores
 from simce.utils import get_mask_imagen
 
 from simce.proc_imgs import select_directorio, get_insumos, get_pages, get_subpregs_distintas, eliminar_franjas_negras, recorte_imagen, \
-    obtener_lineas_horizontales, bound_and_crop, crop_and_save_subpreg, get_pregunta_inicial_pagina, \
+    obtener_lineas_horizontales, bound_and_crop, crop_and_save_subpreg, get_pregunta_inicial_pagina, save_pregunta_completa, \
     partir_imagen_por_mitad, get_contornos_grandes, dejar_solo_recuadros_subpregunta, get_mascara_lineas_horizontales
 
 import json
@@ -101,12 +101,7 @@ def process_single_image(df99, num, rbd, directorio_imagenes, dic_pagina, n_page
                 
                 # Exportamos pregunta si no tiene subpreguntas:
                 if subpreg_x_preg[pregunta_selec] == 1:
-                    print('Pregunta no cuenta con subpreguntas, se guardará imagen')
-                    file_out = str(
-                        dir_subpreg_rbd / f'{estudiante}_{pregunta_selec}.jpg')
-
-                    n_subpreg = 1
-                    cv2.imwrite(file_out, img_pregunta_recuadros)
+                    save_pregunta_completa(img_pregunta_recuadros, dir_subpreg_rbd, estudiante, pregunta_selec)
                     
                     return 'Éxito!'
 
@@ -210,7 +205,7 @@ def process_general(directorio_imagenes, tipo_cuadernillo, para_entrenamiento,
     n_pages, n_preguntas, subpreg_x_preg, dic_cuadernillo, dic_pagina, n_subpreg_tot = get_insumos(tipo_cuadernillo)
 
     # Dividir en bloques para procesamiento paralelo
-    num_workers = 20 #cpu_count() -1
+    num_workers = cpu_count() -1
     print('###########')
     print(num_workers)
     print('###########')
@@ -230,7 +225,7 @@ def process_general(directorio_imagenes, tipo_cuadernillo, para_entrenamiento,
 
 if __name__ == "__main__":
     
-    tipo_cuadernillo = 'estudiantes'
+    tipo_cuadernillo = 'padres'
     directorio_imagenes = select_directorio(tipo_cuadernillo)
     para_entrenamiento = True  
     muestra = False  
