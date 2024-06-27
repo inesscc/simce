@@ -11,6 +11,7 @@ from simce.proc_imgs import get_subpreguntas
 from simce.proc_tabla_99 import get_tablas_99_total
 from simce.preparar_modelamiento import gen_train_test
 import pandas as pd
+
 # %% Subpreguntas
 
 # %%
@@ -29,11 +30,11 @@ if __name__ == '__main__':
     # 3. Recortar subpreguntas
 
     
-    df = pd.read_excel('prob7.xlsx')
-    rbds = df.Pregunta.str.extract('(\d{7})').squeeze().to_list()
-    rbds = [int(i) for i in rbds]
-    get_subpreguntas(tipo_cuadernillo='estudiantes', para_entrenamiento=IS_TRAINING, filter_estudiante=4008188)
-    #get_subpreguntas(tipo_cuadernillo='padres', para_entrenamiento=IS_TRAINING, filter_estudiante=4096037)
+    # df = pd.read_excel('prob7.xlsx')
+    # rbds = df.Pregunta.str.extract('(\d{7})').squeeze().to_list()
+    # rbds = [int(i) for i in rbds]
+    get_subpreguntas(tipo_cuadernillo='estudiantes', para_entrenamiento=IS_TRAINING, filter_estudiante=4001053)
+    #get_subpreguntas(tipo_cuadernillo='padres', para_entrenamiento=IS_TRAINING, filter_estudiante=4001776)
 
     #if IS_TRAINING:
         #4. Obtener set de entrenamiento y test y aumentamos train

@@ -66,9 +66,9 @@ def dejar_solo_recuadros_subpregunta(img_pregunta):
     mask_dilate = cv2.dilate(mask_recuadro, kernel, iterations=2)
 
     # Eliminamos manchas verticales y horizontales:
-    lim_vert = mask_recuadro.shape[0] / 150
+    lim_vert = mask_recuadro.mean(axis=0).mean()
     morph_vert = eliminar_o_rellenar_manchas(mask_dilate, orientacion='vertical', limite=lim_vert, rellenar=False )
-    lim_hor = mask_recuadro.shape[1] / 225
+    lim_hor = mask_recuadro.mean(axis=1).mean()
     morph_hor = eliminar_o_rellenar_manchas(morph_vert, orientacion='horizontal', limite=lim_hor, rellenar=False )
 
     nonzero = cv2.findNonZero(morph_hor)
