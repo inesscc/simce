@@ -1,5 +1,5 @@
 {
-    "name": "maxvit_t",
+    "name": "maxvit_t_color",
     "n_gpu": 1,
     "class_weights": [1.0, 1.0],
     "arch": {
