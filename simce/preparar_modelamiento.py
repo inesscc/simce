@@ -1,4 +1,4 @@
-from config.proc_img import dir_tabla_99, dir_subpreg_aug, dir_train_test, SEED, dir_subpreg
+from config.proc_img import dir_tabla_99, dir_subpreg_aug, dir_train_test, SEED, FRAC_SAMPLE, N_AUGMENT_ROUNDS, dir_subpreg, dir_insumos
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from pathlib import Path
@@ -8,7 +8,14 @@ import torch
 import random
 # Creamos directorio para imágenes aumentadas:
 
-def get_img_existentes():
+def get_img_existentes(fraccion_sample: float = .1) -> tuple[pd.DataFrame, pd.DataFrame]:
+    '''
+    Genera dataframe con archivos existentes (que sí pudieron ser procesados), con la siguiente lógica:
+
+    - Obtiene todas las falsas sospechas (dm_sospecha == 1 y dm_final == 0) de padres y estudiantes
+    - Obtiene fraccion_sample de las filas que no son falsa sospecha de estudiantes (para evitar desbalancear
+    clases y hacer crecer demasiado el dataset)
+    '''
     dir_subpreg_aug.mkdir(parents=True, exist_ok=True)
 
     padres99 = f'casos_99_entrenamiento_compilados_padres.csv'
@@ -17,32 +24,57 @@ def get_img_existentes():
     
     df99e = pd.read_csv(dir_tabla_99 / est99)
 
+    # Obtenemos falsas sospechas de estudiantes para filtrar casos relevantes
     df99e['falsa_sospecha'] = ((df99e['dm_sospecha'] == 1) & (df99e['dm_final'] == 0))
-    
     est_falsa_sospecha = df99e[df99e.falsa_sospecha.eq(1)]
-    otros_est = df99e[df99e.falsa_sospecha.eq(0)].sample(frac=.1, random_state=42)
+
+    # Obtenemos frac_sample de los otros casos para alimentar el dataset:
+    otros_est = df99e[df99e.falsa_sospecha.eq(0)].sample(frac=fraccion_sample, random_state=SEED)
+
     df99 = pd.concat([est_falsa_sospecha, otros_est, df99p]).reset_index(drop=True)
-    
+    # Filtramos archivos que efectivamente fue posible procesar:
     df_exist = df99[df99.ruta_imagen_output.apply(lambda x: Path(x).is_file())].reset_index()
+
 
     print(f'{df_exist.shape=}')
     print(f'{df99.shape=}')
 
+    # Obtenemos versión final de variable falsa sospecha con todos los datos:
     df_exist['falsa_sospecha'] = ((df_exist['dm_sospecha'] == 1) & (df_exist['dm_final'] == 0))
 
-
+    # Separamos entre datos que fueron obtenidos de sampleo aleatorio y datos obtenidos de sospechas de doble marca:
     df_sampleado = df_exist[df_exist.dm_sospecha.eq(0)]
     df_sospecha = df_exist[df_exist.dm_sospecha.ne(0)]
 
     return df_sospecha, df_sampleado
 
 
+def incorporar_reetiquetas(df_exist: pd.DataFrame) -> pd.DataFrame:
+    '''
+    Incorpora re-etiquetas para mejorar calidad del dataset
+    '''
+
+    reetiqueta = pd.read_excel(dir_insumos / 'datos_revisados.xlsx')
+
+    etiqueta_final =reetiqueta.set_index('ruta_imagen_output').etiqueta_final
+    etiqueta_final = etiqueta_final[~etiqueta_final.isin(['-', 99])]
+    df_exist['reetiqueta'] = df_exist.ruta_imagen_output.map(etiqueta_final)
+    df_exist['dm_final'] = df_exist.reetiqueta.combine_first(df_exist.dm_final).astype(int)
+
+    return df_exist
+
+
 def gen_train_test():
 
-    df_exist, df_sampleado = get_img_existentes()
-    train, test = train_test_split(df_exist, stratify=df_exist['falsa_sospecha'], test_size=.2)
+    df_exist, df_sampleado = get_img_existentes(fraccion_sample=FRAC_SAMPLE)
 
-    df_aug = gen_df_aumentado(train)
+    # Traemos re-etiquetado 
+
+    df_exist_re = incorporar_reetiquetas(df_exist)
+
+    train, test = train_test_split(df_exist_re, stratify=df_exist['falsa_sospecha'], test_size=.2)
+
+    df_aug = gen_df_aumentado(train, n_augment_rounds=N_AUGMENT_ROUNDS)
 
     export_train_test(train, df_aug, test, df_sampleado=None)
 
@@ -51,8 +83,9 @@ def gen_train_test():
 
 
 
-def gen_df_aumentado(train):
-
+def gen_df_aumentado(train: pd.DataFrame, n_augment_rounds:int = 5) -> pd.DataFrame:
+    '''Genera n_augment_rounds copias de cada fila del set de entrenamiento con distintas transformaciones que
+     se generarán de acuerdo con una probabilidad '''
 
     df_aug = train[train.falsa_sospecha.eq(1)].copy()
 
@@ -60,8 +93,8 @@ def gen_df_aumentado(train):
     
     rutas = []
     df_aug_final = pd.DataFrame()
-    # 5 rondas de aumentado
-    for i in range(5):
+    # n_augments rondas de aumentado
+    for i in range(n_augment_rounds):
         random.seed(SEED+i)
         torch.manual_seed(SEED+i)
         print(f'{i=}')
@@ -73,7 +106,7 @@ def gen_df_aumentado(train):
 
             dir_imagen_aug = Path(str(dir_imagen_og).replace(dir_subpreg.name, dir_subpreg_aug.name))
             
-            trans_img = transform_img(dir_imagen_og)
+            trans_img = transform_img(dir_imagen_og, i)
             dir_imagen_aug =  Path(str(dir_imagen_aug.with_suffix('')) + f'aug_{i+1}.jpg')
             dir_imagen_aug.parent.mkdir(exist_ok=True, parents=True)
             trans_img.save(dir_imagen_aug)
@@ -103,31 +136,61 @@ def export_train_test(train, df_aug, test, df_sampleado=None):
 
 #### funciones aux para generar transformaciones
 
-def addnoise(input_image, noise_factor = 0.1):
-    """transforma la imagen agredando un ruido gausiano"""
-    inputs = v2.Compose([v2.ToImage(), v2.ToDtype(torch.float32, scale=True)])(input_image)
-    noise = inputs + torch.rand_like(inputs) * noise_factor
-    noise = torch.clip (noise,0,1.)
-    output_image = v2.ToPILImage()
-    image = output_image(noise)
+def random_addnoise(input_image, noise_factor = 0.1, p=.5):
+    """transforma la imagen agredando un ruido gausiano con probabilidad p"""
+    if random.random() < p:
+        inputs = v2.Compose([v2.ToImage(), v2.ToDtype(torch.float32, scale=True)])(input_image)
+        noise = inputs + torch.rand_like(inputs) * noise_factor
+        noise = torch.clip (noise,0,1.)
+        output_image = v2.ToPILImage()
+        image = output_image(noise)
+    else:
+        image = input_image
     return image
 
 
 
 
-def transform_img(path_img):
+def transform_img(path_img, i):
     """Transformaciones a imagen para aumento de casos de sospecha de doble marca en entrenamiento"""
     orig_img = Image.open(path_img)
 
-    trans_img = v2.RandomHorizontalFlip(0.7)(orig_img)               # Randomly flip
-    trans_img = v2.RandomVerticalFlip(0.7)(trans_img) 
-    #trans_img = RandomRotation(degrees=90, p=.5 )(trans_img)
-    trans_img = v2.ColorJitter(brightness=0.1, contrast=0.2, saturation=0.2, hue=0.01)(trans_img)
-    trans_img = addnoise(trans_img)
-    trans_img = v2.GaussianBlur(kernel_size = (3, 5), sigma = (1, 2)) (trans_img)
+    if i == 0:
+        trans_img = v2.RandomHorizontalFlip(1)(orig_img)    
+        trans_img = v2.ColorJitter(brightness=0.1, contrast=0.2, saturation=0.2, hue=0.01)(trans_img)         
+    elif i == 1:
+        trans_img = v2.RandomVerticalFlip(1)(orig_img) 
+        trans_img = v2.ColorJitter(brightness=0.1, contrast=0.2, saturation=0.2, hue=0.01)(trans_img)
+    elif i == 2:
+        trans_img = v2.RandomHorizontalFlip(1)(orig_img)  
+        trans_img = v2.RandomVerticalFlip(1)(trans_img) 
+        trans_img = v2.ColorJitter(brightness=0.1, contrast=0.2, saturation=0.2, hue=0.01)(trans_img)
+    elif i == 3:
+        trans_img = random_addnoise(orig_img)
+        trans_img = v2.ColorJitter(brightness=0.1, contrast=0.2, saturation=0.2, hue=0.01)(trans_img)
+    elif i == 4:
+
+        trans_img = v2.GaussianBlur(kernel_size = (3, 5), sigma = (1, 2)) (orig_img)
+        trans_img = v2.ColorJitter(brightness=0.1, contrast=0.2, saturation=0.2, hue=0.01)(trans_img)
+    else:
+
+        raise 'Función acepta hasta 5 rondas de data augmentation'
+
     
     return trans_img
 
+# from config.proc_img import dir_input
+# folders_output = set([i.name for i in (dir_subpreg / 'CE').glob('*')])
+# folders_input = set([i.name for i in (dir_input / 'CE').glob('*')])
+# dif_folders = sorted(folders_input.difference(folders_output))
+# folders_to_zip = [i for i in (dir_input / 'CE').glob('*') if i.name in dif_folders]
+# import shutil
+# import tempfile
+# with tempfile.TemporaryDirectory() as temp_dir:
+#     for folder in folders_to_zip:
+#         shutil.copytree(folder, Path(temp_dir) / folder.name)
 
+#     # Create the zip archive from the temporary directory
+#     shutil.make_archive('carpetas_faltantes', 'zip', temp_dir)
 
 

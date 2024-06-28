@@ -226,7 +226,7 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
 
         # Si queremos correr función solo para el rbd ingresado
         else:
-            df99 = df99[(df99.rbd_ruta.eq(filter_rbd))]
+            df99 = df99[(df99.rbd_ruta.isin(filter_rbd))]
 
     if filter_estudiante:
         if isinstance(filter_estudiante, int):

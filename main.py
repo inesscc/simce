@@ -10,7 +10,7 @@ from simce.generar_insumos_img import generar_insumos_total
 from simce.proc_imgs import get_subpreguntas
 from simce.proc_tabla_99 import get_tablas_99_total
 from simce.preparar_modelamiento import gen_train_test
-import pandas as pd
+# import pandas as pd
 
 # %% Subpreguntas
 
@@ -25,19 +25,14 @@ if __name__ == '__main__':
     # 1.  Generar insumos para procesamiento
     #generar_insumos_total() # TODO: función está calculando mal insumos. Debuggear
     # 2. Generar tablas con dobles marcas
-    #get_tablas_99_total(para_entrenamiento=IS_TRAINING)
+    get_tablas_99_total(para_entrenamiento=IS_TRAINING)
 
     # 3. Recortar subpreguntas
+    get_subpreguntas(tipo_cuadernillo='estudiantes', para_entrenamiento=IS_TRAINING)
+    get_subpreguntas(tipo_cuadernillo='padres', para_entrenamiento=IS_TRAINING)
 
-    
-    df = pd.read_excel('prob8.xlsx')
-    rbds = df.Pregunta.str.extract('(\d{7})').squeeze().to_list()
-    rbds = [int(i) for i in rbds]
-    get_subpreguntas(tipo_cuadernillo='estudiantes', para_entrenamiento=IS_TRAINING, filter_estudiante=4183814)
-    #get_subpreguntas(tipo_cuadernillo='padres', para_entrenamiento=IS_TRAINING, filter_estudiante=4001776)
-
-    #if IS_TRAINING:
+    if IS_TRAINING:
         #4. Obtener set de entrenamiento y test y aumentamos train
-        #gen_train_test()
+        gen_train_test()
 
 # %%

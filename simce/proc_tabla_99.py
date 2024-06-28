@@ -17,7 +17,6 @@ from pathlib import Path
 random.seed(SEED)
 np.random.seed(SEED)
 
-
 @timing
 def get_tablas_99_total(para_entrenamiento=True):
     print('Generando tabla estudiantes...')
@@ -98,7 +97,7 @@ def procesar_casos_99(df_rptas, nombres_col, dic_cuadernillo, tipo_cuadernillo, 
     # Si queremos obtener set de entrenamiento agregamos muestra de respuestas normales:
     if para_entrenamiento:
 
-        df_sample = df_melt[df_melt.respuestas.ne(99)].sample(round(casos_99.shape[0] * .2))
+        df_sample = df_melt[df_melt.respuestas.ne(99)].sample(round(casos_99.shape[0] * .2), random_state=SEED )
         casos_99 = pd.concat([casos_99, df_sample])
 
     # Usamos diccionario cuadernillo para ver a qué imagen está asociada esa pregunta específica:
