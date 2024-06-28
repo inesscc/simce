@@ -12,7 +12,7 @@ import model.metric as module_metric
 import numpy as np
 import torchvision.models as models
 
-config_dict = read_json('config/model.json')
+config_dict = read_json('config/model_MaxVit_T_Weights.json')
 config = ConfigParser(config_dict)
 
 
@@ -34,6 +34,9 @@ def main(config):
     logger.info(model)
 
     trainloader = config.init_obj('data_loader_train', module_data)
+
+
+    
     valid_data_loader = trainloader.split_validation()
 
 
