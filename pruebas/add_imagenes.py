@@ -26,7 +26,6 @@ import re
 import mlflow
 
 ### mantenemos la carga de archivos
-
 classification_models = list_models(module=torchvision.models)
 padres99 = f'casos_99_entrenamiento_compilados_padres.csv'
 est99 = f'casos_99_entrenamiento_compilados_estudiantes.csv'

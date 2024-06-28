@@ -48,7 +48,6 @@ def plot(imgs, col_title=None, **imshow_kwargs):
 
     plt.tight_layout()
 
-from config.proc_img import nombre_tabla_padres_final
 
 #rev = pd.read_excel('data/otros/datos_a_revisar.xlsx')
 rev = pd.read_excel('data/otros/datos_revisados.xlsx')
@@ -58,7 +57,7 @@ rev.groupby('origen').diferente.sum().div(rev.groupby('origen').diferente.count(
 nombre_encargado = 'juane'
 #mi_rev = rev[rev.encargado.eq(nombre_encargado)]
 #mi_rev = rev[rev.comentarios.notnull()]
-mi_rev = rev[rev.origen.eq('ratio_tinta') & rev.etiqueta_final.eq(0)]
+mi_rev = rev[rev.origen.eq('doble_marca_normal') ]
 #mi_rev2 = mi_rev[mi_rev.etiqueta_final.eq('-')]
 for i in range(len(mi_rev)):
     if i >= 0:
