@@ -1,16 +1,16 @@
 {
-    "name": "Wide_resnet_best_config",
+    "name": "vgg16",
     "n_gpu": 1,
     "class_weights": [
-        3.0,
+        1.0,
         1.0
     ],
     "arch": {
-        "type": "resnet18",
+        "type": "vgg16",
         "args": {}
     },
     "weights": {
-        "type": "ResNet18_Weights",
+        "type": "VGG16_Weights",
         "args": {}
     },
     "data_loader_train": {
@@ -52,7 +52,7 @@
     "optimizer": {
         "type": "SGD",
         "args": {
-            "lr": 0.005,
+            "lr": 0.003,
             "weight_decay": 0.001,
             "momentum": 0.9
         }

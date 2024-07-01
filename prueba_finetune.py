@@ -12,6 +12,7 @@ from trainer import Trainer
 import model.metric as module_metric
 import numpy as np
 import torchvision.models as models
+from simce.modelamiento import preparar_capas_modelo
 
 config_dict = read_json('config/model.json')
 config = ConfigParser(config_dict)
@@ -31,14 +32,9 @@ def main(config):
     num_classes = 2
     weights = config.init_obj('weights', models)
     model = config.init_obj('arch', models, weights=weights)
-    num_features = model.fc.in_features
-    # model.fc = nn.Sequential(
-    # nn.Linear(num_features, 256),  # Additional linear layer with 256 output features
-    # nn.ReLU(inplace=True),         # Activation function (you can choose other activation functions too)
-    # nn.Dropout(0.5),               # Dropout layer with 50% probability
-    # 
-    # )
-    model.fc = nn.Linear(num_features, num_classes)
+
+    model = preparar_capas_modelo(model, config['arch']['type'])
+
     logger.info(model)
 
     trainloader = config.init_obj('data_loader_train', module_data)
