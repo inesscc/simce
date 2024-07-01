@@ -1,7 +1,7 @@
 import argparse
 import collections
 import torch
-import torch.nn as nn
+
 from config.proc_img import SEED
 from config.parse_config import ConfigParser
 from simce.utils import read_json, prepare_device
@@ -15,6 +15,20 @@ import torchvision.models as models
 config_dict = read_json('config/model_MaxVit_T_Weights.json')
 config = ConfigParser(config_dict)
 
+def preparar_capas_modelo(model, modelo_seleccionado):
+    num_classes = 2
+    if modelo_seleccionado == 'vgg16':           
+        num_features = model.classifier[6].in_features
+        model.classifier[6] = nn.Linear(num_features, num_classes)
+    elif modelo_seleccionado == 'maxvit_t':
+        num_features = model.classifier[5].in_features
+        model.classifier[5] = nn.Linear(num_features, num_classes)
+    elif modelo_seleccionado == 'wide_resnet101_2':
+        num_features = model.fc.in_features
+        model.fc = nn.Linear(num_features, num_classes)
+    else:
+        raise('Código no está preparado para incorporar modelo. Modifique función para incorporarla')
+        
 
 def main(config):
 
@@ -24,9 +38,13 @@ def main(config):
     np.random.seed(SEED)
 
     logger = config.get_logger('train')
-    num_classes = 2
+
     weights = config.init_obj('weights', models)
     model = config.init_obj('arch', models, weights=weights)
+
+    model = preparar_capas_modelo(model, config['arch']['type'])
+
+    
     
     num_features = model.classifier[5].in_features
     model.classifier[5] = nn.Linear(num_features, num_classes)

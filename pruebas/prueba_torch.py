@@ -161,9 +161,9 @@ print('Finished Training')
 from torchvision import models
 import data_loader.data_loaders as module_data
 device, device_ids = prepare_device(config['n_gpu'])
-config_dict = read_json('saved/models/maxvit_t/0618_161749/config.json')
+config_dict = read_json('saved/models/maxvit_t/0701_092128/config.json')
 config = ConfigParser(config_dict)
-ruta_modelo = 'saved/models/maxvit_t/0618_161749/model_best.pt'
+ruta_modelo = 'saved/models/maxvit_t/0701_092128/model_best.pt'
 testloader = config.init_obj('data_loader_test', module_data)
 num_classes = 2
 model_load  = config.init_obj('arch', models, num_classes=num_classes)
@@ -222,7 +222,13 @@ preds[preds.true.eq(1) & preds.pred.eq(0)].reset_index().dirs.apply(lambda x: Pa
 
 preds_tot['deciles'] = pd.qcut(preds_tot.proba, q=20)
 preds_tot.groupby('deciles').acierto.mean().plot()
+plt.axhline(.98, color='red')
 plt.show()
+
+preds_tot[preds_tot.deciles.cat.codes.ge(16)].acierto.mean()
+preds_tot[preds_tot.deciles.cat.codes.ge(16) & preds_tot.dm_final.eq(0)].ruta_imagen_output.iloc[0]
+preds_tot.deciles.value_counts()
+
 preds_tot.acierto.mean()
 preds_tot.proba.describe()
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
