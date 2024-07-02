@@ -61,14 +61,15 @@ mi_rev = rev[rev.encargado.eq(nombre_encargado)]
 #mi_rev = rev[rev.comentarios.notnull()]
 #mi_rev = rev[rev.origen.eq('doble_marca_normal') ]
 #mi_rev2 = mi_rev[mi_rev.etiqueta_final.eq('-')]
-
-
+r2 = rev[rev.etiqueta_original.eq(0)]
+r2.ruta_imagen_output.iloc[0]
+r2[r2.ruta_imagen_output.str.contains('aug')]
 # rev2 = pd.read_excel('data/otros/resultados_maxvit.xlsx')
 # fp = rev2[rev2.acierto.eq(0) & rev2.dm_final.eq(1)]
 # fn = rev2[rev2.acierto.eq(0) & rev2.dm_final.eq(0)]
 # fp.iloc[0]
 for i in range(len(mi_rev)):
-    if i >= 0:
+    if i >= 35:
         print(i)
         
         row = mi_rev.iloc[i]
