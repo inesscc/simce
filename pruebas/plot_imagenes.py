@@ -92,6 +92,7 @@ import matplotlib.pyplot as plt
 import torch
 from torchvision.utils import draw_bounding_boxes, draw_segmentation_masks
 from torchvision import tv_tensors
+
 def plot(imgs, col_title=None, titles=None, **imshow_kwargs):
     if not isinstance(imgs[0], list):
         # Make a 2d grid even if there's just 1 row
@@ -115,14 +116,14 @@ def plot(imgs, col_title=None, titles=None, **imshow_kwargs):
                     boxes = target
                 else:
                     raise ValueError(f"Unexpected target type: {type(target)}")
-            img = transforms.ToImage()(img)
+            img = v2.ToImage()(img)
             if img.dtype.is_floating_point and img.min() < 0:
                 # Poor man's re-normalization for the colors to be OK-ish. This
                 # is useful for images coming out of Normalize()
                 img -= img.min()
                 img /= img.max()
 
-            img = transforms.ToDtype(torch.uint8, scale=True)(img)
+            img = v2.ToDtype(torch.uint8, scale=True)(img)
             if boxes is not None:
                 img = draw_bounding_boxes(img, boxes, colors="yellow", width=3)
             if masks is not None:
@@ -144,7 +145,7 @@ def plot(imgs, col_title=None, titles=None, **imshow_kwargs):
 import pandas as pd
 from config.proc_img import dir_tabla_99, dir_input
 from PIL import Image
-import torchvision.transforms.v2 as transforms
+import torchvision.transforms.v2 as v2
 import matplotlib.pyplot as plt
 
 padres99 = f'casos_99_entrenamiento_compilados_padres.csv'
@@ -163,27 +164,35 @@ def addnoise(input_image, noise_factor = 0.1):
     output_image = transforms.ToPILImage()
     image = output_image(noise)
     return image
-def transform_img(orig_img):
+
+def transform_img(orig_img, cortar_bordes=True):
     """Transformaciones a imagen para aumento de casos de sospecha de doble marca en entrenamiento"""
 
-    trans_img = transforms.RandomHorizontalFlip(0.7)(orig_img)  # Randomly flip
-    trans_img = transforms.RandomVerticalFlip(0.7)(trans_img)
-    trans_img = transforms.ColorJitter(brightness=0.1, contrast=0.2, saturation=0.2, hue=0.01)(trans_img)
-    trans_img = addnoise(trans_img)
-    trans_img = transforms.GaussianBlur(kernel_size=(3, 5), sigma=(1, 2))(trans_img)
+    transform = v2.Compose([
+    lambda img: v2.Resize(500)(img) if cortar_bordes else v2.Resize(480)(img),
+    v2.CenterCrop(480)])
+
+    trans_img = transform(orig_img)
+
+    # trans_img = transforms.RandomHorizontalFlip(0.7)(orig_img)  # Randomly flip
+    # trans_img = transforms.RandomVerticalFlip(0.7)(trans_img)
+    # trans_img = transforms.ColorJitter(brightness=0.1, contrast=0.2, saturation=0.2, hue=0.01)(trans_img)
+    # trans_img = addnoise(trans_img)
+    # trans_img = transforms.GaussianBlur(kernel_size=(3, 5), sigma=(1, 2))(trans_img)
 
     return trans_img
 
 
 padded_imgs = [transform_img(img) for padding in (3, 10, 30, 50)]
-
+from config.proc_img import dir_train_test
+train = pd.read_csv(dir_train_test / 'train.csv')
 for i in range(0,10):
-    row = est[est.dm_final.eq(0)].iloc[i]
+    row = train[train.dm_final.eq(0)].iloc[i]
     try:
         img = Image.open(row.ruta_imagen_output)
-        img2 = Image.open((dir_input / row.ruta_imagen.replace('\\', '/')))
+        #img2 = Image.open((dir_input / row.ruta_imagen.replace('\\', '/')))
     
-        plot([img, img2], col_title=[row.ruta_imagen_output, row.ruta_imagen] )
+        plot([img, transform_img(img)], col_title=[row.ruta_imagen_output, row.ruta_imagen] )
         #plt.title(train[train.falsa_sospecha.eq(1)].ruta_imagen_output.iloc[i])
         plt.show()
     except:
