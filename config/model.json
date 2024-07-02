@@ -1,4 +1,5 @@
 {
+
     "name": "efficientnet_v2_s",
     "n_gpu": 4,
     "class_weights": [
