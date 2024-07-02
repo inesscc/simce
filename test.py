@@ -9,6 +9,7 @@ from config.parse_config import ConfigParser
 from simce.utils import read_json
 import torch.nn as nn
 import torchvision.models as models
+from simce.modelamiento import preparar_capas_modelo
 #config_dict = read_json('config/model_MaxVit_T_Weights.json')
 #config = ConfigParser(config_dict)
 def main(config):
@@ -16,12 +17,11 @@ def main(config):
     logger = config.get_logger('test')
 
     # setup data_loader instances
-    data_loader = config.init_obj('data_loader_test', module_data)
-    num_classes = 2
+    data_loader = config.init_obj('data_loader_test', module_data, model=config['arch']['type'])
     # build model architecture
     model = config.init_obj('arch', models)
-    num_features = model.classifier[5].in_features
-    model.classifier[5] = nn.Linear(num_features, num_classes)
+    model_name = config['arch']['type']
+    model = preparar_capas_modelo(model, model_name)
     logger.info(model)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
