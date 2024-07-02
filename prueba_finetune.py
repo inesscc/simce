@@ -29,15 +29,15 @@ def main(config):
 
 
     logger = config.get_logger('train')
-    num_classes = 2
     weights = config.init_obj('weights', models)
     model = config.init_obj('arch', models, weights=weights)
-
-    model = preparar_capas_modelo(model, config['arch']['type'])
+    model_name = config['arch']['type']
+    model = preparar_capas_modelo(model, model_name)
 
     logger.info(model)
 
-    trainloader = config.init_obj('data_loader_train', module_data)
+    trainloader = config.init_obj('data_loader_train', module_data, model=model_name)
+    
     valid_data_loader = trainloader.split_validation()
 
 
