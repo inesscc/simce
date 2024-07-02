@@ -1,5 +1,6 @@
 {
-    "name": "efficiennet_v2_s",
+
+    "name": "efficientnet_v2_s",
     "n_gpu": 4,
     "class_weights": [
         1.0,
@@ -19,6 +20,7 @@
             "data_file": "train.csv",
             "batch_size": 32,
             "num_workers": 2,
+            "cortar_bordes": true,
             "validation_split": 0.15
         }
     },

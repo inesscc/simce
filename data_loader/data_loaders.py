@@ -7,13 +7,14 @@ import torch
 
 class TrainTestDataLoader(BaseDataLoader):
 
-    def __init__(self, data_file, batch_size, model, shuffle=True, validation_split=0.0, num_workers=2,
-                 return_directory=False):
+    def __init__(self, data_file, batch_size, model, cortar_bordes, shuffle=True, validation_split=0.0, num_workers=2,
+                 return_directory=False, ):
         self.model = model
+        self.cortar_bordes = cortar_bordes
 
         if 'eficientnet' in model:
             transform = v2.Compose([
-                v2.resize(480),
+                lambda img: v2.Resize(500)(img) if cortar_bordes else v2.Resize(480)(img),
                 v2.CenterCrop(480),
                 v2.Compose([v2.ToImage(), v2.ToDtype(torch.float32, scale=True)]), # Normaliza valores a 0-1
                 v2.Normalize(mean=[0.485,0.456, 0.406], std=[0.229,0.224, 0.225]) 
@@ -22,9 +23,10 @@ class TrainTestDataLoader(BaseDataLoader):
 
         else:
             transform = v2.Compose([
-                        v2.Resize((224, 224)),
+                        lambda img: v2.Resize(248)(img) if cortar_bordes else v2.Resize(224)(img),
+
                         #v2.Grayscale(num_output_channels=3),  # transformacion blanco negro
-                        #v2.CenterCrop(224),
+                        v2.CenterCrop(224),
                         v2.Compose([v2.ToImage(), v2.ToDtype(torch.float32, scale=True)]), # Normaliza valores a 0-1
                         v2.Normalize(mean=[0.485,0.456, 0.406], std=[0.229,0.224, 0.225]) # Color
                     # v2.Normalize(mean=[0.485, 0.485, 0.485], std=[0.229, 0.229, 0.229]) #ByN
