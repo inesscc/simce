@@ -1,6 +1,6 @@
 {
     "name": "vgg16",
-    "n_gpu": 1,
+    "n_gpu": 4,
     "class_weights": [
         1.0,
         1.0
