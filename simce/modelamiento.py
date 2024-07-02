@@ -15,6 +15,10 @@ def preparar_capas_modelo(model, modelo_seleccionado):
     elif modelo_seleccionado == 'wide_resnet101_2':
         num_features = model.fc.in_features
         model.fc = nn.Linear(num_features, num_classes)
+    elif 'efficientnet' in modelo_seleccionado:
+        num_features = model.classifier[1].in_features
+        model.classifier[1] = nn.Linear(num_features, num_classes)
+
     else:
         raise('Código no está preparado para incorporar modelo. Modifique función para incorporarla')
     

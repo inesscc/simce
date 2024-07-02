@@ -17,6 +17,116 @@ import model.model as module_arch
 import data_loader.data_loaders as module_data
 from trainer import Trainer
 import model.metric as module_metric
+from torchvision import models
+import data_loader.data_loaders as module_data
+## Predicciones -----------------------------------------------------
+
+
+config_dict = read_json('saved/models/maxvit_t/0701_092128/config.json')
+config = ConfigParser(config_dict)
+device, device_ids = prepare_device(config['n_gpu'])
+ruta_modelo = 'saved/models/maxvit_t/0701_092128/model_best.pt'
+testloader = config.init_obj('data_loader_test', module_data)
+trainloader = config.init_obj('data_loader_train', module_data, shuffle=False)
+num_classes = 2
+model_load  = config.init_obj('arch', models, num_classes=num_classes)
+num_features = model_load.classifier[5].in_features
+model_load.classifier[5] = nn.Linear(num_features, num_classes)
+checkpoint = torch.load(ruta_modelo)
+state_dict = checkpoint['state_dict']
+model_load.load_state_dict(state_dict)
+model_load.to(device)
+
+
+#model_load.eval()
+
+# Initialize lists to store predictions and true labels
+predictions = []
+probs = []
+true_labels = []
+
+# Iterate over the test data
+for images, labels in testloader:
+    # Move the images and labels to the same device as the model
+    images = images.to(device)
+    labels = labels.to(device)
+
+    # Make predictions
+    with torch.no_grad():
+        outputs = model_load(images)
+
+    probabilities = torch.nn.functional.softmax(outputs.data, dim=1)
+    max_probabilities = probabilities.max(dim=1)[0]
+    
+    # Get the predicted class for each image
+    _, predicted = torch.max(outputs.data, 1)
+
+    # Store the predictions and true labels
+    predictions.extend(predicted.tolist())
+    true_labels.extend(labels.tolist())
+    probs.extend(max_probabilities)
+
+print('Predicciones listas!')
+probs_float = [i.item() for i in probs]
+import pandas as pd
+test = pd.read_csv(dir_train_test / 'test.csv')
+train = pd.read_csv(dir_train_test / 'train.csv')
+train.dm_final.value_counts()
+
+preds = pd.DataFrame({'pred': predictions,
+              'true': true_labels,
+              'proba': probs_float})
+
+preds['dirs'] = test.ruta_imagen_output
+
+preds_tot = preds.merge(test, left_on='dirs', right_on='ruta_imagen_output', how='left')
+preds_tot['acierto'] = preds_tot.pred == preds_tot.true
+preds[preds.true.eq(1) & preds.pred.eq(0)].reset_index().dirs.apply(lambda x: Path(x).name).value_counts()
+
+preds_tot['deciles'] = pd.qcut(preds_tot.proba, q=20)
+preds_tot.groupby('deciles').acierto.mean().plot()
+plt.axhline(.98, color='red')
+plt.show()
+
+preds_tot.to_excel('data/otros/resultados_maxvit.xlsx')
+preds_tot[preds_tot.deciles.cat.codes.ge(16)].acierto.mean()
+preds_tot[preds_tot.deciles.cat.codes.ge(16) & preds_tot.dm_final.eq(0)].ruta_imagen_output.iloc[0]
+preds_tot.deciles.value_counts()
+
+preds_tot.acierto.mean()
+preds_tot.proba.describe()
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+preds_tot[preds_tot.proba.ge(.95) & preds_tot.true.eq(0)].acierto.mean()
+
+def get_conf_mat(df, preg=None):
+    if preg:
+        df = df[df.preguntas.eq(preg)]
+
+    cm = confusion_matrix(df.true, df.pred )
+    disp = ConfusionMatrixDisplay(cm, display_labels=['Marca normal', 'Doble marca'])
+    disp.plot()
+    plt.title(preg)
+    plt.show()
+    
+
+get_conf_mat(preds_tot)
+preds_tot.groupby(['preguntas']).agg({'rbd':'count', 'acierto':'mean'}).sort_values('acierto')
+
+casi_dm.pred.value_counts()
+df_exist[df_exist.preguntas.eq('p22')]
+
+df_exist.preguntas.value_counts()
+
+########## --------------------------
+########## --------------------------
+
+def denormalize(tensor, mean, std):
+    for t, m, s in zip(tensor, mean, std):
+        t.mul_(s).add_(m)
+    return tensor
+
+
+
 
 config_dict = read_json('config/model.json')
 config = ConfigParser(config_dict)
@@ -154,112 +264,6 @@ for epoch in range(epochs):  # Loop over the dataset multiple times
             break
 print('Finished Training')
 
-
-
- 
-## Predicciones -----------------------------------------------------
-from torchvision import models
-import data_loader.data_loaders as module_data
-device, device_ids = prepare_device(config['n_gpu'])
-config_dict = read_json('saved/models/maxvit_t/0701_092128/config.json')
-config = ConfigParser(config_dict)
-ruta_modelo = 'saved/models/maxvit_t/0701_092128/model_best.pt'
-testloader = config.init_obj('data_loader_test', module_data)
-num_classes = 2
-model_load  = config.init_obj('arch', models, num_classes=num_classes)
-num_features = model_load.classifier[5].in_features
-model_load.classifier[5] = nn.Linear(num_features, num_classes)
-checkpoint = torch.load(ruta_modelo)
-state_dict = checkpoint['state_dict']
-model_load.load_state_dict(state_dict)
-model_load.to(device)
-
-
-#model_load.eval()
-
-# Initialize lists to store predictions and true labels
-predictions = []
-probs = []
-true_labels = []
-
-# Iterate over the test data
-for images, labels in testloader:
-    # Move the images and labels to the same device as the model
-    images = images.to(device)
-    labels = labels.to(device)
-
-    # Make predictions
-    with torch.no_grad():
-        outputs = model_load(images)
-
-    probabilities = torch.nn.functional.softmax(outputs.data, dim=1)
-    max_probabilities = probabilities.max(dim=1)[0]
-    
-    # Get the predicted class for each image
-    _, predicted = torch.max(outputs.data, 1)
-
-    # Store the predictions and true labels
-    predictions.extend(predicted.tolist())
-    true_labels.extend(labels.tolist())
-    probs.extend(max_probabilities)
-
-print('Predicciones listas!')
-probs_float = [i.item() for i in probs]
-
-test = pd.read_csv(dir_train_test / 'test.csv')
-train = pd.read_csv(dir_train_test / 'train.csv')
-train.dm_final.value_counts()
-
-preds = pd.DataFrame({'pred': predictions,
-              'true': true_labels,
-              'proba': probs_float})
-
-preds['dirs'] = test.ruta_imagen_output
-
-preds_tot = preds.merge(test, left_on='dirs', right_on='ruta_imagen_output', how='left')
-preds_tot['acierto'] = preds_tot.pred == preds_tot.true
-preds[preds.true.eq(1) & preds.pred.eq(0)].reset_index().dirs.apply(lambda x: Path(x).name).value_counts()
-
-preds_tot['deciles'] = pd.qcut(preds_tot.proba, q=20)
-preds_tot.groupby('deciles').acierto.mean().plot()
-plt.axhline(.98, color='red')
-plt.show()
-
-preds_tot[preds_tot.deciles.cat.codes.ge(16)].acierto.mean()
-preds_tot[preds_tot.deciles.cat.codes.ge(16) & preds_tot.dm_final.eq(0)].ruta_imagen_output.iloc[0]
-preds_tot.deciles.value_counts()
-
-preds_tot.acierto.mean()
-preds_tot.proba.describe()
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
-preds_tot[preds_tot.proba.ge(.95) & preds_tot.true.eq(0)].acierto.mean()
-
-def get_conf_mat(df, preg=None):
-    if preg:
-        df = df[df.preguntas.eq(preg)]
-
-    cm = confusion_matrix(df.true, df.pred )
-    disp = ConfusionMatrixDisplay(cm, display_labels=['Marca normal', 'Doble marca'])
-    disp.plot()
-    plt.title(preg)
-    plt.show()
-    
-
-get_conf_mat(preds_tot)
-preds_tot.groupby(['preguntas']).agg({'rbd':'count', 'acierto':'mean'}).sort_values('acierto')
-
-casi_dm.pred.value_counts()
-df_exist[df_exist.preguntas.eq('p22')]
-
-df_exist.preguntas.value_counts()
-
-########## --------------------------
-########## --------------------------
-
-def denormalize(tensor, mean, std):
-    for t, m, s in zip(tensor, mean, std):
-        t.mul_(s).add_(m)
-    return tensor
 """ dirs[1]
 images_denom = image_denormalized = denormalize(images, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 imshow(torchvision.utils.make_grid(images))

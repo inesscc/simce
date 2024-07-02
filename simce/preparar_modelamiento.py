@@ -8,7 +8,7 @@ import torch
 import random
 # Creamos directorio para imágenes aumentadas:
 
-def get_img_existentes(fraccion_sample: float = .1) -> tuple[pd.DataFrame, pd.DataFrame]:
+def get_img_existentes(fraccion_sample: float) -> pd.DataFrame:
     '''
     Genera dataframe con archivos existentes (que sí pudieron ser procesados), con la siguiente lógica:
 
@@ -39,8 +39,11 @@ def get_img_existentes(fraccion_sample: float = .1) -> tuple[pd.DataFrame, pd.Da
     print(f'{df_exist.shape=}')
     print(f'{df99.shape=}')
 
+    return df_exist
+
+def separar_dataframes(df_exist) -> tuple[pd.DataFrame, pd.DataFrame]:
     # Obtenemos versión final de variable falsa sospecha con todos los datos:
-    df_exist['falsa_sospecha'] = ((df_exist['dm_sospecha'] == 1) & (df_exist['dm_final'] == 0))
+    
 
     # Separamos entre datos que fueron obtenidos de sampleo aleatorio y datos obtenidos de sospechas de doble marca:
     df_sampleado = df_exist[df_exist.dm_sospecha.eq(0)]
@@ -61,18 +64,22 @@ def incorporar_reetiquetas(df_exist: pd.DataFrame) -> pd.DataFrame:
     df_exist['reetiqueta'] = df_exist.ruta_imagen_output.map(etiqueta_final)
     df_exist['dm_final'] = df_exist.reetiqueta.combine_first(df_exist.dm_final).astype(int)
 
+    df_exist['falsa_sospecha'] = ((df_exist['dm_sospecha'] == 1) & (df_exist['dm_final'] == 0))
+
     return df_exist
 
 
 def gen_train_test():
 
-    df_exist, df_sampleado = get_img_existentes(fraccion_sample=FRAC_SAMPLE)
+    df_exist = get_img_existentes(fraccion_sample=FRAC_SAMPLE)
 
     # Traemos re-etiquetado 
 
     df_exist_re = incorporar_reetiquetas(df_exist)
 
-    train, test = train_test_split(df_exist_re, stratify=df_exist['falsa_sospecha'], test_size=.2)
+    df_sospecha, df_sampleado = separar_dataframes(df_exist_re)
+
+    train, test = train_test_split(df_sospecha, stratify=df_sospecha['falsa_sospecha'], test_size=.2)
 
     df_aug = gen_df_aumentado(train, n_augment_rounds=N_AUGMENT_ROUNDS)
 
@@ -86,8 +93,9 @@ def gen_train_test():
 def gen_df_aumentado(train: pd.DataFrame, n_augment_rounds:int = 5) -> pd.DataFrame:
     '''Genera n_augment_rounds copias de cada fila del set de entrenamiento con distintas transformaciones que
      se generarán de acuerdo con una probabilidad '''
-
+    
     df_aug = train[train.falsa_sospecha.eq(1)].copy()
+
 
 
     

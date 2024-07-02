@@ -49,22 +49,30 @@ def plot(imgs, col_title=None, **imshow_kwargs):
     plt.tight_layout()
 
 
-#rev = pd.read_excel('data/otros/datos_a_revisar.xlsx')
-rev = pd.read_excel('data/otros/datos_revisados.xlsx')
+rev = pd.read_excel('data/otros/datos_a_revisar_p2.xlsx')
+
+#rev = pd.read_excel('data/otros/datos_revisados_p2.xlsx')
+
 rev.origen.value_counts()
-rev['diferente'] = rev.etiqueta_original != rev.etiqueta_final
-rev.groupby('origen').diferente.sum().div(rev.groupby('origen').diferente.count()).sort_values(ascending=False)
+#rev['diferente'] = rev.etiqueta_original != rev.etiqueta_final
+#rev.groupby('origen').diferente.sum().div(rev.groupby('origen').diferente.count()).sort_values(ascending=False)
 nombre_encargado = 'juane'
-#mi_rev = rev[rev.encargado.eq(nombre_encargado)]
+mi_rev = rev[rev.encargado.eq(nombre_encargado)]
 #mi_rev = rev[rev.comentarios.notnull()]
-mi_rev = rev[rev.origen.eq('doble_marca_normal') ]
+#mi_rev = rev[rev.origen.eq('doble_marca_normal') ]
 #mi_rev2 = mi_rev[mi_rev.etiqueta_final.eq('-')]
+
+
+# rev2 = pd.read_excel('data/otros/resultados_maxvit.xlsx')
+# fp = rev2[rev2.acierto.eq(0) & rev2.dm_final.eq(1)]
+# fn = rev2[rev2.acierto.eq(0) & rev2.dm_final.eq(0)]
+# fp.iloc[0]
 for i in range(len(mi_rev)):
     if i >= 0:
         print(i)
         
         row = mi_rev.iloc[i]
-        print(row.origen)
+        #print(row.origen)
         try:
             img = Image.open(row.ruta_imagen_output)
             
