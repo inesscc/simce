@@ -14,7 +14,7 @@ class TrainTestDataLoader(BaseDataLoader):
 
         if 'eficientnet' in model:
             transform = v2.Compose([
-                lambda img: v2.Resize(500)(img) if cortar_bordes else v2.Resize(480)(img),
+                lambda img: v2.Resize((560, 560))(img) if cortar_bordes else v2.Resize((480, 480))(img),
                 v2.CenterCrop(480),
                 v2.Compose([v2.ToImage(), v2.ToDtype(torch.float32, scale=True)]), # Normaliza valores a 0-1
                 v2.Normalize(mean=[0.485,0.456, 0.406], std=[0.229,0.224, 0.225]) 
