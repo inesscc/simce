@@ -29,8 +29,10 @@ def main(config):
 
 
     logger = config.get_logger('train')
-
-    weights = config.init_obj('weights', models)
+    if config['weights']['type'] == 'none':
+        weights = None
+    else:
+        weights = config.init_obj('weights', models)
     model = config.init_obj('arch', models, weights=weights)
     model_name = config['arch']['type']
 
