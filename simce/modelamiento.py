@@ -24,20 +24,25 @@ def preparar_capas_modelo(model, modelo_seleccionado):
     
     return model
 
-def get_metricas_modelo(config_name, run_id, val_loss, val_acc, train_loss, train_acc):
+def anotar_metricas_modelo(config_name, run_id, log):
     if not Path('metricas_modelos.xlsx').is_file():
         wb = Workbook()
         ws = wb.active
-        ws['A1'] = 'config_name'
-        ws['B1'] = 'run_id'
-        ws['C1'] = 'val_loss'
-        ws['D1'] = 'val_acc'
-        ws['E1'] = 'train_loss'
-        ws['F1'] = 'train_acc'
+        ws['A1'] = 'ID_modelo'
+        ws['B1'] = 'val_loss'
+        ws['C1'] = 'val_acc'
         wb.save('metricas_modelos.xlsx')
+
+    id_modelo = f'{config_name}-{run_id}'
 
     wb = load_workbook(filename='metricas_modelos.xlsx')
 
     ws = wb.active
+    id_modelos = {cell[0].value for cell in ws.iter_rows(min_col=1, max_col=1)}
 
-    ws.append([config_name, run_id, val_loss, val_acc, train_loss, train_acc])
+    if id_modelo not in id_modelos:
+        ws.append([id_modelo, log['loss'], log['accuracy']])
+        wb.save('metricas_modelos.xlsx')
+        print('Métricas guardadas exitosamente!')
+    else:
+        print('MODELO YA ANOTADO ANTERIORMENTE, no fue anotado.')

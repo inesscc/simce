@@ -9,7 +9,7 @@ from config.parse_config import ConfigParser
 from simce.utils import read_json
 import torch.nn as nn
 import torchvision.models as models
-from simce.modelamiento import preparar_capas_modelo
+from simce.modelamiento import preparar_capas_modelo, anotar_metricas_modelo
 #config_dict = read_json('config/model_MaxVit_T_Weights.json')
 #config = ConfigParser(config_dict)
 def main(config):
@@ -32,6 +32,9 @@ def main(config):
     metric_fns = [getattr(module_metric, met) for met in config['metrics']]
 
     logger.info('Loading checkpoint: {} ...'.format(config.resume))
+
+
+
     checkpoint = torch.load(config.resume)
     state_dict = checkpoint['state_dict']
 
@@ -62,12 +65,20 @@ def main(config):
             for i, metric in enumerate(metric_fns):
                 total_metrics[i] += metric(output, target) * batch_size
 
+
+
     n_samples = len(data_loader.sampler)
     log = {'loss': total_loss / n_samples}
     log.update({
         met.__name__: total_metrics[i].item() / n_samples for i, met in enumerate(metric_fns)
     })
     logger.info(log)
+
+    run_id = config.resume.parts[-2]
+    config_name = config.resume.parts[-3]
+
+    anotar_metricas_modelo(config_name, run_id, log)
+
 
 
 if __name__ == '__main__':
