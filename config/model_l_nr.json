@@ -1,16 +1,16 @@
 {
-    "name": "maxvit_t",
+    "name": "efficientnet_l_nr",
     "n_gpu": 4,
     "class_weights": [
         1.0,
         1.0
     ],
     "arch": {
-        "type": "maxvit_t",
+        "type": "efficientnet_v2_l",
         "args": {}
     },
     "weights": {
-        "type": "MaxVit_T_Weights",
+        "type": "EfficientNet_V2_L_Weights",
         "args": {}
     },
     "data_loader_train": {
@@ -54,7 +54,7 @@
     "optimizer": {
         "type": "SGD",
         "args": {
-            "lr": 0.002,
+            "lr": 0.001,
             "weight_decay": 0.001,
             "momentum": 0.9
         }
