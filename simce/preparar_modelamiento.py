@@ -184,7 +184,7 @@ def transform_img(path_img, i):
 
         trans_img = v2.GaussianBlur(kernel_size = (3, 5), sigma = (1, 2)) (orig_img)
        # trans_img = v2.ColorJitter(brightness=0.1, contrast=0.2, saturation=0.2, hue=0.01)(trans_img)
-    if i >= 5:
+    elif i >= 5:
         trans_img = v2.ColorJitter(brightness=0.08, contrast=0.15, saturation=0.15, hue=0.005)(trans_img)
     else:
 
