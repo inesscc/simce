@@ -29,12 +29,16 @@ def main(config):
 
 
     logger = config.get_logger('train')
+
     weights = config.init_obj('weights', models)
     model = config.init_obj('arch', models, weights=weights)
     model_name = config['arch']['type']
+
     model = preparar_capas_modelo(model, model_name)
 
-    logger.info(model)
+    #logger.info(model)
+    print(f'{model_name=}')
+    
 
     trainloader = config.init_obj('data_loader_train', module_data, model=model_name)
     
@@ -49,6 +53,8 @@ def main(config):
     # Si hay más de una GPU, paraleliza el trabajo:
     if len(device_ids) > 1:
         model = torch.nn.DataParallel(model, device_ids=device_ids)
+        
+    
 
 
     # Define the loss function and optimizer

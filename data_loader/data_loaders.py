@@ -23,7 +23,7 @@ class TrainTestDataLoader(BaseDataLoader):
 
         else:
             transform = v2.Compose([
-                        lambda img: v2.Resize(248)(img) if cortar_bordes else v2.Resize(224)(img),
+                        lambda img: v2.Resize((248, 248))(img) if cortar_bordes else v2.Resize((224, 224))(img),
 
                         #v2.Grayscale(num_output_channels=3),  # transformacion blanco negro
                         v2.CenterCrop(224),

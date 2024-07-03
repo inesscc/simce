@@ -9,7 +9,9 @@ from config.parse_config import ConfigParser
 from simce.utils import read_json
 import torch.nn as nn
 import torchvision.models as models
+
 from simce.modelamiento import preparar_capas_modelo, anotar_metricas_modelo
+
 #config_dict = read_json('config/model_MaxVit_T_Weights.json')
 #config = ConfigParser(config_dict)
 def main(config):
