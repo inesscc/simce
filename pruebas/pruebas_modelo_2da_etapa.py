@@ -1,0 +1,1 @@
+from simce.preparar_modelamiento import get_indices_tinta
