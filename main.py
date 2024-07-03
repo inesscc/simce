@@ -10,6 +10,7 @@ from simce.generar_insumos_img import generar_insumos_total
 from simce.proc_imgs import get_subpreguntas
 from simce.proc_tabla_99 import get_tablas_99_total
 from simce.preparar_modelamiento import gen_train_test
+from config.proc_img import N_AUGMENT_ROUNDS, FRAC_SAMPLE
 # import pandas as pd
 
 # %% Subpreguntas
@@ -33,6 +34,6 @@ if __name__ == '__main__':
 
     if IS_TRAINING:
         #4. Obtener set de entrenamiento y test y aumentamos train
-        gen_train_test()
+        gen_train_test(n_augment_rounds=N_AUGMENT_ROUNDS, fraccion_sample=FRAC_SAMPLE)
 
 # %%

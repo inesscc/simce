@@ -1,4 +1,4 @@
-from config.proc_img import dir_tabla_99, dir_subpreg_aug, dir_train_test, SEED, FRAC_SAMPLE, N_AUGMENT_ROUNDS, dir_subpreg, dir_insumos
+from config.proc_img import dir_tabla_99, dir_subpreg_aug, dir_train_test, SEED, dir_subpreg, dir_insumos
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from pathlib import Path
@@ -73,9 +73,9 @@ def incorporar_reetiquetas(df_exist: pd.DataFrame) -> pd.DataFrame:
     return df_exist
 
 
-def gen_train_test():
+def gen_train_test(n_augment_rounds, fraccion_sample):
 
-    df_exist = get_img_existentes(fraccion_sample=FRAC_SAMPLE)
+    df_exist = get_img_existentes(fraccion_sample=fraccion_sample)
 
     # Traemos re-etiquetado 
 
@@ -85,7 +85,7 @@ def gen_train_test():
 
     train, test = train_test_split(df_sospecha, stratify=df_sospecha['falsa_sospecha'], test_size=.2)
 
-    df_aug = gen_df_aumentado(train, n_augment_rounds=N_AUGMENT_ROUNDS)
+    df_aug = gen_df_aumentado(train, n_augment_rounds=n_augment_rounds)
 
     export_train_test(train, df_aug, test, df_sampleado=None)
 
@@ -94,7 +94,7 @@ def gen_train_test():
 
 
 
-def gen_df_aumentado(train: pd.DataFrame, n_augment_rounds:int = 5) -> pd.DataFrame:
+def gen_df_aumentado(train: pd.DataFrame, n_augment_rounds:int) -> pd.DataFrame:
     '''Genera n_augment_rounds copias de cada fila del set de entrenamiento con distintas transformaciones que
      se generarán de acuerdo con una probabilidad '''
     
