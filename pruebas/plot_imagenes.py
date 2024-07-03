@@ -169,8 +169,9 @@ def transform_img(orig_img, cortar_bordes=True):
     """Transformaciones a imagen para aumento de casos de sospecha de doble marca en entrenamiento"""
 
     transform = v2.Compose([
-    lambda img: v2.Resize(500)(img) if cortar_bordes else v2.Resize(480)(img),
-    v2.CenterCrop(480)])
+    lambda img: v2.Resize((560, 560))(img) if cortar_bordes else v2.Resize((480, 480))(img),
+    v2.CenterCrop(480),
+    v2.GaussianBlur(kernel_size=(5,9), sigma=(1, 1))])
 
     trans_img = transform(orig_img)
 
@@ -192,7 +193,7 @@ for i in range(0,10):
         img = Image.open(row.ruta_imagen_output)
         #img2 = Image.open((dir_input / row.ruta_imagen.replace('\\', '/')))
     
-        plot([img, transform_img(img)], col_title=[row.ruta_imagen_output, row.ruta_imagen] )
+        plot([img, transform_img(img, cortar_bordes=True)], col_title=[row.ruta_imagen_output, row.ruta_imagen] )
         #plt.title(train[train.falsa_sospecha.eq(1)].ruta_imagen_output.iloc[i])
         plt.show()
     except:
