@@ -51,7 +51,7 @@ SEED = 2024
 FRAC_SAMPLE = .05
 
 # n° de rondas de aumentado de datos (máximo 5):
-N_AUGMENT_ROUNDS = 5
+N_AUGMENT_ROUNDS = 3
 # OBTENCIÓN DE INSUMOS ----------------------------------------
 
 regex_hoja_cuadernillo = r'_(\d+)'
