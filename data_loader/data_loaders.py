@@ -25,11 +25,11 @@ class TrainTestDataLoader(BaseDataLoader):
             transform = v2.Compose([
                         lambda img: v2.Resize((248, 248))(img) if cortar_bordes else v2.Resize((224, 224))(img),
 
-                        #v2.Grayscale(num_output_channels=3),  # transformacion blanco negro
+                        v2.Grayscale(num_output_channels=1),  # transformacion blanco negro
                         v2.CenterCrop(224),
                         v2.Compose([v2.ToImage(), v2.ToDtype(torch.float32, scale=True)]), # Normaliza valores a 0-1
-                        v2.Normalize(mean=[0.485,0.456, 0.406], std=[0.229,0.224, 0.225]) # Color
-                    # v2.Normalize(mean=[0.485, 0.485, 0.485], std=[0.229, 0.229, 0.229]) #ByN
+                       # v2.Normalize(mean=[0.485,0.456, 0.406], std=[0.229,0.224, 0.225]) # Color
+                        v2.Normalize(mean=[0.5], std=[0.5]) #ByN
                     ])
         self.data_file = data_file
         self.return_directory = return_directory

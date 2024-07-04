@@ -10,7 +10,7 @@
         "args": {}
     },
     "weights": {
-        "type": "none",
+        "type": "MaxVit_T_Weights",
         "args": {}
     },
     "data_loader_train": {

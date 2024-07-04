@@ -1,6 +1,7 @@
 import torch.nn as nn
 from pathlib import Path
 from openpyxl import load_workbook, Workbook
+from torch.nn import Conv2d
 
 
 def preparar_capas_modelo(model, modelo_seleccionado):
@@ -10,6 +11,9 @@ def preparar_capas_modelo(model, modelo_seleccionado):
         num_features = model.classifier[6].in_features
         model.classifier[6] = nn.Linear(num_features, num_classes)
     elif modelo_seleccionado == 'maxvit_t':
+
+        model.stem[0][0] = Conv2d(1, 64, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+
         num_features = model.classifier[5].in_features
         model.classifier[5] = nn.Linear(num_features, num_classes)
     elif modelo_seleccionado == 'wide_resnet101_2':

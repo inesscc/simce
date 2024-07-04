@@ -35,7 +35,7 @@ def main(config):
         weights = config.init_obj('weights', models)
     model = config.init_obj('arch', models, weights=weights)
     model_name = config['arch']['type']
-
+    
     model = preparar_capas_modelo(model, model_name)
 
     #logger.info(model)
