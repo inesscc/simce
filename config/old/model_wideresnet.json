@@ -1,6 +1,6 @@
 {
     "name": "Wide_resnet_best_config",
-    "n_gpu": 1,
+    "n_gpu": 4,
     "class_weights": [
         1.0,
         1.0
@@ -17,7 +17,7 @@
         "type": "TrainTestDataLoader",
         "args": {
             "data_file": "train.csv",
-            "batch_size": 32,
+            "batch_size": 64,
             "shuffle": true,
             "cortar_bordes": true,
             "num_workers": 2,
