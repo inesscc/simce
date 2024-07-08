@@ -19,23 +19,39 @@ from trainer import Trainer
 import model.metric as module_metric
 from torchvision import models
 import data_loader.data_loaders as module_data
+from simce.modelamiento import preparar_capas_modelo
+from tqdm import tqdm
 ## Predicciones -----------------------------------------------------
 
 
-config_dict = read_json('saved/models/maxvit_t/0701_092128/config.json')
+config_dict = read_json('saved/models/saved_server/efficientnetv2_m/config.json')
 config = ConfigParser(config_dict)
 device, device_ids = prepare_device(config['n_gpu'])
-ruta_modelo = 'saved/models/maxvit_t/0701_092128/model_best.pt'
-testloader = config.init_obj('data_loader_test', module_data)
-trainloader = config.init_obj('data_loader_train', module_data, shuffle=False)
-num_classes = 2
-model_load  = config.init_obj('arch', models, num_classes=num_classes)
-num_features = model_load.classifier[5].in_features
-model_load.classifier[5] = nn.Linear(num_features, num_classes)
+
+
+
+model  = config.init_obj('arch', models)
+model_name = config['arch']['type']
+model = preparar_capas_modelo(model, model_name)
+
+ruta_modelo = 'saved/models//saved_server/efficientnetv2_m/model_best.pt'
 checkpoint = torch.load(ruta_modelo)
 state_dict = checkpoint['state_dict']
-model_load.load_state_dict(state_dict)
-model_load.to(device)
+if config['n_gpu'] > 1:
+    model = torch.nn.DataParallel(model)
+model.load_state_dict(state_dict)
+
+model = model.to(device)
+
+model.eval()
+
+testloader = config.init_obj('data_loader_test', module_data, model=model_name, 
+                             return_directory=True)
+trainloader = config.init_obj('data_loader_train', module_data, model=model_name, 
+                              return_directory=True)
+
+
+
 
 
 #model_load.eval()
@@ -44,43 +60,50 @@ model_load.to(device)
 predictions = []
 probs = []
 true_labels = []
+lst_directories = []
 
-# Iterate over the test data
-for images, labels in testloader:
-    # Move the images and labels to the same device as the model
-    images = images.to(device)
-    labels = labels.to(device)
+with torch.no_grad():
+    # Iterate over the test data
+    for n,(images, labels, directories) in enumerate(tqdm(testloader)):
+        # Move the images and labels to the same device as the model
+        images = images.to(device)
+        labels = labels.to(device)
 
-    # Make predictions
-    with torch.no_grad():
-        outputs = model_load(images)
+        # Make predictions
+        
+        outputs = model(images)
 
-    probabilities = torch.nn.functional.softmax(outputs.data, dim=1)
-    max_probabilities = probabilities.max(dim=1)[0]
-    
-    # Get the predicted class for each image
-    _, predicted = torch.max(outputs.data, 1)
+        probabilities = torch.nn.functional.softmax(outputs.data, dim=1)
+        max_probabilities = probabilities.max(dim=1)[0]
+        
+        # Get the predicted class for each image
+        _, predicted = torch.max(outputs.data, 1)
 
-    # Store the predictions and true labels
-    predictions.extend(predicted.tolist())
-    true_labels.extend(labels.tolist())
-    probs.extend(max_probabilities)
+        # Store the predictions and true labels
+        predictions.extend(predicted.tolist())
+        true_labels.extend(labels.tolist())
+        probs.extend(max_probabilities)
+        lst_directories.extend(directories)
 
 print('Predicciones listas!')
 probs_float = [i.item() for i in probs]
+probs_float
 import pandas as pd
+
 test = pd.read_csv(dir_train_test / 'test.csv')
 train = pd.read_csv(dir_train_test / 'train.csv')
 train.dm_final.value_counts()
 
 preds = pd.DataFrame({'pred': predictions,
               'true': true_labels,
-              'proba': probs_float})
+              'proba': probs_float,
+              'dirs': lst_directories})
 
-preds['dirs'] = test.ruta_imagen_output
+#preds['dirs'] = test.ruta_imagen_output
 
 preds_tot = preds.merge(test, left_on='dirs', right_on='ruta_imagen_output', how='left')
 preds_tot['acierto'] = preds_tot.pred == preds_tot.true
+
 preds[preds.true.eq(1) & preds.pred.eq(0)].reset_index().dirs.apply(lambda x: Path(x).name).value_counts()
 
 preds_tot['deciles'] = pd.qcut(preds_tot.proba, q=20)
@@ -89,10 +112,10 @@ plt.axhline(.98, color='red')
 plt.show()
 
 preds_tot.to_excel('data/otros/resultados_maxvit.xlsx')
-preds_tot[preds_tot.deciles.cat.codes.ge(16)].acierto.mean()
+preds_tot[preds_tot.deciles.cat.codes.ge(7)].acierto.mean()
 preds_tot[preds_tot.deciles.cat.codes.ge(16) & preds_tot.dm_final.eq(0)].ruta_imagen_output.iloc[0]
 preds_tot.deciles.value_counts()
-
+test.dm_final.value_counts().div(test.shape[0])
 preds_tot.acierto.mean()
 preds_tot.proba.describe()
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
@@ -110,9 +133,18 @@ def get_conf_mat(df, preg=None):
     
 
 get_conf_mat(preds_tot)
+preds_tot['cuestionario'] = preds_tot.dirs.str.extract('(C[EP])')
+preds_tot['pregunta'] = preds_tot.dirs.str.extract('(p\d+)')
+preds_tot['pregunta'] = preds_tot.cuestionario + '-' + preds_tot.pregunta
 preds_tot.groupby(['preguntas']).agg({'rbd':'count', 'acierto':'mean'}).sort_values('acierto')
-
-casi_dm.pred.value_counts()
+preds_tot.preguntas
+preds_tot[preds_tot.acierto.eq(0) ].pregunta.value_counts()
+preds_tot[preds_tot.acierto.eq(0) & preds_tot.cuestionario.eq('CP')].pregunta.value_counts().div(preds_tot[preds_tot.acierto.eq(0) & preds_tot.cuestionario.eq('CP')].shape[0])
+preds_tot[preds_tot.acierto.eq(0) ].pregunta.value_counts().div(preds_tot.pregunta.value_counts()).sort_values(ascending=False)
+preds_tot[preds_tot.pregunta.eq('CE-p2')]
+preds_tot.dirs.str.extract('(C[EP])').value_counts().div(preds_tot.shape[0])
+preds_tot[preds_tot.pregunta.eq('CE-p21') & preds_tot.acierto.eq(0)][['dirs', 'acierto']]
+preds_tot.loc[3385].dirs
 df_exist[df_exist.preguntas.eq('p22')]
 
 df_exist.preguntas.value_counts()

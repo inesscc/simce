@@ -40,14 +40,14 @@ def get_insumos(tipo_cuadernillo):
     return n_pages, n_preguntas, subpreg_x_preg, dic_cuadernillo, dic_pagina, n_subpreg_tot
 
 
-def select_directorio(tipo_cuadernillo):
+def select_directorio(tipo_cuadernillo, directorios):
     '''Selecciona directorio de datos según si se está procesando el cuadernillo
     de padres o de estudiantes'''
 
     if tipo_cuadernillo == 'estudiantes':
-        directorio_imagenes = dir_estudiantes
+        directorio_imagenes = directorios['dir_estudiantes']
     elif tipo_cuadernillo == 'padres':
-        directorio_imagenes = dir_padres
+        directorio_imagenes = directorios['dir_padres']
 
     return directorio_imagenes
 
@@ -202,7 +202,7 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
 
     '''
     # Obtenemos directorio de imágenes (padres o estudiantes)
-    directorio_imagenes = select_directorio(tipo_cuadernillo)
+    directorio_imagenes = select_directorio(tipo_cuadernillo, directorios)
 
     # Definimos tabla a utilizar para seleccionar subpreguntas
     if para_entrenamiento:

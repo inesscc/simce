@@ -7,8 +7,7 @@ Created on Thu May 16 17:46:31 2024
 
 import numpy as np
 import cv2
-from config.proc_img import dir_subpreg, regex_estudiante, dir_insumos, regex_hoja_cuadernillo, \
-    IGNORAR_PRIMERA_PAGINA
+from config.proc_img import regex_estudiante, regex_hoja_cuadernillo, IGNORAR_PRIMERA_PAGINA
 from simce.errors import anotar_error
 from simce.utils import timing
 from itertools import islice
@@ -20,6 +19,8 @@ from simce.utils import get_mask_imagen
 import simce.proc_imgs as proc
 import json
 from shutil import rmtree
+import config.proc_img as module_config
+
 
 
 def calcular_pregunta_actual(pages, p, dic_q):
@@ -425,7 +426,7 @@ def generar_insumos(tipo_cuadernillo):
 
 
 @timing
-def generar_insumos_total():
+def generar_insumos_total(config, curso):
     print('Generando insumos estudiantes...')
 
     insumos_est = generar_insumos(tipo_cuadernillo='estudiantes')
@@ -436,7 +437,7 @@ def generar_insumos_total():
     insumos = {'estudiantes': insumos_est,
                'padres': insumos_padres}
 
-    dir_insumos.mkdir(exist_ok=True)
+    dir_insumos = config.init_obj('directorios', module_config, curso=str(curso))
     with open(dir_insumos / 'insumos.json', 'w') as fp:
         json.dump(insumos, fp)
 

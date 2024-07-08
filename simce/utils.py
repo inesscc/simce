@@ -11,7 +11,7 @@ from os.path import abspath
 import cv2
 import numpy as np
 import pandas as pd
-from config.proc_img import dir_estudiantes, dir_subpreg, dir_tabla_99, dir_input, dir_padres, dir_insumos
+# from config.proc_img import dir_estudiantes, dir_subpreg, dir_tabla_99, dir_input, dir_padres, dir_insumos
 import json
 import torch
 from pathlib import Path
@@ -34,14 +34,7 @@ def timing(f):
     return wrap
 
 
-def crear_directorios():
 
-    dir_input.mkdir(exist_ok=True, parents=True)
-    dir_tabla_99.mkdir(exist_ok=True, parents=True)
-    dir_estudiantes.mkdir(exist_ok=True, parents=True)
-    dir_padres.mkdir(exist_ok=True, parents=True)
-    dir_subpreg.mkdir(exist_ok=True, parents=True)
-    dir_insumos.mkdir(exist_ok=True, parents=True)
 
 
 def ls(ruta=getcwd()):

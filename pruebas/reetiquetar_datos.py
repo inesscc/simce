@@ -1,34 +1,3 @@
-import pandas as pd
-from config.proc_img import dir_tabla_99, SEED, dir_train_test
-
-est99 = pd.read_csv(dir_tabla_99 / 'casos_99_entrenamiento_compilados_estudiantes.csv')
-pad99 = pd.read_csv(dir_tabla_99 / 'casos_99_entrenamiento_compilados_padres.csv')
-
-fs = pd.concat([est99, pad99])
-fs = fs[fs.dm_sospecha.eq(1) & fs.dm_final.eq(0)]
-fs['origen'] = 'falsa_sospecha'
-fs_sample = fs.sample(800, random_state=SEED)
-
-tinta_problematico = pd.read_excel('data/otros/problematicos.xlsx')
-tinta_problematico['origen'] = 'ratio_tinta'
-
-train = pd.read_csv(dir_train_test / 'train.csv') 
-train['origen'] = 'doble_marca_normal'
-not_fs = train[train.falsa_sospecha.eq(0)]
-train_sample = not_fs.sample(300, random_state=SEED).drop(columns=['Unnamed: 0'])
-a_revisar = (pd.concat([tinta_problematico, fs_sample, train_sample]).drop(columns=['Unnamed: 0', 'indice_original'])
-             .drop_duplicates(['ruta_imagen_output']))[['origen', 'ruta_imagen_output', 'ruta_imagen', 'dm_final']]
-import numpy as np
-a_revisar['encargado'] = np.tile(['juane', 'klaus', 'javi', 'nacho'], len(a_revisar)//4 + 1)[:len(a_revisar)]
-a_revisar = a_revisar.rename(columns={'dm_final': 'etiqueta_original'}) 
-a_revisar['etiqueta_final'] = ''
-a_revisar = a_revisar[['ruta_imagen_output', 'ruta_imagen', 'origen', 'encargado', 'etiqueta_original', 'etiqueta_final']]
-a_revisar.to_excel('data/otros/datos_a_revisar.xlsx', index=False)
-
-
-
-# A revisar, parte 2 --------------
-
 import torch
 torch.cuda.is_available()
 import torchvision
@@ -49,23 +18,40 @@ import data_loader.data_loaders as module_data
 from trainer import Trainer
 import model.metric as module_metric
 from torchvision import models
+import data_loader.data_loaders as module_data
 from simce.modelamiento import preparar_capas_modelo
+from tqdm import tqdm
+## Predicciones -----------------------------------------------------
 
-config_dict = read_json('saved/models/maxvit_t/0701_092128/config.json')
+
+config_dict = read_json('saved/models/saved_server/efficientnetv2_m/config.json')
 config = ConfigParser(config_dict)
 device, device_ids = prepare_device(config['n_gpu'])
-ruta_modelo = 'saved/models/maxvit_t/0701_092128/model_best.pt'
-config2 = read_json('config/model.json')
-config2 = ConfigParser(config2)
-trainloader = config2.init_obj('data_loader_train', module_data, shuffle=False, batch_size=256, return_directory=True )
 
-model_load  = config.init_obj('arch', models)
-model_load = preparar_capas_modelo(model_load, config['arch']['type'])
 
+
+model  = config.init_obj('arch', models)
+model_name = config['arch']['type']
+model = preparar_capas_modelo(model, model_name)
+
+ruta_modelo = 'saved/models//saved_server/efficientnetv2_m/model_best.pt'
 checkpoint = torch.load(ruta_modelo)
 state_dict = checkpoint['state_dict']
-model_load.load_state_dict(state_dict)
-model_load.to(device)
+if config['n_gpu'] > 1:
+    model = torch.nn.DataParallel(model)
+model.load_state_dict(state_dict)
+
+model = model.to(device)
+
+model.eval()
+
+testloader = config.init_obj('data_loader_test', module_data, model=model_name, 
+                             return_directory=True)
+trainloader = config.init_obj('data_loader_train', module_data, model=model_name, 
+                              return_directory=True)
+
+
+
 
 
 #model_load.eval()
@@ -75,34 +61,38 @@ predictions = []
 probs = []
 true_labels = []
 lst_directories = []
-# Iterate over the test data
-for n,(images, labels, directories) in enumerate(trainloader):
-    print(n, '/' , len(trainloader))
-    # Move the images and labels to the same device as the model
-    images = images.to(device)
-    labels = labels.to(device)
 
-    # Make predictions
-    with torch.no_grad():
-        outputs = model_load(images)
+with torch.no_grad():
+    # Iterate over the test data
+    for n,(images, labels, directories) in enumerate(tqdm(trainloader)):
+        # Move the images and labels to the same device as the model
+        images = images.to(device)
+        labels = labels.to(device)
 
-    probabilities = torch.nn.functional.softmax(outputs.data, dim=1)
-    max_probabilities = probabilities.max(dim=1)[0]
-    
-    # Get the predicted class for each image
-    _, predicted = torch.max(outputs.data, 1)
+        # Make predictions
+        
+        outputs = model(images)
 
-    # Store the predictions and true labels
-    predictions.extend(predicted.tolist())
-    true_labels.extend(labels.tolist())
-    probs.extend(max_probabilities)
-    lst_directories.extend(directories)
+        probabilities = torch.nn.functional.softmax(outputs.data, dim=1)
+        max_probabilities = probabilities.max(dim=1)[0]
+        
+        # Get the predicted class for each image
+        _, predicted = torch.max(outputs.data, 1)
+
+        # Store the predictions and true labels
+        predictions.extend(predicted.tolist())
+        true_labels.extend(labels.tolist())
+        probs.extend(max_probabilities)
+        lst_directories.extend(directories)
 
 print('Predicciones listas!')
 probs_float = [i.item() for i in probs]
+probs_float
 import pandas as pd
+
 test = pd.read_csv(dir_train_test / 'test.csv')
 train = pd.read_csv(dir_train_test / 'train.csv')
+train.dm_final.value_counts()
 
 preds = pd.DataFrame({'pred': predictions,
               'true': true_labels,
@@ -123,32 +113,36 @@ plt.axhline(.98, color='red')
 plt.show()
 
 preds_tot = preds_tot.sort_values('proba', ascending=False)
+preds_tot.dirs.iloc[0]
+preds_tot['origen_imagen'] = preds_tot.dirs.str.extract('(augmented|base)')
+preds_tot = preds_tot[preds_tot.origen_imagen.ne('augmented')]
 fp = preds_tot[preds_tot.acierto.eq(0) & preds_tot.dm_final.eq(1)].copy()
 fp['origen'] = 'falso_negativo'
 fn = preds_tot[preds_tot.acierto.eq(0) & preds_tot.dm_final.eq(0)].copy()
 fn['origen'] = 'falso_positivo'
+
 import numpy as np
-a_revisar_p2 = pd.concat([fp.head(int(np.round(len(fp)/2))),
-                            fn.head(int(np.round(len(fn)/2)))])[['origen', 'ruta_imagen_output', 'ruta_imagen', 'dm_final', 'pred']]
+a_revisar_p2 = pd.concat([fp, fn])[['origen', 'ruta_imagen_output', 'ruta_imagen', 'dm_final', 'pred']]
+
 a_revisar_p2['encargado'] = np.tile(['juane', 'klaus', 'javi', 'nacho'], len(a_revisar_p2)//4 + 1)[:len(a_revisar_p2)]
 a_revisar_p2 = a_revisar_p2.rename(columns={'dm_final': 'etiqueta_original', 'pred': 'etiqueta_predicha'}) 
 a_revisar_p2['etiqueta_final'] = ''
 a_revisar_p2 = a_revisar_p2[['ruta_imagen_output', 'ruta_imagen', 'origen', 'encargado', 'etiqueta_original',
                               'etiqueta_predicha', 'etiqueta_final']]
-a_revisar_p2.to_excel('data/otros/datos_a_revisar_p2.xlsx', index=False)
+a_revisar_p2.to_excel('data/otros/datos_a_revisar_p2_2.xlsx', index=False)
 a_revisar_p2
 
 
 
-from config.proc_img import dir_input, dir_subpreg
+from config.proc_img import dir_input, dir_subpreg, dir_subpreg_aux
 folders_output = set([i.name for i in (dir_subpreg / 'CE').glob('*')])
 folders_input = set([i.name for i in (dir_input / 'CE').glob('*')])
-klaus = a_revisar_p2[a_revisar_p2.encargado.eq('klaus')]
+klaus = rev[rev.encargado.eq('nacho')]
 files_input = (dir_input / klaus.ruta_imagen.str.replace('\\', '/').squeeze()).to_list()
-files_output = klaus.ruta_imagen_output
+files_output = klaus.ruta_imagen_output.apply(lambda x: dir_subpreg_aux / ('/'.join(Path(x).parts[-4:])))
 
 import zipfile
-output_filename = 'klaus.zip'
+output_filename = 'nacho.zip'
 
 with zipfile.ZipFile(output_filename, 'w') as zipf:
     # Add input files to the 'input' folder

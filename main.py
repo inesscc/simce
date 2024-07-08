@@ -5,12 +5,16 @@ Created on Tue Apr  9 10:34:05 2024
 @author: jeconchao
 """
 
-from simce.utils import crear_directorios
+from simce.trabajar_rutas import crear_directorios
 from simce.generar_insumos_img import generar_insumos_total
 from simce.proc_imgs import get_subpreguntas
 from simce.proc_tabla_99 import get_tablas_99_total
 from simce.preparar_modelamiento import gen_train_test
-from config.proc_img import N_AUGMENT_ROUNDS, FRAC_SAMPLE
+from config.proc_img import N_AUGMENT_ROUNDS, FRAC_SAMPLE, CURSO
+import config.proc_img as module_config
+from config.parse_config import ConfigParser
+from simce.utils import read_json
+
 # import pandas as pd
 
 # %% Subpreguntas
@@ -22,9 +26,12 @@ if __name__ == '__main__':
     # Define si estamos obteniendo datos para entrenamiento o predicción
     IS_TRAINING = True
     # 0. Creamos directorios
-    crear_directorios()
+    config_dict = read_json('config/model.json')
+    config = ConfigParser(config_dict)
+    directorios = config.init_obj('directorios', module_config, curso=str(CURSO), filtro='dir_subpreg_aux' )
+    crear_directorios(directorios)
     # 1.  Generar insumos para procesamiento
-    #generar_insumos_total() # TODO: función está calculando mal insumos. Debuggear
+    generar_insumos_total(config, CURSO) 
     # 2. Generar tablas con dobles marcas
     get_tablas_99_total(para_entrenamiento=IS_TRAINING)
 
