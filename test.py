@@ -19,7 +19,8 @@ def main(config):
     logger = config.get_logger('test')
 
     # setup data_loader instances
-    data_loader = config.init_obj('data_loader_test', module_data, model=config['arch']['type'])
+    data_loader = config.init_obj('data_loader_test', module_data,
+                                   model=config['arch']['type'])
     # build model architecture
     model = config.init_obj('arch', models)
     model_name = config['arch']['type']
