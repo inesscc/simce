@@ -7,6 +7,9 @@ Created on Tue Apr  9 10:50:14 2024
 
 from pathlib import Path
 
+curso = Path('4b')
+
+
 
 # Expresión regular para capturar el identificador del estudiante en nombre de archivos
 regex_estudiante = r'(\d{7,})_.*jpg'
@@ -19,18 +22,18 @@ carpeta_estudiantes = 'CE'
 carpeta_padres = 'CP'
 
 dir_data = Path('data/')
-dir_input = dir_data / 'input_raw'
+dir_input = dir_data / 'input_raw' / curso
 dir_estudiantes = dir_input / carpeta_estudiantes
 dir_padres = dir_input / carpeta_padres
 
 dir_input_proc = Path('data/input_proc/')
-dir_subpreg_aux = dir_input_proc / 'subpreg_recortadas'
+dir_subpreg_aux = dir_input_proc / curso / 'subpreg_recortadas'
 dir_subpreg = dir_subpreg_aux / 'base'
 dir_subpreg_aug = dir_subpreg_aux / 'augmented'
 
 
 dir_tabla_99 = dir_input_proc / 'output_tabla_99'
-dir_insumos = dir_input_proc / 'insumos'
+dir_insumos = dir_input_proc / curso / 'insumos'
 
 dir_train_test = dir_data / 'input_modelamiento'
 
@@ -51,7 +54,7 @@ SEED = 2024
 FRAC_SAMPLE = .05
 
 # n° de rondas de aumentado de datos (máximo 5):
-N_AUGMENT_ROUNDS = 6
+N_AUGMENT_ROUNDS = 5
 # OBTENCIÓN DE INSUMOS ----------------------------------------
 
 regex_hoja_cuadernillo = r'_(\d+)'

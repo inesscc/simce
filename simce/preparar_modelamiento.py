@@ -1,4 +1,4 @@
-from config.proc_img import dir_tabla_99, dir_subpreg_aug, dir_train_test, SEED, dir_subpreg, dir_insumos
+from config.proc_img import dir_tabla_99, dir_subpreg_aug, dir_train_test, SEED, dir_subpreg, dir_insumos, dir_input_proc, curso
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from pathlib import Path
@@ -62,15 +62,30 @@ def incorporar_reetiquetas(df_exist: pd.DataFrame) -> pd.DataFrame:
     '''
 
     reetiqueta = pd.read_excel(dir_insumos / 'datos_revisados.xlsx')
+    reetiqueta2 = pd.read_excel(dir_insumos / 'datos_revisados_p2_2.xlsx')
 
     etiqueta_final =reetiqueta.set_index('ruta_imagen_output').etiqueta_final
+    data_eliminar = set(etiqueta_final[etiqueta_final.isin(['-', 99])].index)    
     etiqueta_final = etiqueta_final[~etiqueta_final.isin(['-', 99])]
+    etiqueta_final.index = etiqueta_final.index.str.replace(str(dir_input_proc), str(dir_input_proc / curso))
+ 
+
+    etiqueta_final2 =reetiqueta2.set_index('ruta_imagen_output').etiqueta_final
+    data_eliminar.update(set(etiqueta_final2[etiqueta_final2.isin(['-', 99])].index)  )
+    etiqueta_final2 = etiqueta_final2[~etiqueta_final2.isin(['-', 99])]
+    etiqueta_final2.index = etiqueta_final2.index.str.replace(str(dir_input_proc), str(dir_input_proc / curso))
+
     df_exist['reetiqueta'] = df_exist.ruta_imagen_output.map(etiqueta_final)
+    df_exist['reetiqueta2'] = df_exist.ruta_imagen_output.map(etiqueta_final2)
+    df_exist['reetiqueta'] = df_exist.reetiqueta.combine_first(df_exist.reetiqueta2)
     df_exist['dm_final'] = df_exist.reetiqueta.combine_first(df_exist.dm_final).astype(int)
 
     df_exist['falsa_sospecha'] = ((df_exist['dm_sospecha'] == 1) & (df_exist['dm_final'] == 0))
 
-    return df_exist
+    # Eliminamos datos confusos para el modelo
+    df_exist_final = df_exist[~df_exist.ruta_imagen_output.isin(data_eliminar)]
+
+    return df_exist_final
 
 
 def gen_train_test(n_augment_rounds, fraccion_sample):
