@@ -7,10 +7,14 @@ Created on Tue Apr  9 10:50:14 2024
 
 from pathlib import Path
 
+<<<<<<< HEAD
 curso = Path('4b')
 
 
 
+=======
+CURSO = Path('4b')
+>>>>>>> pruebas_8b
 # Expresión regular para capturar el identificador del estudiante en nombre de archivos
 regex_estudiante = r'(\d{7,})_.*jpg'
 
@@ -21,24 +25,42 @@ n_pixeles_entre_lineas = 22
 carpeta_estudiantes = 'CE'
 carpeta_padres = 'CP'
 
-dir_data = Path('data/')
-dir_input = dir_data / 'input_raw' / curso
-dir_estudiantes = dir_input / carpeta_estudiantes
-dir_padres = dir_input / carpeta_padres
-
-dir_input_proc = Path('data/input_proc/')
-dir_subpreg_aux = dir_input_proc / curso / 'subpreg_recortadas'
-dir_subpreg = dir_subpreg_aux / 'base'
-dir_subpreg_aug = dir_subpreg_aux / 'augmented'
 
 
-dir_tabla_99 = dir_input_proc / 'output_tabla_99'
-dir_insumos = dir_input_proc / curso / 'insumos'
+def get_directorios(curso, filtro=None):
+    dd = dict()
+    dd['dir_data'] = Path('data/')
+    dd['dir_input'] = dd['dir_data'] / 'input_raw' / curso
+    dd['dir_estudiantes'] = dd['dir_input'] / carpeta_estudiantes
+    dd['dir_padres'] = dd['dir_input'] / carpeta_padres
 
-dir_train_test = dir_data / 'input_modelamiento'
+    dd['dir_input_proc'] = Path('data/input_proc/')
+    dd['dir_subpreg_aux'] = dd['dir_input_proc'] / curso / 'subpreg_recortadas'
+    dd['dir_subpreg'] = dd['dir_subpreg_aux'] / 'base'
+    dd['dir_subpreg_aug'] = dd['dir_subpreg_aux'] / 'augmented'
 
-dir_output = Path('data/output')
-dir_modelos = dir_output / 'modelos' 
+
+    dd['dir_tabla_99'] = dd['dir_input_proc'] / 'output_tabla_99'
+    dd['dir_insumos'] = dd['dir_input_proc'] / curso /  'insumos'
+
+    dd['dir_train_test'] = dd['dir_data'] / 'input_modelamiento'
+
+    dd['dir_output'] = Path('data/output')
+    dd['dir_modelos'] = dd['dir_output'] / 'modelos' 
+
+    
+    
+    if filtro:
+        if isinstance(filtro, str):
+            filtro = [filtro]
+        
+        dd = { k:v for k,v in dd.items() if k in filtro }
+
+        if len(filtro) == 1:
+
+            dd = list(dd.values())[0]
+
+    return dd
 
 
 

@@ -9,9 +9,17 @@ Created on Wed May  8 15:52:13 2024
 import re
 import cv2
 import numpy as np
-from simce.utils import get_mask_imagen
-from config.proc_img import regex_estudiante
+from simce.utils import get_mask_imagen, read_json
 import simce.proc_imgs as proc
+from config.proc_img import regex_estudiante
+#import simce.proc_imgs as proc
+from config.parse_config import ConfigParser
+
+def crear_directorios(directorios):
+
+    for i in directorios.values():
+        i.mkdir(exist_ok=True, parents=True)
+    print('Directorios generados exitosamente!')
 
 
 def get_n_paginas(directorio_imagenes):
@@ -26,7 +34,7 @@ def get_n_paginas(directorio_imagenes):
     return n_pages
 
 
-def get_n_preguntas(directorio_imagenes, tipo_cuadernillo, ignorar_primera_pagina=True):
+def get_n_preguntas(directorio_imagenes, ignorar_primera_pagina=True):
     rbds = list(directorio_imagenes.iterdir())
     rbd1 = rbds[0]
 

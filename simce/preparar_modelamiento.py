@@ -1,4 +1,4 @@
-from config.proc_img import dir_tabla_99, dir_subpreg_aug, dir_train_test, SEED, dir_subpreg, dir_insumos, dir_input_proc, curso
+from config.proc_img import SEED
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from pathlib import Path
@@ -12,7 +12,7 @@ from simce.utils  import get_mask_imagen
 from simce.proc_imgs import bound_and_crop
 # Creamos directorio para imágenes aumentadas:
 
-def get_img_existentes(fraccion_sample: float) -> pd.DataFrame:
+def get_img_existentes(fraccion_sample: float, directorios) -> pd.DataFrame:
     '''
     Genera dataframe con archivos existentes (que sí pudieron ser procesados), con la siguiente lógica:
 
@@ -20,13 +20,12 @@ def get_img_existentes(fraccion_sample: float) -> pd.DataFrame:
     - Obtiene fraccion_sample de las filas que no son falsa sospecha de estudiantes (para evitar desbalancear
     clases y hacer crecer demasiado el dataset)
     '''
-    dir_subpreg_aug.mkdir(parents=True, exist_ok=True)
 
     padres99 = f'casos_99_entrenamiento_compilados_padres.csv'
     est99 = f'casos_99_entrenamiento_compilados_estudiantes.csv'
-    df99p = pd.read_csv(dir_tabla_99 / padres99)
+    df99p = pd.read_csv(directorios['dir_tabla_99'] / padres99)
     
-    df99e = pd.read_csv(dir_tabla_99 / est99)
+    df99e = pd.read_csv(directorios['dir_tabla_99'] / est99)
 
     # Obtenemos falsas sospechas de estudiantes para filtrar casos relevantes
     df99e['falsa_sospecha'] = ((df99e['dm_sospecha'] == 1) & (df99e['dm_final'] == 0))
@@ -56,13 +55,17 @@ def separar_dataframes(df_exist) -> tuple[pd.DataFrame, pd.DataFrame]:
     return df_sospecha, df_sampleado
 
 
-def incorporar_reetiquetas(df_exist: pd.DataFrame) -> pd.DataFrame:
+def incorporar_reetiquetas(df_exist: pd.DataFrame, directorios) -> pd.DataFrame:
     '''
     Incorpora re-etiquetas para mejorar calidad del dataset
     '''
 
+<<<<<<< HEAD
     reetiqueta = pd.read_excel(dir_insumos / 'datos_revisados.xlsx')
     reetiqueta2 = pd.read_excel(dir_insumos / 'datos_revisados_p2_2.xlsx')
+=======
+    reetiqueta = pd.read_excel(directorios['dir_insumos'] / 'datos_revisados.xlsx')
+>>>>>>> pruebas_8b
 
     etiqueta_final =reetiqueta.set_index('ruta_imagen_output').etiqueta_final
     data_eliminar = set(etiqueta_final[etiqueta_final.isin(['-', 99])].index)    
@@ -88,28 +91,28 @@ def incorporar_reetiquetas(df_exist: pd.DataFrame) -> pd.DataFrame:
     return df_exist_final
 
 
-def gen_train_test(n_augment_rounds, fraccion_sample):
+def gen_train_test(n_augment_rounds, fraccion_sample, directorios):
 
-    df_exist = get_img_existentes(fraccion_sample=fraccion_sample)
+    df_exist = get_img_existentes(fraccion_sample, directorios)
 
     # Traemos re-etiquetado 
 
-    df_exist_re = incorporar_reetiquetas(df_exist)
+    df_exist_re = incorporar_reetiquetas(df_exist,directorios)
 
     df_sospecha, df_sampleado = separar_dataframes(df_exist_re)
 
     train, test = train_test_split(df_sospecha, stratify=df_sospecha['falsa_sospecha'], test_size=.2)
 
-    df_aug = gen_df_aumentado(train, n_augment_rounds=n_augment_rounds)
+    df_aug = gen_df_aumentado(train, directorios, n_augment_rounds=n_augment_rounds)
 
-    export_train_test(train, df_aug, test, df_sampleado=None)
+    export_train_test(train, df_aug, test, directorios, df_sampleado=None)
 
 
 ############# generando imagenes #############
 
 
 
-def gen_df_aumentado(train: pd.DataFrame, n_augment_rounds:int) -> pd.DataFrame:
+def gen_df_aumentado(train: pd.DataFrame, directorios, n_augment_rounds:int) -> pd.DataFrame:
     '''Genera n_augment_rounds copias de cada fila del set de entrenamiento con distintas transformaciones que
      se generarán de acuerdo con una probabilidad '''
     
@@ -131,7 +134,7 @@ def gen_df_aumentado(train: pd.DataFrame, n_augment_rounds:int) -> pd.DataFrame:
         for img in range(df_aug.shape[0]):
             dir_imagen_og = Path(df_aug.iloc[img].ruta_imagen_output)
 
-            dir_imagen_aug = Path(str(dir_imagen_og).replace(dir_subpreg.name, dir_subpreg_aug.name))
+            dir_imagen_aug = Path(str(dir_imagen_og).replace(directorios['dir_subpreg'].name, directorios['dir_subpreg_aug'].name))
             
             trans_img = transform_img(dir_imagen_og, i)
             dir_imagen_aug =  Path(str(dir_imagen_aug.with_suffix('')) + f'aug_{i+1}.jpg')
@@ -146,8 +149,8 @@ def gen_df_aumentado(train: pd.DataFrame, n_augment_rounds:int) -> pd.DataFrame:
 
     return df_aug_final
 
-def export_train_test(train, df_aug, test, df_sampleado=None):
-    dir_train_test.mkdir(parents=True, exist_ok=True)
+def export_train_test(train, df_aug, test, directorios, df_sampleado=None):
+
 
     if df_sampleado:
         dfs_concat = [train, df_aug, df_sampleado]
@@ -156,9 +159,13 @@ def export_train_test(train, df_aug, test, df_sampleado=None):
 
     (pd.concat(dfs_concat).reset_index()
     .rename(columns={'level_0': 'indice_original'})
-    .drop('index', axis= 1).to_csv(dir_train_test / 'train.csv'))
+    .drop('index', axis= 1).to_csv(directorios['dir_train_test'] / 'train.csv'))
 
-    test[test.dm_sospecha.eq(1)].reset_index().rename(columns={'level_0': 'indice_original'}).drop('index', axis= 1).to_csv(dir_train_test / 'test.csv')
+    (test[test.dm_sospecha.eq(1)]
+     .reset_index()
+     .rename(columns={'level_0': 'indice_original'})
+     .drop('index', axis= 1)
+     .to_csv(directorios['dir_train_test'] / 'test.csv'))
     print('Tablas de entrenamiento y test exportadas exitosamente!')
 
 #### funciones aux para generar transformaciones
