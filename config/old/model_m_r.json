@@ -1,0 +1,85 @@
+{
+    "name": "efficientnet_m_r",
+    "n_gpu": 4,
+    "class_weights": [
+        1.0,
+        1.0
+    ],
+    "arch": {
+        "type": "efficientnet_v2_m",
+        "args": {}
+    },
+    "weights": {
+        "type": "EfficientNet_V2_M_Weights",
+        "args": {}
+    },
+    "data_loader_train": {
+        "type": "TrainTestDataLoader",
+        "args": {
+            "data_file": "train.csv",
+            "batch_size": 64,
+            "shuffle": true,
+            "cortar_bordes": true,
+            "num_workers": 2,
+            "validation_split": 0.15
+        }
+    },
+    "data_loader_test": {
+        "type": "TrainTestDataLoader",
+        "args": {
+            "data_file": "test.csv",
+            "batch_size": 16,
+            "shuffle": false,
+            "cortar_bordes": true,
+            "num_workers": 2,
+            "validation_split": 0.0
+        }
+    },
+    "optimizer_adam": {
+        "type": "Adam",
+        "args": {
+            "lr": 0.004,
+            "weight_decay": 0,
+            "amsgrad": true
+        }
+    },
+    "optimizer_sgd": {
+        "type": "SGD",
+        "args": {
+            "lr": 0.004,
+            "weight_decay": 0.001,
+            "momentum": 0.9
+        }
+    },
+    "optimizer": {
+        "type": "SGD",
+        "args": {
+            "lr": 0.001,
+            "weight_decay": 0.001,
+            "momentum": 0.9
+        }
+    },
+    "loss": {
+        "type": "CrossEntropyLoss",
+        "args": {}
+    },
+    "metrics": [
+        "accuracy"
+    ],
+    "lr_scheduler": {
+        "type": "StepLR",
+        "args": {
+            "step_size": 10,
+            "gamma": 0.8
+        }
+    },
+    "trainer": {
+        "epochs": 100,
+        "save_dir": "saved/",
+        "save_period": 1,
+        "verbosity": 2,
+        "monitor": "min val_loss",
+        "early_stop": 10,
+        "tensorboard": false
+    }
+}
