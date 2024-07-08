@@ -60,7 +60,7 @@ def calcular_pregunta_actual(pages, p, dic_q):
     return q, dic_q
 
 
-def get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes, dic_pagina=None,
+def get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes, dir_subpreg, dic_pagina=None,
                               filter_rbd=None, filter_estudiante=None,
                               filter_rbd_int=False, nivel=None,
                               ignorar_primera_pagina=True):
@@ -323,7 +323,7 @@ def poblar_diccionario_preguntas(q, diccionario, nivel='cuadernillo',
     return diccionario
 
 
-def get_preg_por_hoja(n_pages, n_preguntas, directorio_imagenes, nivel='cuadernillo'):
+def get_preg_por_hoja(n_pages, n_preguntas, directorio_imagenes, directorios, nivel='cuadernillo' ):
     '''Función que pobla diccionario completo que mapea preguntas del cuestionario a su hoja o imagen
     correspondiente en el cuadernillo. Utiliza como insumo el número de páginas del cuadernillo y el n°
     de preguntas del cuestionario.
@@ -344,7 +344,7 @@ def get_preg_por_hoja(n_pages, n_preguntas, directorio_imagenes, nivel='cuaderni
 
 
     '''
-
+    dir_subpreg = directorios['dir_subpreg']
     if nivel not in proc.VALID_INPUT:
         raise ValueError(f"nivel debe ser uno de los siguientes valores: {proc.VALID_INPUT}")
 
@@ -355,17 +355,20 @@ def get_preg_por_hoja(n_pages, n_preguntas, directorio_imagenes, nivel='cuaderni
     if nivel == 'cuadernillo':
         dic = get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes,
                                         filter_estudiante=primer_est,
-                                        nivel=nivel, ignorar_primera_pagina=IGNORAR_PRIMERA_PAGINA)
+                                        nivel=nivel, ignorar_primera_pagina=IGNORAR_PRIMERA_PAGINA,
+                                        dir_subpreg=dir_subpreg)
     elif nivel == 'pagina':
         dic = get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes,
                                         filter_estudiante=primer_est, nivel=nivel,
-                                        ignorar_primera_pagina=IGNORAR_PRIMERA_PAGINA)
+                                        ignorar_primera_pagina=IGNORAR_PRIMERA_PAGINA,
+                                        dir_subpreg=dir_subpreg)
     return dic
 
 
-def get_baseline(n_pages, n_preguntas, directorio_imagenes, dic_pagina):
+def get_baseline(n_pages, n_preguntas, directorio_imagenes, dic_pagina, directorios):
     rbds = set()
     paths = []
+    dir_subpreg = directorios['dir_subpreg']
 
     for rbd in (islice(directorio_imagenes.iterdir(), 2)):
         print(rbd)
@@ -374,7 +377,8 @@ def get_baseline(n_pages, n_preguntas, directorio_imagenes, dic_pagina):
 
     get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes,
                               dic_pagina=dic_pagina, filter_rbd=rbds,
-                              ignorar_primera_pagina=IGNORAR_PRIMERA_PAGINA)
+                              ignorar_primera_pagina=IGNORAR_PRIMERA_PAGINA,
+                              dir_subpreg=dir_subpreg)
 
     dir_subpreg_rbd = (dir_subpreg / f'{directorio_imagenes.name}')
     rutas_output = [dir_subpreg_rbd / i for i in rbds]
@@ -403,16 +407,15 @@ def get_baseline(n_pages, n_preguntas, directorio_imagenes, dic_pagina):
     return df_resumen
 
 
-def generar_insumos(tipo_cuadernillo):
+def generar_insumos(tipo_cuadernillo, directorios):
 
-    directorio_imagenes = proc.select_directorio(tipo_cuadernillo)
+    directorio_imagenes = proc.select_directorio(tipo_cuadernillo, directorios)
 
     n_pages = get_n_paginas(directorio_imagenes)
-    n_preguntas = get_n_preguntas(directorio_imagenes, tipo_cuadernillo=tipo_cuadernillo,
-                                  ignorar_primera_pagina=IGNORAR_PRIMERA_PAGINA)
-    dic_cuadernillo = get_preg_por_hoja(n_pages, n_preguntas, directorio_imagenes, nivel='cuadernillo')
-    dic_pagina = get_preg_por_hoja(n_pages, n_preguntas, directorio_imagenes, nivel='pagina')
-    subpreg_x_preg = get_baseline(n_pages, n_preguntas, directorio_imagenes, dic_pagina)
+    n_preguntas = get_n_preguntas(directorio_imagenes, ignorar_primera_pagina=IGNORAR_PRIMERA_PAGINA)
+    dic_cuadernillo = get_preg_por_hoja(n_pages, n_preguntas, directorio_imagenes, directorios, nivel='cuadernillo')
+    dic_pagina = get_preg_por_hoja(n_pages, n_preguntas, directorio_imagenes, directorios, nivel='pagina')
+    subpreg_x_preg = get_baseline(n_pages, n_preguntas, directorio_imagenes, dic_pagina, directorios)
     n_subpreg_tot = str(subpreg_x_preg.sum())
 
     insumos_tipo_cuadernillo = {'n_pages': n_pages,
@@ -426,18 +429,18 @@ def generar_insumos(tipo_cuadernillo):
 
 
 @timing
-def generar_insumos_total(config, curso):
+def generar_insumos_total(directorios, curso):
     print('Generando insumos estudiantes...')
 
-    insumos_est = generar_insumos(tipo_cuadernillo='estudiantes')
+    insumos_est = generar_insumos(tipo_cuadernillo='estudiantes', directorios=directorios)
     print('Generando insumos padres...')
 
-    insumos_padres = generar_insumos(tipo_cuadernillo='padres')
+    insumos_padres = generar_insumos(tipo_cuadernillo='padres', directorios=directorios)
 
     insumos = {'estudiantes': insumos_est,
                'padres': insumos_padres}
 
-    dir_insumos = config.init_obj('directorios', module_config, curso=str(curso))
+    dir_insumos = directorios['dir_insumos']
     with open(dir_insumos / 'insumos.json', 'w') as fp:
         json.dump(insumos, fp)
 

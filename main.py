@@ -28,19 +28,19 @@ if __name__ == '__main__':
     # 0. Creamos directorios
     config_dict = read_json('config/model.json')
     config = ConfigParser(config_dict)
-    directorios = config.init_obj('directorios', module_config, curso=str(CURSO), filtro='dir_subpreg_aux' )
+    directorios = config.init_obj('directorios', module_config, curso=str(CURSO) )
     crear_directorios(directorios)
     # 1.  Generar insumos para procesamiento
-    generar_insumos_total(config, CURSO) 
+    generar_insumos_total(directorios, CURSO) 
     # 2. Generar tablas con dobles marcas
-    get_tablas_99_total(para_entrenamiento=IS_TRAINING)
+    get_tablas_99_total(para_entrenamiento=IS_TRAINING, directorios=directorios)
 
     # 3. Recortar subpreguntas
-    #get_subpreguntas(tipo_cuadernillo='estudiantes', para_entrenamiento=IS_TRAINING)
-    #get_subpreguntas(tipo_cuadernillo='padres', para_entrenamiento=IS_TRAINING)
+    get_subpreguntas(tipo_cuadernillo='estudiantes', directorios=directorios, para_entrenamiento=IS_TRAINING)
+    get_subpreguntas(tipo_cuadernillo='padres', directorios=directorios, para_entrenamiento=IS_TRAINING)
 
     if IS_TRAINING:
         #4. Obtener set de entrenamiento y test y aumentamos train
-        gen_train_test(n_augment_rounds=N_AUGMENT_ROUNDS, fraccion_sample=FRAC_SAMPLE)
+        gen_train_test(n_augment_rounds=N_AUGMENT_ROUNDS, fraccion_sample=FRAC_SAMPLE, directorios=directorios)
 
 # %%
