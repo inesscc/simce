@@ -1,23 +1,23 @@
 {
-    "name": "efficientnet_m_r",
+    "name": "maxvit_t",
     "n_gpu": 4,
     "class_weights": [
         1.0,
         1.0
     ],
     "arch": {
-        "type": "efficientnet_v2_m",
+        "type": "maxvit_t",
         "args": {}
     },
     "weights": {
-        "type": "EfficientNet_V2_M_Weights",
+        "type": "MaxVit_T_Weights",
         "args": {}
     },
     "data_loader_train": {
         "type": "TrainTestDataLoader",
         "args": {
             "data_file": "train.csv",
-            "batch_size": 64,
+            "batch_size": 128,
             "shuffle": true,
             "cortar_bordes": true,
             "num_workers": 2,
@@ -28,7 +28,7 @@
         "type": "TrainTestDataLoader",
         "args": {
             "data_file": "test.csv",
-            "batch_size": 16,
+            "batch_size": 128,
             "shuffle": false,
             "cortar_bordes": true,
             "num_workers": 2,
@@ -54,7 +54,7 @@
     "optimizer": {
         "type": "SGD",
         "args": {
-            "lr": 0.01,
+            "lr": 0.005,
             "weight_decay": 0.001,
             "momentum": 0.9
         }

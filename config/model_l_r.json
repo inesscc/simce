@@ -54,7 +54,7 @@
     "optimizer": {
         "type": "SGD",
         "args": {
-            "lr": 0.001,
+            "lr": 0.01,
             "weight_decay": 0.001,
             "momentum": 0.9
         }
@@ -69,7 +69,7 @@
     "lr_scheduler": {
         "type": "StepLR",
         "args": {
-            "step_size": 10,
+            "step_size": 2,
             "gamma": 0.8
         }
     },
