@@ -36,11 +36,11 @@ if __name__ == '__main__':
     get_tablas_99_total(para_entrenamiento=IS_TRAINING, directorios=directorios)
 
     # 3. Recortar subpreguntas
-    get_subpreguntas(tipo_cuadernillo='estudiantes', directorios=directorios, para_entrenamiento=IS_TRAINING)
-    get_subpreguntas(tipo_cuadernillo='padres', directorios=directorios, para_entrenamiento=IS_TRAINING)
+    #get_subpreguntas(tipo_cuadernillo='estudiantes', directorios=directorios, para_entrenamiento=IS_TRAINING)
+    #get_subpreguntas(tipo_cuadernillo='padres', directorios=directorios, para_entrenamiento=IS_TRAINING)
 
     if IS_TRAINING:
         #4. Obtener set de entrenamiento y test y aumentamos train
-        gen_train_test(n_augment_rounds=N_AUGMENT_ROUNDS, fraccion_sample=FRAC_SAMPLE, directorios=directorios)
+        gen_train_test(n_augment_rounds=N_AUGMENT_ROUNDS, fraccion_sample=FRAC_SAMPLE, config=config)
 
 # %%

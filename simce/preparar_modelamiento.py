@@ -10,6 +10,7 @@ import cv2
 import numpy as np
 from simce.utils  import get_mask_imagen
 from simce.proc_imgs import bound_and_crop
+import config.proc_img as module_config
 # Creamos directorio para imágenes aumentadas:
 
 def get_img_existentes(fraccion_sample: float, directorios) -> pd.DataFrame:
@@ -20,7 +21,7 @@ def get_img_existentes(fraccion_sample: float, directorios) -> pd.DataFrame:
     - Obtiene fraccion_sample de las filas que no son falsa sospecha de estudiantes (para evitar desbalancear
     clases y hacer crecer demasiado el dataset)
     '''
-
+    
     padres99 = f'casos_99_entrenamiento_compilados_padres.csv'
     est99 = f'casos_99_entrenamiento_compilados_estudiantes.csv'
     df99p = pd.read_csv(directorios['dir_tabla_99'] / padres99)
@@ -60,12 +61,8 @@ def incorporar_reetiquetas(df_exist: pd.DataFrame, directorios) -> pd.DataFrame:
     Incorpora re-etiquetas para mejorar calidad del dataset
     '''
 
-<<<<<<< HEAD
-    reetiqueta = pd.read_excel(dir_insumos / 'datos_revisados.xlsx')
-    reetiqueta2 = pd.read_excel(dir_insumos / 'datos_revisados_p2_2.xlsx')
-=======
     reetiqueta = pd.read_excel(directorios['dir_insumos'] / 'datos_revisados.xlsx')
->>>>>>> pruebas_8b
+    reetiqueta2 = pd.read_excel(directorios['dir_insumos'] / 'datos_revisados_p2_2.xlsx')
 
     etiqueta_final =reetiqueta.set_index('ruta_imagen_output').etiqueta_final
     data_eliminar = set(etiqueta_final[etiqueta_final.isin(['-', 99])].index)    
@@ -91,9 +88,14 @@ def incorporar_reetiquetas(df_exist: pd.DataFrame, directorios) -> pd.DataFrame:
     return df_exist_final
 
 
-def gen_train_test(n_augment_rounds, fraccion_sample, directorios):
+def gen_train_test(n_augment_rounds, fraccion_sample, config):
 
-    df_exist = get_img_existentes(fraccion_sample, directorios)
+    for curso in ['4b', '8b']:
+
+        directorios_curso = config.init_obj('directorios', module_config, curso=curso )
+        df_exist_4b = get_img_existentes(fraccion_sample, directorios_curso )
+    
+    df_exist = df_exist_4b
 
     # Traemos re-etiquetado 
 

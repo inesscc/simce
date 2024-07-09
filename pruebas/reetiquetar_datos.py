@@ -21,6 +21,7 @@ from torchvision import models
 import data_loader.data_loaders as module_data
 from simce.modelamiento import preparar_capas_modelo
 from tqdm import tqdm
+import config.proc_img as module_config
 ## Predicciones -----------------------------------------------------
 
 
@@ -45,11 +46,12 @@ model = model.to(device)
 
 model.eval()
 
-testloader = config.init_obj('data_loader_test', module_data, model=model_name, 
-                             return_directory=True)
-trainloader = config.init_obj('data_loader_train', module_data, model=model_name, 
-                              return_directory=True)
+dir_train_test = config.init_obj('directorios', module_config, curso='4b', filtro='dir_train_test' )
 
+testloader = config.init_obj('data_loader_test', module_data, model=model_name, 
+                             return_directory=True, dir_data=dir_train_test)
+trainloader = config.init_obj('data_loader_train', module_data, model=model_name, 
+                              return_directory=True, dir_data=dir_train_test)
 
 
 
@@ -129,20 +131,32 @@ a_revisar_p2 = a_revisar_p2.rename(columns={'dm_final': 'etiqueta_original', 'pr
 a_revisar_p2['etiqueta_final'] = ''
 a_revisar_p2 = a_revisar_p2[['ruta_imagen_output', 'ruta_imagen', 'origen', 'encargado', 'etiqueta_original',
                               'etiqueta_predicha', 'etiqueta_final']]
-a_revisar_p2.to_excel('data/otros/datos_a_revisar_p2_2.xlsx', index=False)
+
 a_revisar_p2
 
 
+# --- p3
 
-from config.proc_img import dir_input, dir_subpreg, dir_subpreg_aux
-folders_output = set([i.name for i in (dir_subpreg / 'CE').glob('*')])
-folders_input = set([i.name for i in (dir_input / 'CE').glob('*')])
-klaus = rev[rev.encargado.eq('nacho')]
-files_input = (dir_input / klaus.ruta_imagen.str.replace('\\', '/').squeeze()).to_list()
-files_output = klaus.ruta_imagen_output.apply(lambda x: dir_subpreg_aux / ('/'.join(Path(x).parts[-4:])))
+a_revisar_p3 = preds_tot[preds_tot.veintiles.lt(8) & preds_tot.acierto.eq(0)]
+a_revisar_p3['encargado'] = np.tile(['juane', 'klaus', 'javi', 'nacho'], len(a_revisar_p3)//4 + 1)[:len(a_revisar_p3)]
+a_revisar_p3['etiqueta_final'] = ''
+a_revisar_p3 = a_revisar_p3.rename(columns={'dm_final': 'etiqueta_original', 'pred': 'etiqueta_predicha'}) 
+a_revisar_p3 = a_revisar_p3[['ruta_imagen_output', 'ruta_imagen', 'encargado', 'etiqueta_original',
+                              'etiqueta_predicha', 'etiqueta_final']]
+a_revisar_p3.to_excel('data/otros/datos_a_revisar_p3.xlsx', index=False)
+
+
+
+directorios = config.init_obj('directorios', module_config, curso='4b')
+
+folders_output = set([i.name for i in (directorios['dir_subpreg'] / 'CE').glob('*')])
+folders_input = set([i.name for i in (directorios['dir_input'] / 'CE').glob('*')])
+klaus = a_revisar_p3[a_revisar_p3.encargado.eq('klaus')]
+files_input = (directorios['dir_input'] / klaus.ruta_imagen.str.replace('\\', '/').squeeze()).to_list()
+files_output = klaus.ruta_imagen_output.apply(lambda x: directorios['dir_subpreg_aux'] / ('/'.join(Path(x).parts[-4:])))
 
 import zipfile
-output_filename = 'nacho.zip'
+output_filename = 'klaus.zip'
 
 with zipfile.ZipFile(output_filename, 'w') as zipf:
     # Add input files to the 'input' folder

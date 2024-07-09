@@ -2,15 +2,16 @@
 import torchvision.transforms.v2 as v2
 from base import BaseDataLoader
 from dataset import CustomImageDataset
-from config.proc_img import dir_train_test
+
 import torch
 
 class TrainTestDataLoader(BaseDataLoader):
 
-    def __init__(self, data_file, batch_size, model, cortar_bordes, shuffle=True, validation_split=0.0, num_workers=2,
+    def __init__(self, data_file, dir_data, batch_size, model, cortar_bordes, shuffle=True, validation_split=0.0, num_workers=2,
                  return_directory=False, ):
         self.model = model
         self.cortar_bordes = cortar_bordes
+        self.dir_data = dir_data
 
         if 'eficientnet' in model:
             transform = v2.Compose([
@@ -33,5 +34,5 @@ class TrainTestDataLoader(BaseDataLoader):
                     ])
         self.data_file = data_file
         self.return_directory = return_directory
-        self.dataset = CustomImageDataset(csv_file=dir_train_test / self.data_file, transform=transform, return_directory=self.return_directory)
+        self.dataset = CustomImageDataset(csv_file=self.dir_data / self.data_file, transform=transform, return_directory=self.return_directory)
         super().__init__(self.dataset, batch_size, shuffle, validation_split, num_workers)

@@ -57,17 +57,19 @@ def plot(imgs, col_title=None, **imshow_kwargs):
     plt.tight_layout()
 
 
-rev = pd.read_excel('data/otros/datos_revisados_p2_2.xlsx')
-
-#rev = pd.read_excel('data/otros/datos_revisados_p2.xlsx')
+rev = pd.read_excel('data/otros/resultados_maxvit.xlsx')
+mi_rev = rev[rev.deciles.le(8)]
+mi_rev.deciles.value_counts()
+mi_rev.ruta_imagen_output.iloc[2]
+rev = pd.read_excel('data/otros/datos_a_revisar_p3.xlsx')
 
 df99e = pd.read_csv(dir_input / 'CE_Final_DobleMarca.csv', sep=';')
 df99e[df99e.serie.eq(4153717)].p3_4
 rev.origen.value_counts()
 #rev['diferente'] = rev.etiqueta_original != rev.etiqueta_final
 #rev.groupby('origen').diferente.sum().div(rev.groupby('origen').diferente.count()).sort_values(ascending=False)
-#nombre_encargado = 'juane'
-#mi_rev = rev[rev.encargado.eq(nombre_encargado)]
+nombre_encargado = 'juane'
+mi_rev = rev[rev.encargado.eq(nombre_encargado)]
 #rev[rev.ruta_imagen_output.str.contains('data/input_proc/subpreg_recortadas/augmented/CE/07940/4216808_p4')].ruta_imagen_output
 mi_rev = rev[rev.comentarios.notnull()]
 #mi_rev = rev[rev.origen.eq('doble_marca_normal') ]
@@ -98,7 +100,7 @@ for i in range(len(mi_rev)):
             
             img2 = Image.open((dirs['dir_input'] / row.ruta_imagen.replace('\\', '/')))
         
-            plot([img, img2], col_title=[row.ruta_imagen_output, row.comentarios] )
+            plot([img, img2], col_title=[row.ruta_imagen_output, row.ruta_imagen] )
             #plt.title(train[tr-ain.falsa_sospecha.eq(1)].ruta_imagen_output.iloc[i])
             plt.show()
         except Exception as e:
