@@ -1,3 +1,23 @@
+import pandas as pd
+import config.proc_img as module_config
+from config.parse_config import ConfigParser
+from simce.utils import read_json
+from config.proc_img import CURSO
+config_dict = read_json('config/model.json')
+config = ConfigParser(config_dict)
+d = config.init_obj('directorios', module_config, curso=str(module_config.CURSO) )
+r1 = pd.read_excel(d['dir_insumos'] / 'datos_revisados.xlsx') 
+r2 = pd.read_excel(d['dir_insumos'] / 'datos_revisados_p2_2.xlsx')
+r3 = pd.read_excel('data/otros/datos_revisados_p3.xlsx') 
+
+rev = pd.concat([r1, r2, r3])
+rev['cambio_etiqueta'] = rev.etiqueta_original != rev.etiqueta_final
+rev.cambio_etiqueta.value_counts()
+rev.mostrar_ACE.value_counts()
+
+
+
+# ----------
 import torch
 torch.cuda.is_available()
 import torchvision
@@ -26,104 +46,112 @@ from config.proc_img import SEED
 import numpy as np
 ## Predicciones -----------------------------------------------------
 
-torch.manual_seed(SEED)
-torch.backends.cudnn.deterministic = True
-torch.backends.cudnn.benchmark = False
-np.random.seed(SEED)
+def testear_modelo(modelo):
+    torch.manual_seed(SEED)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    np.random.seed(SEED)
 
 
-config_dict = read_json('saved/models/saved_server/maxvit/config.json')
-config = ConfigParser(config_dict)
-directorios = config.init_obj('directorios', module_config, curso='4b' )
-device, device_ids = prepare_device(config['n_gpu'])
+    config_dict = read_json(f'saved/models/saved_server/{modelo}/config.json')
+    config = ConfigParser(config_dict)
 
-
-
-model  = config.init_obj('arch', models)
-model_name = config['arch']['type']
-model = preparar_capas_modelo(model, model_name)
-
-ruta_modelo = 'saved/models/saved_server/maxvit/model_best.pt'
-checkpoint = torch.load(ruta_modelo)
-state_dict = checkpoint['state_dict']
-if config['n_gpu'] > 1:
-    model = torch.nn.DataParallel(model)
-model.load_state_dict(state_dict)
-
-model = model.to(device)
-
-model.eval()
-dir_train_test = config.init_obj('directorios', module_config, curso='4b', filtro='dir_train_test' )
-
-testloader = config.init_obj('data_loader_test', module_data, model=model_name, 
-                             return_directory=True, dir_data=dir_train_test)
-trainloader = config.init_obj('data_loader_train', module_data, model=model_name, 
-                              return_directory=True, dir_data=dir_train_test)
+    device, _ = prepare_device(config['n_gpu'])
 
 
 
+    model  = config.init_obj('arch', models)
+    model_name = config['arch']['type']
+    model = preparar_capas_modelo(model, model_name)
+
+    ruta_modelo = f'saved/models/saved_server/{modelo}/model_best.pt'
+    checkpoint = torch.load(ruta_modelo)
+    state_dict = checkpoint['state_dict']
+    if config['n_gpu'] > 1:
+        model = torch.nn.DataParallel(model)
+    model.load_state_dict(state_dict)
+
+    model = model.to(device)
+
+    model.eval()
+    dir_train_test = config.init_obj('directorios', module_config, curso='4b', filtro='dir_train_test' )
+
+    testloader = config.init_obj('data_loader_test', module_data, model=model_name, 
+                                return_directory=True, dir_data=dir_train_test)
 
 
-#model_load.eval()
 
-# Initialize lists to store predictions and true labels
-predictions = []
-probs = []
-true_labels = []
-lst_directories = []
+    #model_load.eval()
 
-with torch.no_grad():
-    # Iterate over the test data
-    for n,(images, labels, directories) in enumerate(tqdm(testloader)):
-        # Move the images and labels to the same device as the model
-        images = images.to(device)
-        labels = labels.to(device)
+    # Initialize lists to store predictions and true labels
+    predictions = []
+    probs = []
+    true_labels = []
+    lst_directories = []
 
-        # Make predictions
-        
-        outputs = model(images)
+    with torch.no_grad():
+        # Iterate over the test data
+        for n,(images, labels, directories) in enumerate(tqdm(testloader)):
+            # Move the images and labels to the same device as the model
+            images = images.to(device)
+            labels = labels.to(device)
 
-        probabilities = torch.nn.functional.softmax(outputs.data, dim=1)
-        max_probabilities = probabilities.max(dim=1)[0]
-        
-        # Get the predicted class for each image
-        _, predicted = torch.max(outputs.data, 1)
+            # Make predictions
+            
+            outputs = model(images)
 
-        # Store the predictions and true labels
-        predictions.extend(predicted.tolist())
-        true_labels.extend(labels.tolist())
-        probs.extend(max_probabilities)
-        lst_directories.extend(directories)
+            probabilities = torch.nn.functional.softmax(outputs.data, dim=1)
+            max_probabilities = probabilities.max(dim=1)[0]
+            
+            # Get the predicted class for each image
+            _, predicted = torch.max(outputs.data, 1)
 
-print('Predicciones listas!')
-probs_float = [i.item() for i in probs]
-probs_float
-import pandas as pd
+            # Store the predictions and true labels
+            predictions.extend(predicted.tolist())
+            true_labels.extend(labels.tolist())
+            probs.extend(max_probabilities)
+            lst_directories.extend(directories)
 
+    print('Predicciones listas!')
+    probs_float = [i.item() for i in probs]
+    probs_float
+    import pandas as pd
+
+    test = pd.read_csv(dir_train_test / 'test.csv')
+    test_rev = pd.read_excel('data/otros/resultados_maxvit_rev.xlsx')[['ruta_imagen_output', 'etiqueta_final']]
+    test_rev2 = pd.read_excel('data/otros/datos_revisados_p3.xlsx')[['ruta_imagen_output', 'etiqueta_final']]
+    test_rev = test_rev[~test_rev.ruta_imagen_output.isin(test_rev2.ruta_imagen_output)]
+    test_rev_total = pd.concat([test_rev, test_rev2])
+
+    test = test.merge(test_rev_total, on='ruta_imagen_output', how='left')
+    test['dm_final2'] = test.etiqueta_final.combine_first(test.dm_final)
+
+    train = pd.read_csv(dir_train_test / 'train.csv')
+    train.dm_final.value_counts()
+
+    preds = pd.DataFrame({'pred': predictions,
+                'true': true_labels,
+                'proba': probs_float,
+                'dirs': lst_directories})
+
+    #preds['dirs'] = test.ruta_imagen_output
+
+    preds_tot = preds.merge(test, left_on='dirs', right_on='ruta_imagen_output', how='left')
+    preds_tot['acierto'] = preds_tot.pred == preds_tot.dm_final
+    preds_tot['acierto2'] = preds_tot.pred == preds_tot.dm_final2
+
+
+    preds_tot['veintiles'] = pd.qcut(preds_tot.proba, q=20).cat.codes + 1
+    return preds_tot
+
+preds_tot_maxvit = testear_modelo('maxvit')
+preds_tot_maxvit.etiqueta_final.isnull().sum()
 test = pd.read_csv(dir_train_test / 'test.csv')
-test_rev = pd.read_excel('data/otros/resultados_maxvit_rev.xlsx')[['ruta_imagen_output', 'etiqueta_final']]
-test_rev2 = pd.read_excel('data/otros/datos_revisados_p3.xlsx')[['ruta_imagen_output', 'etiqueta_final']]
-test_rev = test_rev[~test_rev.ruta_imagen_output.isin(test_rev2.ruta_imagen_output)]
-test_rev_total = pd.concat([test_rev, test_rev2])
-test = test.merge(test_rev_total, on='ruta_imagen_output', how='left')
-test['dm_final2'] = test.etiqueta_final.combine_first(test.dm_final)
+set(test.ruta_imagen_output).intersection(set())
+preds_tot_maxvit.dm_final2.isnull().sum()
 
-train = pd.read_csv(dir_train_test / 'train.csv')
-train.dm_final.value_counts()
+preds_tot_maxvit.acierto.mean()
 
-preds = pd.DataFrame({'pred': predictions,
-              'true': true_labels,
-              'proba': probs_float,
-              'dirs': lst_directories})
-
-#preds['dirs'] = test.ruta_imagen_output
-
-preds_tot = preds.merge(test, left_on='dirs', right_on='ruta_imagen_output', how='left')
-preds_tot['acierto'] = preds_tot.pred == preds_tot.dm_final
-preds_tot['acierto2'] = preds_tot.pred == preds_tot.dm_final2
-
-
-preds_tot['veintiles'] = pd.qcut(preds_tot.proba, q=20).cat.codes + 1
 preds_tot[preds_tot.acierto.eq(0)].veintiles.value_counts()
 import matplotlib.ticker as mtick
 
@@ -334,79 +362,3 @@ for epoch in range(epochs):  # Loop over the dataset multiple times
             print('Early stopping')
             break
 print('Finished Training')
-
-""" dirs[1]
-images_denom = image_denormalized = denormalize(images, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-imshow(torchvision.utils.make_grid(images))
-import cv2
-
-
-
-transform = transforms.Compose(
-    [transforms.ToTensor(),
-     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-
-
-
-
-trainset = torchvision.datasets.CIFAR10(root='./data', train=True,
-                                        download=True, transform=transform)
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
-                                          shuffle=True, num_workers=2)
-
-testset = torchvision.datasets.CIFAR10(root='./data', train=False,
-                                       download=True, transform=transform)
-testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size,
-                                         shuffle=False, num_workers=2)
-
-classes = ('plane', 'car', 'bird', 'cat',
-           'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
-
-
-
-# functions to show an image
-
-
-def imshow(img):
-    img = img / 2 + 0.5     # unnormalize
-    npimg = img.numpy()
-    plt.imshow(np.transpose(npimg, (1, 2, 0)))
-    plt.show()
- """
-
-""" # get some random training images
-dataiter = iter(trainloader)
-images, labels = next(dataiter)
-next(dataiter)
-
-# show images
-imshow(torchvision.utils.make_grid(images))
-# print labels
-print(' '.join(f'{classes[labels[j]]:5s}' for j in range(batch_size)))
-
-
-
-class Net(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.conv1 = nn.Conv2d(3, 6, 5)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(6, 16, 5)
-        self.fc1 = nn.Linear(16 * 5 * 5, 120)
-        self.fc2 = nn.Linear(120, 84)
-        self.fc3 = nn.Linear(84, 10)
-
-    def forward(self, x):
-        x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
-        x = torch.flatten(x, 1) # flatten all dimensions except batch
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = self.fc3(x)
-        return x
-
-
-net = Net()
-
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9) """

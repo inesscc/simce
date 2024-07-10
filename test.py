@@ -9,7 +9,7 @@ from config.parse_config import ConfigParser
 from simce.utils import read_json
 import torch.nn as nn
 import torchvision.models as models
-
+import config.proc_img as module_config
 from simce.modelamiento import preparar_capas_modelo, anotar_metricas_modelo
 
 #config_dict = read_json('config/model_MaxVit_T_Weights.json')
@@ -17,10 +17,10 @@ from simce.modelamiento import preparar_capas_modelo, anotar_metricas_modelo
 def main(config):
 
     logger = config.get_logger('test')
-
+    dir_train_test = config.init_obj('directorios', module_config, curso='4b', filtro='dir_train_test' )
     # setup data_loader instances
     data_loader = config.init_obj('data_loader_test', module_data,
-                                   model=config['arch']['type'])
+                                   model=config['arch']['type'], dir_data=dir_train_test)
     # build model architecture
     model = config.init_obj('arch', models)
     model_name = config['arch']['type']

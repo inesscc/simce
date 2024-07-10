@@ -429,7 +429,7 @@ def generar_insumos(tipo_cuadernillo, directorios):
 
 
 @timing
-def generar_insumos_total(directorios, curso):
+def generar_insumos_total(directorios):
     print('Generando insumos estudiantes...')
 
     insumos_est = generar_insumos(tipo_cuadernillo='estudiantes', directorios=directorios)
