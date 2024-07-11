@@ -45,9 +45,6 @@ def get_img_existentes(fraccion_sample: float, directorios, curso) -> pd.DataFra
 
     return df_exist
 
-
-
-
 def incorporar_reetiquetas(df_exist: pd.DataFrame, directorios, curso) -> pd.DataFrame:
     '''
     Incorpora re-etiquetas para mejorar calidad del dataset
@@ -55,11 +52,13 @@ def incorporar_reetiquetas(df_exist: pd.DataFrame, directorios, curso) -> pd.Dat
 
     reetiqueta = pd.read_excel(directorios['dir_insumos'] / 'datos_revisados.xlsx')
     reetiqueta2 = pd.read_excel(directorios['dir_insumos'] / 'datos_revisados_p2_2.xlsx')
+    reetiqueta3 = pd.read_excel(directorios['dir_insumos'] / 'datos_revisados_p3.xlsx')
 
     etiqueta_final =reetiqueta.set_index('ruta_imagen_output').etiqueta_final
     data_eliminar = set(etiqueta_final[etiqueta_final.isin(['-', 99])].index)    
     etiqueta_final = etiqueta_final[~etiqueta_final.isin(['-', 99])]
-    etiqueta_final.index = etiqueta_final.index.str.replace(str(directorios['dir_input_proc']), str(directorios['dir_input_proc'] / curso))
+    etiqueta_final.index = etiqueta_final.index.str.replace(str(directorios['dir_input_proc']), 
+                                                            str(directorios['dir_input_proc'] / curso))
  
 
     etiqueta_final2 =reetiqueta2.set_index('ruta_imagen_output').etiqueta_final
@@ -67,10 +66,19 @@ def incorporar_reetiquetas(df_exist: pd.DataFrame, directorios, curso) -> pd.Dat
     etiqueta_final2 = etiqueta_final2[~etiqueta_final2.isin(['-', 99])]
     etiqueta_final2.index = etiqueta_final2.index.str.replace(str(directorios['dir_input_proc']),
                                                                str(directorios['dir_input_proc'] / curso))
+    
+    etiqueta_final3 =reetiqueta3.set_index('ruta_imagen_output').etiqueta_final
+    data_eliminar.update(set(etiqueta_final3[etiqueta_final3.isin(['-', 99])].index)  )  
+    etiqueta_final3 = etiqueta_final3[~etiqueta_final3.isin(['-', 99])]
+    etiqueta_final3.index = etiqueta_final3.index.str.replace(str(directorios['dir_input_proc']), 
+                                                            str(directorios['dir_input_proc'] ))
 
     df_exist['reetiqueta'] = df_exist.ruta_imagen_output.map(etiqueta_final)
     df_exist['reetiqueta2'] = df_exist.ruta_imagen_output.map(etiqueta_final2)
-    df_exist['reetiqueta'] = df_exist.reetiqueta.combine_first(df_exist.reetiqueta2)
+    df_exist['reetiqueta3'] = df_exist.ruta_imagen_output.map(etiqueta_final3)
+
+    df_exist['reetiqueta'] = df_exist.reetiqueta.combine_first(df_exist.reetiqueta2).combine_first(df_exist.reetiqueta3)
+    
     df_exist['dm_final'] = df_exist.reetiqueta.combine_first(df_exist.dm_final).astype(int)
 
     df_exist['falsa_sospecha'] = ((df_exist['dm_sospecha'] == 1) & (df_exist['dm_final'] == 0))
@@ -112,7 +120,7 @@ def gen_train_test(n_augment_rounds, fraccion_sample, config):
 
     df_sospecha, df_sampleado = separar_dataframes(df_exist_re)
 
-    train, test = train_test_split(df_sospecha, stratify=df_sospecha['falsa_sospecha'], test_size=.2)
+    train, test = train_test_split(df_sospecha, stratify=df_sospecha['falsa_sospecha'], test_size=.2, random_state=SEED)
 
     df_aug = gen_df_aumentado(train, directorios, n_augment_rounds=n_augment_rounds)
 
