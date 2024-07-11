@@ -10,7 +10,7 @@ from simce.generar_insumos_img import generar_insumos_total
 from simce.proc_imgs import get_subpreguntas
 from simce.proc_tabla_99 import get_tablas_99_total
 from simce.preparar_modelamiento import gen_train_test
-from config.proc_img import N_AUGMENT_ROUNDS, FRAC_SAMPLE, CURSO
+from config.proc_img import N_AUGMENT_ROUNDS, FRAC_SAMPLE
 import config.proc_img as module_config
 from config.parse_config import ConfigParser
 from simce.utils import read_json
@@ -28,10 +28,11 @@ if __name__ == '__main__':
     # 0. Creamos directorios
     config_dict = read_json('config/model.json')
     config = ConfigParser(config_dict)
-    directorios = config.init_obj('directorios', module_config, curso=str(CURSO) )
+    
+    directorios = config.init_obj('directorios', module_config, curso=str(module_config.CURSO) )
     crear_directorios(directorios)
     # 1.  Generar insumos para procesamiento
-    generar_insumos_total(directorios, CURSO) 
+    #generar_insumos_total(directorios) 
     # 2. Generar tablas con dobles marcas
     get_tablas_99_total(para_entrenamiento=IS_TRAINING, directorios=directorios)
 

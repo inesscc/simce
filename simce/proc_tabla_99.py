@@ -5,7 +5,8 @@ Created on Thu May  9 17:20:37 2024
 @author: jeconchao
 """
 import pandas as pd
-from config.proc_img import  variables_identificadoras, SEED, regex_extraer_rbd_de_ruta, dic_ignorar_p1, regex_p1 
+from config.proc_img_8b import  variables_identificadoras, SEED, CURSO, regex_extraer_rbd_de_ruta, dic_ignorar_p1, regex_p1, \
+nombre_tabla_estud_origen, nombre_tabla_estud_final, nombre_tabla_padres_origen, nombre_tabla_padres_final 
 from simce.utils import timing
 import re
 import json
@@ -18,6 +19,7 @@ np.random.seed(SEED)
 
 @timing
 def get_tablas_99_total(directorios, para_entrenamiento=True ):
+    
     print('Generando tabla estudiantes...')
 
     get_tablas_99(tipo_cuadernillo='estudiantes', para_entrenamiento=para_entrenamiento,
@@ -30,13 +32,13 @@ def get_tablas_99_total(directorios, para_entrenamiento=True ):
 def get_tablas_99(tipo_cuadernillo, directorios, para_entrenamiento=True):
 
     if tipo_cuadernillo == 'estudiantes':
-        from config.proc_img import nombre_tabla_estud_origen, nombre_tabla_estud_final
+
 
         tabla_origen = nombre_tabla_estud_origen
         tabla_final = nombre_tabla_estud_final
 
     elif tipo_cuadernillo == 'padres':
-        from config.proc_img import nombre_tabla_padres_origen, nombre_tabla_padres_final
+
 
         tabla_origen = nombre_tabla_padres_origen
         tabla_final = nombre_tabla_padres_final
@@ -44,19 +46,29 @@ def get_tablas_99(tipo_cuadernillo, directorios, para_entrenamiento=True):
     with open(directorios['dir_insumos'] / 'insumos.json') as f:
         insumos = json.load(f)
 
+
+
+    if not tipo_cuadernillo in insumos.keys():
+        print('No hay tabla de padres para este curso')
+        return ''
     dic_cuadernillo = insumos[tipo_cuadernillo]['dic_cuadernillo']
 
+
     Origen_DobleMarca = pd.read_csv(directorios['dir_input'] / tabla_origen, delimiter=';')
-    Final_DobleMarca = pd.read_csv(directorios['dir_input'] / tabla_final, delimiter=';')
+
+    # Tabla de 8vo requiere encoding latin-1 para tabla final:
+    if '8vo' in tabla_final:
+        encoding = 'latin-1'
+    else:
+        encoding = 'utf-8'
+    Final_DobleMarca = pd.read_csv(directorios['dir_input'] / tabla_final, delimiter=';', encoding=encoding)
 
     nombres_col = [i for i in Final_DobleMarca.columns.to_list() if re.search(r'p\d+', i)]
 
     casos_99 = procesar_casos_99(Final_DobleMarca, nombres_col, dic_cuadernillo,
-                                 tipo_cuadernillo,
-                                 para_entrenamiento=para_entrenamiento)
+                                 tipo_cuadernillo)
     casos_99_origen = procesar_casos_99(Origen_DobleMarca, nombres_col, dic_cuadernillo,
-                                        tipo_cuadernillo,
-                                        para_entrenamiento=para_entrenamiento)
+                                        tipo_cuadernillo)
 
     df_final = gen_tabla_entrenamiento(casos_99, casos_99_origen)
 
@@ -72,16 +84,16 @@ def get_tablas_99(tipo_cuadernillo, directorios, para_entrenamiento=True):
     if para_entrenamiento:
 
         df_final.to_csv(
-            directorios['dir_tabla_99'] / f'casos_99_entrenamiento_compilados_{tipo_cuadernillo}.csv', index=False)
+            directorios['dir_tabla_99'] / f'casos_99_entrenamiento_compilados_{CURSO}_{tipo_cuadernillo}.csv', index=False)
     else:
 
         df_final.to_csv(
-            directorios['dir_tabla_99'] / f'casos_99_compilados_{tipo_cuadernillo}.csv', index=False)
+            directorios['dir_tabla_99'] / f'casos_99_compilados_{CURSO}_{tipo_cuadernillo}.csv', index=False)
 
     print('Tabla compilada generada exitosamente!')
 
 
-def procesar_casos_99(df_rptas, nombres_col, dic_cuadernillo, tipo_cuadernillo, para_entrenamiento):
+def procesar_casos_99(df_rptas, nombres_col, dic_cuadernillo, tipo_cuadernillo):
 
     ignorar_p1 = dic_ignorar_p1[tipo_cuadernillo]
 
@@ -96,10 +108,10 @@ def procesar_casos_99(df_rptas, nombres_col, dic_cuadernillo, tipo_cuadernillo, 
     casos_99 = df_melt[(df_melt['respuestas'] == 99)].copy()
 
     # Si queremos obtener set de entrenamiento agregamos muestra de respuestas normales:
-    if para_entrenamiento:
+    # if para_entrenamiento:
 
-        df_sample = df_melt[df_melt.respuestas.ne(99)].sample(round(casos_99.shape[0] * .2), random_state=SEED )
-        casos_99 = pd.concat([casos_99, df_sample])
+    #     df_sample = df_melt[df_melt.respuestas.ne(99)].sample(round(casos_99.shape[0] * .2), random_state=SEED )
+    #     casos_99 = pd.concat([casos_99, df_sample])
 
     # Usamos diccionario cuadernillo para ver a qué imagen está asociada esa pregunta específica:
     casos_99['ruta_imagen'] = (casos_99.rutaImagen1.str.replace(r'(_\d+.*)', '_', regex=True) +

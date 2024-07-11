@@ -13,7 +13,7 @@ from simce.proc_imgs import bound_and_crop
 import config.proc_img as module_config
 # Creamos directorio para imágenes aumentadas:
 
-def get_img_existentes(fraccion_sample: float, directorios) -> pd.DataFrame:
+def get_img_existentes(fraccion_sample: float, directorios, curso) -> pd.DataFrame:
     '''
     Genera dataframe con archivos existentes (que sí pudieron ser procesados), con la siguiente lógica:
 
@@ -22,8 +22,8 @@ def get_img_existentes(fraccion_sample: float, directorios) -> pd.DataFrame:
     clases y hacer crecer demasiado el dataset)
     '''
     
-    padres99 = f'casos_99_entrenamiento_compilados_padres.csv'
-    est99 = f'casos_99_entrenamiento_compilados_estudiantes.csv'
+    padres99 = f'casos_99_entrenamiento_compilados_{curso}_padres.csv'
+    est99 = f'casos_99_entrenamiento_compilados_{curso}_estudiantes.csv'
     df99p = pd.read_csv(directorios['dir_tabla_99'] / padres99)
     
     df99e = pd.read_csv(directorios['dir_tabla_99'] / est99)
@@ -45,39 +45,40 @@ def get_img_existentes(fraccion_sample: float, directorios) -> pd.DataFrame:
 
     return df_exist
 
-def separar_dataframes(df_exist) -> tuple[pd.DataFrame, pd.DataFrame]:
-    # Obtenemos versión final de variable falsa sospecha con todos los datos:
-    
-
-    # Separamos entre datos que fueron obtenidos de sampleo aleatorio y datos obtenidos de sospechas de doble marca:
-    df_sampleado = df_exist[df_exist.dm_sospecha.eq(0)]
-    df_sospecha = df_exist[df_exist.dm_sospecha.ne(0)]
-
-    return df_sospecha, df_sampleado
-
-
-def incorporar_reetiquetas(df_exist: pd.DataFrame, directorios) -> pd.DataFrame:
+def incorporar_reetiquetas(df_exist: pd.DataFrame, directorios, curso) -> pd.DataFrame:
     '''
     Incorpora re-etiquetas para mejorar calidad del dataset
     '''
 
     reetiqueta = pd.read_excel(directorios['dir_insumos'] / 'datos_revisados.xlsx')
     reetiqueta2 = pd.read_excel(directorios['dir_insumos'] / 'datos_revisados_p2_2.xlsx')
+    reetiqueta3 = pd.read_excel(directorios['dir_insumos'] / 'datos_revisados_p3.xlsx')
 
     etiqueta_final =reetiqueta.set_index('ruta_imagen_output').etiqueta_final
     data_eliminar = set(etiqueta_final[etiqueta_final.isin(['-', 99])].index)    
     etiqueta_final = etiqueta_final[~etiqueta_final.isin(['-', 99])]
-    etiqueta_final.index = etiqueta_final.index.str.replace(str(dir_input_proc), str(dir_input_proc / curso))
+    etiqueta_final.index = etiqueta_final.index.str.replace(str(directorios['dir_input_proc']), 
+                                                            str(directorios['dir_input_proc'] / curso))
  
 
     etiqueta_final2 =reetiqueta2.set_index('ruta_imagen_output').etiqueta_final
     data_eliminar.update(set(etiqueta_final2[etiqueta_final2.isin(['-', 99])].index)  )
     etiqueta_final2 = etiqueta_final2[~etiqueta_final2.isin(['-', 99])]
-    etiqueta_final2.index = etiqueta_final2.index.str.replace(str(dir_input_proc), str(dir_input_proc / curso))
+    etiqueta_final2.index = etiqueta_final2.index.str.replace(str(directorios['dir_input_proc']),
+                                                               str(directorios['dir_input_proc'] / curso))
+    
+    etiqueta_final3 =reetiqueta3.set_index('ruta_imagen_output').etiqueta_final
+    data_eliminar.update(set(etiqueta_final3[etiqueta_final3.isin(['-', 99])].index)  )  
+    etiqueta_final3 = etiqueta_final3[~etiqueta_final3.isin(['-', 99])]
+    etiqueta_final3.index = etiqueta_final3.index.str.replace(str(directorios['dir_input_proc']), 
+                                                            str(directorios['dir_input_proc'] ))
 
     df_exist['reetiqueta'] = df_exist.ruta_imagen_output.map(etiqueta_final)
     df_exist['reetiqueta2'] = df_exist.ruta_imagen_output.map(etiqueta_final2)
-    df_exist['reetiqueta'] = df_exist.reetiqueta.combine_first(df_exist.reetiqueta2)
+    df_exist['reetiqueta3'] = df_exist.ruta_imagen_output.map(etiqueta_final3)
+
+    df_exist['reetiqueta'] = df_exist.reetiqueta.combine_first(df_exist.reetiqueta2).combine_first(df_exist.reetiqueta3)
+    
     df_exist['dm_final'] = df_exist.reetiqueta.combine_first(df_exist.dm_final).astype(int)
 
     df_exist['falsa_sospecha'] = ((df_exist['dm_sospecha'] == 1) & (df_exist['dm_final'] == 0))
@@ -90,20 +91,36 @@ def incorporar_reetiquetas(df_exist: pd.DataFrame, directorios) -> pd.DataFrame:
 
 def gen_train_test(n_augment_rounds, fraccion_sample, config):
 
-    for curso in ['4b', '8b']:
+    # for curso in ['4b', '8b']:
 
-        directorios_curso = config.init_obj('directorios', module_config, curso=curso )
-        df_exist_4b = get_img_existentes(fraccion_sample, directorios_curso )
+    #     directorios_curso = config.init_obj('directorios', module_config, curso=curso )
+    #     df_exist_curso = get_img_existentes(fraccion_sample, directorios_curso, curso=curso )
+
+    #     if curso == '4b':
+    #         df_exist_curso = incorporar_reetiquetas(df_exist_curso,directorios_curso, curso)
+        
+    #     # df_sospecha, df_sampleado = separar_dataframes(df_exist_curso)
+
+    #     train, test = train_test_split(df_exist_curso, stratify=df_exist_curso['falsa_sospecha'], test_size=.2)
+
+    #     df_aug = gen_df_aumentado(train, directorios_curso, n_augment_rounds=n_augment_rounds)
+
+    #     export_train_test(train, df_aug, test, directorios_curso, df_sampleado=None)
     
-    df_exist = df_exist_4b
+
 
     # Traemos re-etiquetado 
 
-    df_exist_re = incorporar_reetiquetas(df_exist,directorios)
+    directorios = config.init_obj('directorios', module_config, curso='4b' )
+    df_exist_curso = get_img_existentes(fraccion_sample, directorios, curso='4b' )
+
+    df_exist_re = incorporar_reetiquetas(df_exist_curso,directorios, '4b')
+
+    
 
     df_sospecha, df_sampleado = separar_dataframes(df_exist_re)
 
-    train, test = train_test_split(df_sospecha, stratify=df_sospecha['falsa_sospecha'], test_size=.2)
+    train, test = train_test_split(df_sospecha, stratify=df_sospecha['falsa_sospecha'], test_size=.2, random_state=SEED)
 
     df_aug = gen_df_aumentado(train, directorios, n_augment_rounds=n_augment_rounds)
 
@@ -290,3 +307,12 @@ def get_indices_tinta(ruta):
 #     shutil.make_archive('carpetas_faltantes', 'zip', temp_dir)
 
 
+def separar_dataframes(df_exist) -> tuple[pd.DataFrame, pd.DataFrame]:
+    # Obtenemos versión final de variable falsa sospecha con todos los datos:
+    
+
+    # Separamos entre datos que fueron obtenidos de sampleo aleatorio y datos obtenidos de sospechas de doble marca:
+    df_sampleado = df_exist[df_exist.dm_sospecha.eq(0)]
+    df_sospecha = df_exist[df_exist.dm_sospecha.ne(0)]
+
+    return df_sospecha, df_sampleado
