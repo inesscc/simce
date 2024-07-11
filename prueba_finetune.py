@@ -12,9 +12,10 @@ from trainer import Trainer
 import model.metric as module_metric
 import numpy as np
 import torchvision.models as models
+import config.proc_img as module_config
 from simce.modelamiento import preparar_capas_modelo
 
-config_dict = read_json('config/model.json')
+config_dict = read_json('saved/models/saved_server/maxvit/config.json')
 config = ConfigParser(config_dict)
 
 
@@ -40,9 +41,9 @@ def main(config):
 
     #logger.info(model)
     print(f'{model_name=}')
-    
+    dir_train_test = config.init_obj('directorios', module_config, curso='4b', filtro='dir_train_test' )
 
-    trainloader = config.init_obj('data_loader_train', module_data, model=model_name)
+    trainloader = config.init_obj('data_loader_train', module_data, model=model_name, dir_data=dir_train_test)
     
     valid_data_loader = trainloader.split_validation()
 

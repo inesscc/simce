@@ -7,8 +7,7 @@ Created on Thu May  2 17:22:37 2024
 import numpy as np
 import cv2
 from itertools import chain
-from config.proc_img import dir_subpreg, regex_estudiante, dir_tabla_99, \
-    dir_input, n_pixeles_entre_lineas, dir_estudiantes, dir_padres
+from config.proc_img import regex_estudiante, n_pixeles_entre_lineas 
 from simce.errors import anotar_error
 # from simce.apoyo_proc_imgs import get_subpreguntas_completo
 import pandas as pd
@@ -17,13 +16,13 @@ from dotenv import load_dotenv
 
 from simce.utils import get_mask_imagen, eliminar_o_rellenar_manchas
 import json
-from config.proc_img import dir_insumos
+
 load_dotenv()
 
 VALID_INPUT = {'cuadernillo', 'pagina'}
 
 
-def get_insumos(tipo_cuadernillo):
+def get_insumos(tipo_cuadernillo, dir_insumos):
     with open(dir_insumos / 'insumos.json') as f:
         insumos = json.load(f)
 
@@ -40,14 +39,14 @@ def get_insumos(tipo_cuadernillo):
     return n_pages, n_preguntas, subpreg_x_preg, dic_cuadernillo, dic_pagina, n_subpreg_tot
 
 
-def select_directorio(tipo_cuadernillo):
+def select_directorio(tipo_cuadernillo, directorios):
     '''Selecciona directorio de datos según si se está procesando el cuadernillo
     de padres o de estudiantes'''
 
     if tipo_cuadernillo == 'estudiantes':
-        directorio_imagenes = dir_estudiantes
+        directorio_imagenes = directorios['dir_estudiantes']
     elif tipo_cuadernillo == 'padres':
-        directorio_imagenes = dir_padres
+        directorio_imagenes = directorios['dir_padres']
 
     return directorio_imagenes
 
@@ -180,7 +179,7 @@ def save_pregunta_completa(img_pregunta_recuadros, dir_subpreg_rbd, estudiante, 
     cv2.imwrite(file_out, img_pregunta_recuadros)
     
 
-def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None, filter_estudiante=None,
+def get_subpreguntas(tipo_cuadernillo, directorios, para_entrenamiento=True, filter_rbd=None, filter_estudiante=None,
                      filter_rbd_int=False, muestra=False):
     '''
     Obtiene las cada una de las subpreguntas obtenidas de la función get_tablas_99(). Esto considera dos
@@ -202,7 +201,11 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
 
     '''
     # Obtenemos directorio de imágenes (padres o estudiantes)
-    directorio_imagenes = select_directorio(tipo_cuadernillo)
+    directorio_imagenes = select_directorio(tipo_cuadernillo, directorios)
+    dir_tabla_99 = directorios['dir_tabla_99']
+    dir_input = directorios['dir_input']
+    dir_subpreg = directorios['dir_subpreg']
+    
 
     # Definimos tabla a utilizar para seleccionar subpreguntas
     if para_entrenamiento:
@@ -236,7 +239,7 @@ def get_subpreguntas(tipo_cuadernillo, para_entrenamiento=True, filter_rbd=None,
     dir_preg99 = [dir_input / i for i in df99.ruta_imagen]
 
     n_pages, _, subpreg_x_preg, _, dic_pagina, _ = get_insumos(
-        tipo_cuadernillo)
+        tipo_cuadernillo, dir_insumos=directorios['dir_insumos'])
 
     for num, rbd in enumerate(dir_preg99):
 
