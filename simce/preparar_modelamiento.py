@@ -27,7 +27,8 @@ def get_img_existentes(fraccion_sample: float, directorios, curso) -> pd.DataFra
     df99p = pd.read_csv(directorios['dir_tabla_99'] / padres99)
     
     df99e = pd.read_csv(directorios['dir_tabla_99'] / est99)
-
+    print(f'{df99p.shape=}')
+    print(f'{df99e.shape=}')
     # Obtenemos falsas sospechas de estudiantes para filtrar casos relevantes
     df99e['falsa_sospecha'] = ((df99e['dm_sospecha'] == 1) & (df99e['dm_final'] == 0))
     est_falsa_sospecha = df99e[df99e.falsa_sospecha.eq(1)]
