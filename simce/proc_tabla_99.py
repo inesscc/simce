@@ -5,7 +5,7 @@ Created on Thu May  9 17:20:37 2024
 @author: jeconchao
 """
 import pandas as pd
-from config.proc_img_8b import  variables_identificadoras, SEED, CURSO, regex_extraer_rbd_de_ruta, dic_ignorar_p1, regex_p1, \
+from config.proc_img import  variables_identificadoras, SEED, CURSO, regex_extraer_rbd_de_ruta, dic_ignorar_p1, regex_p1, \
 nombre_tabla_estud_origen, nombre_tabla_estud_final, nombre_tabla_padres_origen, nombre_tabla_padres_final 
 from simce.utils import timing
 import re

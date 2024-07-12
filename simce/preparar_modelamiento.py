@@ -77,7 +77,7 @@ def incorporar_reetiquetas(df_exist: pd.DataFrame, directorios, curso) -> pd.Dat
     df_exist['reetiqueta2'] = df_exist.ruta_imagen_output.map(etiqueta_final2)
     df_exist['reetiqueta3'] = df_exist.ruta_imagen_output.map(etiqueta_final3)
 
-    df_exist['reetiqueta'] = df_exist.reetiqueta.combine_first(df_exist.reetiqueta2).combine_first(df_exist.reetiqueta3)
+    df_exist['reetiqueta'] = df_exist.reetiqueta3.combine_first(df_exist.reetiqueta2).combine_first(df_exist.reetiqueta)
     
     df_exist['dm_final'] = df_exist.reetiqueta.combine_first(df_exist.dm_final).astype(int)
 
