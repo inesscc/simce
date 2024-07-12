@@ -24,11 +24,13 @@ def get_img_existentes(fraccion_sample: float, directorios, curso) -> pd.DataFra
     
     padres99 = f'casos_99_entrenamiento_compilados_{curso}_padres.csv'
     est99 = f'casos_99_entrenamiento_compilados_{curso}_estudiantes.csv'
-    df99p = pd.read_csv(directorios['dir_tabla_99'] / padres99)
+
+    if (directorios['dir_tabla_99'] / padres99).is_file():
+        df99p = pd.read_csv(directorios['dir_tabla_99'] / padres99)
     
     df99e = pd.read_csv(directorios['dir_tabla_99'] / est99)
-    print(f'{df99p.shape=}')
-    print(f'{df99e.shape=}')
+
+
     # Obtenemos falsas sospechas de estudiantes para filtrar casos relevantes
     df99e['falsa_sospecha'] = ((df99e['dm_sospecha'] == 1) & (df99e['dm_final'] == 0))
     est_falsa_sospecha = df99e[df99e.falsa_sospecha.eq(1)]
@@ -36,7 +38,13 @@ def get_img_existentes(fraccion_sample: float, directorios, curso) -> pd.DataFra
     # Obtenemos frac_sample de los otros casos para alimentar el dataset:
     otros_est = df99e[df99e.falsa_sospecha.eq(0)].sample(frac=fraccion_sample, random_state=SEED)
 
-    df99 = pd.concat([est_falsa_sospecha, otros_est, df99p]).reset_index(drop=True)
+    if (directorios['dir_tabla_99'] / padres99).is_file():
+        dfs_99 = [est_falsa_sospecha, otros_est, df99p]
+    else:
+        dfs_99 = [est_falsa_sospecha, otros_est]
+
+    df99 = pd.concat(dfs_99).reset_index(drop=True)
+
     # Filtramos archivos que efectivamente fue posible procesar:
     df_exist = df99[df99.ruta_imagen_output.apply(lambda x: Path(x).is_file())].reset_index()
 
@@ -89,43 +97,44 @@ def incorporar_reetiquetas(df_exist: pd.DataFrame, directorios, curso) -> pd.Dat
 
     return df_exist_final
 
-
 def gen_train_test(n_augment_rounds, fraccion_sample, config):
 
-    # for curso in ['4b', '8b']:
+    for curso in ['4b', '8b']:
 
-    #     directorios_curso = config.init_obj('directorios', module_config, curso=curso )
-    #     df_exist_curso = get_img_existentes(fraccion_sample, directorios_curso, curso=curso )
+        directorios_curso = config.init_obj('directorios', module_config, curso=curso )
+        df_exist_curso = get_img_existentes(fraccion_sample, directorios_curso, curso=curso )
 
-    #     if curso == '4b':
-    #         df_exist_curso = incorporar_reetiquetas(df_exist_curso,directorios_curso, curso)
+        if curso == '4b':
+            df_exist_curso = incorporar_reetiquetas(df_exist_curso,directorios_curso, curso)
         
-    #     # df_sospecha, df_sampleado = separar_dataframes(df_exist_curso)
+        # df_sospecha, df_sampleado = separar_dataframes(df_exist_curso)
 
-    #     train, test = train_test_split(df_exist_curso, stratify=df_exist_curso['falsa_sospecha'], test_size=.2)
+        train, test = train_test_split(df_exist_curso, stratify=df_exist_curso['falsa_sospecha'],
+                                        test_size=.2, random_state=SEED)
 
-    #     df_aug = gen_df_aumentado(train, directorios_curso, n_augment_rounds=n_augment_rounds)
+        df_aug = gen_df_aumentado(train, directorios_curso, n_augment_rounds=n_augment_rounds)
 
-    #     export_train_test(train, df_aug, test, directorios_curso, df_sampleado=None)
+        export_train_test(train, df_aug, test, directorios_curso, curso=curso, df_sampleado=None)
+    return print('Tablas exportadas para todos los cursos exitosamente!')
     
 
 
     # Traemos re-etiquetado 
 
-    directorios = config.init_obj('directorios', module_config, curso='4b' )
-    df_exist_curso = get_img_existentes(fraccion_sample, directorios, curso='4b' )
+    # directorios = config.init_obj('directorios', module_config, curso='4b' )
+    # df_exist_curso = get_img_existentes(fraccion_sample, directorios, curso='4b' )
 
-    df_exist_re = incorporar_reetiquetas(df_exist_curso,directorios, '4b')
+    # df_exist_re = incorporar_reetiquetas(df_exist_curso,directorios, '4b')
 
     
 
-    df_sospecha, df_sampleado = separar_dataframes(df_exist_re)
+    # df_sospecha, df_sampleado = separar_dataframes(df_exist_re)
 
-    train, test = train_test_split(df_sospecha, stratify=df_sospecha['falsa_sospecha'], test_size=.2, random_state=SEED)
+    # train, test = train_test_split(df_sospecha, stratify=df_sospecha['falsa_sospecha'], test_size=.2, random_state=SEED)
 
-    df_aug = gen_df_aumentado(train, directorios, n_augment_rounds=n_augment_rounds)
+    # df_aug = gen_df_aumentado(train, directorios, n_augment_rounds=n_augment_rounds)
 
-    export_train_test(train, df_aug, test, directorios, df_sampleado=None)
+    # export_train_test(train, df_aug, test, directorios, df_sampleado=None)
 
 
 ############# generando imagenes #############
@@ -169,7 +178,7 @@ def gen_df_aumentado(train: pd.DataFrame, directorios, n_augment_rounds:int) -> 
 
     return df_aug_final
 
-def export_train_test(train, df_aug, test, directorios, df_sampleado=None):
+def export_train_test(train, df_aug, test, directorios, curso, df_sampleado=None):
 
 
     if df_sampleado:
@@ -179,13 +188,13 @@ def export_train_test(train, df_aug, test, directorios, df_sampleado=None):
 
     (pd.concat(dfs_concat).reset_index()
     .rename(columns={'level_0': 'indice_original'})
-    .drop('index', axis= 1).to_csv(directorios['dir_train_test'] / 'train.csv'))
+    .drop('index', axis= 1).to_csv(directorios['dir_train_test'] / f'train_{curso}.csv'))
 
     (test[test.dm_sospecha.eq(1)]
      .reset_index()
      .rename(columns={'level_0': 'indice_original'})
      .drop('index', axis= 1)
-     .to_csv(directorios['dir_train_test'] / 'test.csv'))
+     .to_csv(directorios['dir_train_test'] / f'test_{curso}.csv'))
     print('Tablas de entrenamiento y test exportadas exitosamente!')
 
 #### funciones aux para generar transformaciones
@@ -308,12 +317,12 @@ def get_indices_tinta(ruta):
 #     shutil.make_archive('carpetas_faltantes', 'zip', temp_dir)
 
 
-def separar_dataframes(df_exist) -> tuple[pd.DataFrame, pd.DataFrame]:
-    # Obtenemos versión final de variable falsa sospecha con todos los datos:
+# def separar_dataframes(df_exist) -> tuple[pd.DataFrame, pd.DataFrame]:
+#     # Obtenemos versión final de variable falsa sospecha con todos los datos:
     
 
-    # Separamos entre datos que fueron obtenidos de sampleo aleatorio y datos obtenidos de sospechas de doble marca:
-    df_sampleado = df_exist[df_exist.dm_sospecha.eq(0)]
-    df_sospecha = df_exist[df_exist.dm_sospecha.ne(0)]
+#     # Separamos entre datos que fueron obtenidos de sampleo aleatorio y datos obtenidos de sospechas de doble marca:
+#     df_sampleado = df_exist[df_exist.dm_sospecha.eq(0)]
+#     df_sospecha = df_exist[df_exist.dm_sospecha.ne(0)]
 
-    return df_sospecha, df_sampleado
+#     return df_sospecha, df_sampleado
