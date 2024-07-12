@@ -71,6 +71,7 @@ def get_tablas_99(tipo_cuadernillo, directorios, para_entrenamiento=True):
                                         tipo_cuadernillo)
 
     df_final = gen_tabla_entrenamiento(casos_99, casos_99_origen)
+    print(f'{df_final.shape[0]=}')
 
     df_final['rbd_ruta'] = df_final.ruta_imagen.astype('string').str.extract(regex_extraer_rbd_de_ruta)
 
