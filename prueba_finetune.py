@@ -15,8 +15,8 @@ import torchvision.models as models
 import config.proc_img as module_config
 from simce.modelamiento import preparar_capas_modelo
 
-config_dict = read_json('saved/models/saved_server/maxvit/config.json')
-config = ConfigParser(config_dict)
+#config_dict = read_json('saved/models/saved_server/maxvit/config.json')
+#config = ConfigParser(config_dict)
 
 
 def main(config):
