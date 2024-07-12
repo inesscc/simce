@@ -10,6 +10,10 @@ r1 = pd.read_excel(d['dir_insumos'] / 'datos_revisados.xlsx')
 r2 = pd.read_excel(d['dir_insumos'] / 'datos_revisados_p2_2.xlsx')
 r3 = pd.read_excel('data/otros/datos_revisados_p3.xlsx') 
 
+
+muestra = r1[r1.origen.eq('doble_marca_normal')]
+muestra.etiqueta_original.ne(muestra.etiqueta_final).value_counts()
+
 rev = pd.concat([r1, r2, r3])
 rev['cambio_etiqueta'] = rev.etiqueta_original != rev.etiqueta_final
 rev.cambio_etiqueta.value_counts()
@@ -44,8 +48,12 @@ from tqdm import tqdm
 import config.proc_img as module_config
 from config.proc_img import SEED
 import numpy as np
+
 ## Predicciones -----------------------------------------------------
 
+
+    
+fix_test(Path('data/input_modelamiento'))
 def testear_modelo(modelo):
     torch.manual_seed(SEED)
     torch.backends.cudnn.deterministic = True
@@ -118,16 +126,14 @@ def testear_modelo(modelo):
     import pandas as pd
 
     test = pd.read_csv(dir_train_test / 'test.csv')
+    
     test_rev = pd.read_excel('data/otros/resultados_maxvit_rev.xlsx')[['ruta_imagen_output', 'etiqueta_final']]
     test_rev2 = pd.read_excel('data/otros/datos_revisados_p3.xlsx')[['ruta_imagen_output', 'etiqueta_final']]
     test_rev = test_rev[~test_rev.ruta_imagen_output.isin(test_rev2.ruta_imagen_output)]
     test_rev_total = pd.concat([test_rev, test_rev2])
-
     test = test.merge(test_rev_total, on='ruta_imagen_output', how='left')
     test['dm_final2'] = test.etiqueta_final.combine_first(test.dm_final)
 
-    train = pd.read_csv(dir_train_test / 'train.csv')
-    train.dm_final.value_counts()
 
     preds = pd.DataFrame({'pred': predictions,
                 'true': true_labels,
@@ -141,16 +147,13 @@ def testear_modelo(modelo):
     preds_tot['acierto2'] = preds_tot.pred == preds_tot.dm_final2
 
 
+
     preds_tot['veintiles'] = pd.qcut(preds_tot.proba, q=20).cat.codes + 1
     return preds_tot
 
 preds_tot_maxvit = testear_modelo('maxvit')
-preds_tot_maxvit.etiqueta_final.isnull().sum()
-test = pd.read_csv(dir_train_test / 'test.csv')
-set(test.ruta_imagen_output).intersection(set())
-preds_tot_maxvit.dm_final2.isnull().sum()
 
-preds_tot_maxvit.acierto.mean()
+
 
 preds_tot[preds_tot.acierto.eq(0)].veintiles.value_counts()
 import matplotlib.ticker as mtick

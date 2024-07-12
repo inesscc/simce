@@ -57,12 +57,13 @@ def plot(imgs, col_title=None, **imshow_kwargs):
     plt.tight_layout()
 
 
-rev = pd.read_excel('data/otros/resultados_maxvit.xlsx')
+rev = pd.read_excel('data/otros/resultados_maxvit2.xlsx')
+mi_rev = rev
 mi_rev = rev[rev.deciles.le(8)]
 mi_rev.deciles.value_counts()
 mi_rev.ruta_imagen_output.iloc[2]
-rev = pd.read_excel('data/otros/datos_a_revisar_p3.xlsx')
-
+rev = pd.read_excel('data/otros/datos_revisados_p2_2.xlsx')
+mi_rev = rev[rev.mostrar_ACE.eq(1)]
 df99e = pd.read_csv(dir_input / 'CE_Final_DobleMarca.csv', sep=';')
 df99e[df99e.serie.eq(4153717)].p3_4
 rev.origen.value_counts()
@@ -88,9 +89,8 @@ r2.shape
 
 
 
-
 for i in range(len(mi_rev)):
-    if i >= 0:
+    if i >= 377 and rev.iloc[i].encargado == 'juane':
         print(i)
         
         row = mi_rev.iloc[i]

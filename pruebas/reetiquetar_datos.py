@@ -150,6 +150,8 @@ a_revisar_p3.to_excel('data/otros/datos_a_revisar_p3.xlsx', index=False)
 directorios = config.init_obj('directorios', module_config, curso='4b')
 
 folders_output = set([i.name for i in (directorios['dir_subpreg'] / 'CE').glob('*')])
+
+
 folders_input = set([i.name for i in (directorios['dir_input'] / 'CE').glob('*')])
 klaus = a_revisar_p3[a_revisar_p3.encargado.eq('klaus')]
 files_input = (directorios['dir_input'] / klaus.ruta_imagen.str.replace('\\', '/').squeeze()).to_list()
