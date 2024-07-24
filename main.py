@@ -5,15 +5,15 @@ Created on Tue Apr  9 10:34:05 2024
 @author: jeconchao
 """
 
-from simce.trabajar_rutas import crear_directorios
 from simce.generar_insumos_img import generar_insumos_total
 from simce.proc_imgs import get_subpreguntas
 from simce.proc_tabla_99 import get_tablas_99_total
 from simce.preparar_modelamiento import gen_train_test
 from config.proc_img import N_AUGMENT_ROUNDS, FRAC_SAMPLE
 import config.proc_img as module_config
+
 from config.parse_config import ConfigParser
-from simce.utils import read_json
+from simce.utils import read_json, crear_directorios
 
 # import pandas as pd
 
@@ -34,11 +34,11 @@ if __name__ == '__main__':
     # 1.  Generar insumos para procesamiento
     #generar_insumos_total(directorios) 
     # 2. Generar tablas con dobles marcas
-    get_tablas_99_total(para_entrenamiento=IS_TRAINING, directorios=directorios)
+    #get_tablas_99_total(para_entrenamiento=IS_TRAINING, directorios=directorios)
 
     # 3. Recortar subpreguntas
-    #get_subpreguntas(tipo_cuadernillo='estudiantes', directorios=directorios, para_entrenamiento=IS_TRAINING)
-    #get_subpreguntas(tipo_cuadernillo='padres', directorios=directorios, para_entrenamiento=IS_TRAINING)
+    get_subpreguntas(tipo_cuadernillo='estudiantes', directorios=directorios, curso=str(module_config.CURSO), para_entrenamiento=IS_TRAINING)
+    #get_subpreguntas(tipo_cuadernillo='padres', directorios=directorios, curso=str(module_config.CURSO), para_entrenamiento=IS_TRAINING)
 
     if IS_TRAINING:
         #4. Obtener set de entrenamiento y test y aumentamos train

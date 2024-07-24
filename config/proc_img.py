@@ -7,7 +7,7 @@ Created on Tue Apr  9 10:50:14 2024
 
 from pathlib import Path
 
-CURSO = Path('8b')
+CURSO = Path('4b')
 # Expresión regular para capturar el identificador del estudiante en nombre de archivos
 regex_estudiante = r'(/?\d{7,}/?)(_.*jpg)?'
 
@@ -76,13 +76,10 @@ regex_hoja_cuadernillo = r'_(\d+)'
 
 
 # PROCESAMIENTO POSIBLES DOBLES MARCAS -----
-nombre_tabla_estud_origen = f'doble_marca_origen_8vo.csv'
-nombre_tabla_estud_final = f'doble_marca_final_8vo.csv'
-nombre_tabla_padres_origen = f''
-nombre_tabla_padres_final = f''
-
-
-
+nombre_tabla_estud_origen = f'{carpeta_estudiantes}_Origen_DobleMarca.csv'
+nombre_tabla_estud_final = f'{carpeta_estudiantes}_Final_DobleMarca.csv'
+nombre_tabla_padres_origen = f'{carpeta_padres}_Origen_DobleMarca.csv'
+nombre_tabla_padres_final = f'{carpeta_padres}_Final_DobleMarca.csv'
 
 # Variables identificadoras
 id_estudiante = 'serie'
