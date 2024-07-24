@@ -97,9 +97,9 @@ def incorporar_reetiquetas(df_exist: pd.DataFrame, directorios, curso) -> pd.Dat
 
     return df_exist_final
 
-def gen_train_test(n_augment_rounds, fraccion_sample, config):
+def gen_train_test(n_augment_rounds, fraccion_sample, config, cursos=['4b', '8b']):
 
-    for curso in ['4b', '8b']:
+    for curso in cursos:
 
         directorios_curso = config.init_obj('directorios', module_config, curso=curso )
         df_exist_curso = get_img_existentes(fraccion_sample, directorios_curso, curso=curso )

@@ -7,7 +7,7 @@ Created on Tue Apr  9 10:50:14 2024
 
 from pathlib import Path
 
-CURSO = Path('4b')
+CURSO = Path('8b')
 # Expresión regular para capturar el identificador del estudiante en nombre de archivos
 regex_estudiante = r'(/?\d{7,}/?)(_.*jpg)?'
 
@@ -66,20 +66,23 @@ IGNORAR_PRIMERA_PAGINA = True
 SEED = 2024
 
 # Porcentaje de casos de doble marca que extraemos de estudiantes
-FRAC_SAMPLE = .05
+FRAC_SAMPLE = 1
 
 # n° de rondas de aumentado de datos (máximo 5):
-N_AUGMENT_ROUNDS = 5
+N_AUGMENT_ROUNDS = 2
 # OBTENCIÓN DE INSUMOS ----------------------------------------
 
 regex_hoja_cuadernillo = r'_(\d+)'
 
 
 # PROCESAMIENTO POSIBLES DOBLES MARCAS -----
-nombre_tabla_estud_origen = f'{carpeta_estudiantes}_Origen_DobleMarca.csv'
-nombre_tabla_estud_final = f'{carpeta_estudiantes}_Final_DobleMarca.csv'
-nombre_tabla_padres_origen = f'{carpeta_padres}_Origen_DobleMarca.csv'
-nombre_tabla_padres_final = f'{carpeta_padres}_Final_DobleMarca.csv'
+nombre_tabla_estud_origen = f'doble_marca_origen_8vo.csv'
+nombre_tabla_estud_final = f'doble_marca_final_8vo.csv'
+nombre_tabla_padres_origen = f''
+nombre_tabla_padres_final = f''
+
+
+
 
 # Variables identificadoras
 id_estudiante = 'serie'

@@ -115,8 +115,9 @@ for i in range(len(mi_rev)):
         except Exception as e:
             print(e)
             pass
-
-
+import pandas as pd
+dirs = config.init_obj('directorios', module_config, curso='8b' )
+t8 = pd.read_csv(dirs['dir_train_test'] / 'train_8b.csv')
 t8 = pd.read_csv(dirs['dir_tabla_99'] / 'casos_99_entrenamiento_compilados_8b_estudiantes.csv')
 t4 = pd.read_csv(dirs['dir_tabla_99'] / 'casos_99_entrenamiento_compilados_4b_estudiantes.csv')
 
