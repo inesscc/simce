@@ -80,10 +80,11 @@ from PIL import Image
     #     return approx
 
     # %%
-
+    cv2.startWindowThread()
     cv2.imshow("Detected Lines", cv2.resize(mask_naranjo, (900, 900)))
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+    cv2.waitKey(1)
 
 
 # %%

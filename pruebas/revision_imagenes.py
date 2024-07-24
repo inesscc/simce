@@ -20,9 +20,9 @@ dir_input = Path('data/input_raw')
 config_dict = read_json('config/model.json')
 config = ConfigParser(config_dict)
 
-dirs = config.init_obj('directorios', module_config, curso='4b' )
+dirs = config.init_obj('directorios', module_config, curso='8b' )
 
-def plot(imgs, col_title=None, **imshow_kwargs):
+def plot(imgs, col_title=None, suptitle='', **imshow_kwargs):
     if not isinstance(imgs[0], list):
         # Make a 2d grid even if there's just 1 row
         imgs = [imgs]
@@ -31,7 +31,8 @@ def plot(imgs, col_title=None, **imshow_kwargs):
     num_cols = len(imgs[0])
     # print(f'{num_rows=}')
     # print(f'{num_cols=}')
-    _, axs = plt.subplots(nrows=num_rows, ncols=num_cols, squeeze=False)
+    fig, axs = plt.subplots(nrows=num_rows, ncols=num_cols, squeeze=False)
+    fig.suptitle(suptitle)
     for row_idx, row in enumerate(imgs):
         for col_idx, img in enumerate(row):
             
@@ -53,17 +54,22 @@ def plot(imgs, col_title=None, **imshow_kwargs):
         for col_idx in range(num_cols):
             print(col_title[col_idx])
             axs[0, col_idx].set_title(col_title[col_idx])
-
+    
     plt.tight_layout()
+tes
 
-
-rev = pd.read_excel('data/otros/resultados_maxvit2.xlsx')
+rev = pd.read_excel('data/otros/resultados_maxvit_8b.xlsx')
+rev.ruta_imagen = rev.ruta_imagen.str.replace(r'^\\', '', regex=True)
 mi_rev = rev
 mi_rev = rev[rev.deciles.le(8)]
 mi_rev.deciles.value_counts()
 mi_rev.ruta_imagen_output.iloc[2]
 rev = pd.read_excel('data/otros/datos_revisados_p2_2.xlsx')
+#rev = pd.read_csv('data/input_modelamiento/test_8b.csv')
+
+mi_rev = rev
 mi_rev = rev[rev.mostrar_ACE.eq(1)]
+mi_rev.to_excel('data/otros/revisión_ACE.xlsx')
 df99e = pd.read_csv(dir_input / 'CE_Final_DobleMarca.csv', sep=';')
 df99e[df99e.serie.eq(4153717)].p3_4
 rev.origen.value_counts()
@@ -90,17 +96,20 @@ r2.shape
 
 
 for i in range(len(mi_rev)):
-    if i >= 377 and rev.iloc[i].encargado == 'juane':
+    #if i >= 377 and rev.iloc[i].encargado == 'juane':
         print(i)
         
         row = mi_rev.iloc[i]
         #print(row.origen)
         try:
-            img = Image.open(dirs['dir_subpreg_aux'] / ('/'.join(Path(row.ruta_imagen_output).parts[-4:])))
+            #img = Image.open(dirs['dir_subpreg_aux'] / ('/'.join(Path(row.ruta_imagen_output).parts[-4:])))
+            img = Image.open(row.ruta_imagen_output)
             
             img2 = Image.open((dirs['dir_input'] / row.ruta_imagen.replace('\\', '/')))
         
-            plot([img, img2], col_title=[row.ruta_imagen_output, row.ruta_imagen] )
+            plot([img, img2], suptitle= f'{row.proba:.1%}',
+                  col_title=[f'{row.ruta_imagen_output}, {row.pred=}', f'{row.ruta_imagen}, {row.true=}'] )
+            #plot([img], col_title=[row.ruta_imagen_output] )
             #plt.title(train[tr-ain.falsa_sospecha.eq(1)].ruta_imagen_output.iloc[i])
             plt.show()
         except Exception as e:
@@ -108,3 +117,8 @@ for i in range(len(mi_rev)):
             pass
 
 
+t8 = pd.read_csv(dirs['dir_tabla_99'] / 'casos_99_entrenamiento_compilados_8b_estudiantes.csv')
+t4 = pd.read_csv(dirs['dir_tabla_99'] / 'casos_99_entrenamiento_compilados_4b_estudiantes.csv')
+
+t8.dm_final.value_counts().sort_index().div(len(t8))
+t4.dm_final.value_counts().sort_index().div(len(t4))
