@@ -33,7 +33,11 @@ def timing(f):
         return result
     return wrap
 
+def crear_directorios(directorios):
 
+    for i in directorios.values():
+        i.mkdir(exist_ok=True, parents=True)
+    print('Directorios generados exitosamente!')
 
 
 

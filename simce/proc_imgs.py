@@ -65,9 +65,11 @@ def dejar_solo_recuadros_subpregunta(img_pregunta):
 
     # Eliminamos manchas verticales y horizontales:
     lim_vert = mask_recuadro.mean(axis=0).mean()
-    morph_vert = eliminar_o_rellenar_manchas(mask_dilate, orientacion='vertical', limite=lim_vert, rellenar=False )
+    morph_vert = eliminar_o_rellenar_manchas(mask_dilate, orientacion='vertical', 
+                                             limite=lim_vert, rellenar=False )
     lim_hor = mask_recuadro.mean(axis=1).mean()
-    morph_hor = eliminar_o_rellenar_manchas(morph_vert, orientacion='horizontal', limite=lim_hor, rellenar=False )
+    morph_hor = eliminar_o_rellenar_manchas(morph_vert, orientacion='horizontal',
+                                             limite=lim_hor, rellenar=False )
 
     nonzero = cv2.findNonZero(morph_hor)
 
@@ -113,14 +115,9 @@ def get_mascara_lineas_horizontales(img_pregunta_recuadros):
     gray[idx_negro] = 255
     gray[idx_naranjo ] = 0
 
-
-
-
     gray2 = gray.copy() 
 
-    mean_value = np.mean(gray)
-
-    
+    mean_value = np.mean(gray)    
     # Replace values above the mean with 255
     gray2[(gray2 > mean_value*.95) ] = 255
 
@@ -131,8 +128,6 @@ def get_mascara_lineas_horizontales(img_pregunta_recuadros):
                                                        orientacion='horizontal',
                                                          limite=100, rellenar=False)[:-10, :-10]
     
-    
-
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 1))
 
     gray_dilated = cv2.dilate(gray_limpio, kernel, iterations=2)
@@ -155,10 +150,6 @@ def get_mascara_lineas_horizontales(img_pregunta_recuadros):
                                                        orientacion='horizontal',
                                                          limite=220, rellenar=False)
 
-
-
-
-
     mask_lineas_horizontales = cv2.bitwise_not(gray_limpio3)
 
     
@@ -179,7 +170,7 @@ def save_pregunta_completa(img_pregunta_recuadros, dir_subpreg_rbd, estudiante, 
     cv2.imwrite(file_out, img_pregunta_recuadros)
     
 
-def get_subpreguntas(tipo_cuadernillo, directorios, para_entrenamiento=True, filter_rbd=None, filter_estudiante=None,
+def get_subpreguntas(tipo_cuadernillo, directorios, curso='4b', para_entrenamiento=True, filter_rbd=None, filter_estudiante=None,
                      filter_rbd_int=False, muestra=False):
     '''
     Obtiene las cada una de las subpreguntas obtenidas de la función get_tablas_99(). Esto considera dos
@@ -209,9 +200,9 @@ def get_subpreguntas(tipo_cuadernillo, directorios, para_entrenamiento=True, fil
 
     # Definimos tabla a utilizar para seleccionar subpreguntas
     if para_entrenamiento:
-        nombre_tabla_casos99 = f'casos_99_entrenamiento_compilados_{tipo_cuadernillo}.csv'
+        nombre_tabla_casos99 = f'casos_99_entrenamiento_compilados_{curso}_{tipo_cuadernillo}.csv'
     else:
-        nombre_tabla_casos99 = f'casos_99_compilados_{tipo_cuadernillo}.csv'
+        nombre_tabla_casos99 = f'casos_99_compilados_{curso}_{tipo_cuadernillo}.csv'
 
     df99 = pd.read_csv(
         dir_tabla_99 / nombre_tabla_casos99, dtype={'rbd_ruta': 'string'}).sort_values('ruta_imagen')
