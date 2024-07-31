@@ -9,7 +9,7 @@ from pathlib import Path
 
 CURSO = Path('4b')
 # Expresión regular para capturar el identificador del estudiante en nombre de archivos
-regex_estudiante = r'(/?\d{7,}/?)(_.*jpg)?'
+regex_estudiante = r'/?(\d{7,})/?(_.*jpg)?'
 
 # IMPORTANTE: parámetro que define cuántos píxeles espera como
 # mínimo entre línea y línea de cada subpregunta
@@ -20,21 +20,24 @@ carpeta_padres = 'CP'
 
 
 
-def get_directorios(curso, filtro=None):
+def get_directorios(filtro=None) -> dict:
+    '''Acá se indican todos los directorios del proyecto. Luego, la función crear_directorios() toma todos
+    los directorios de este diccionario y los crea. La opción filtro permite cargar solo algunos directorios,
+    en caso de requerirse. Si el filtro '''
     dd = dict()
     dd['dir_data'] = Path('data/')
-    dd['dir_input'] = dd['dir_data'] / 'input_raw' / curso
+    dd['dir_input'] = dd['dir_data'] / 'input_raw' / CURSO
     dd['dir_estudiantes'] = dd['dir_input'] / carpeta_estudiantes
     dd['dir_padres'] = dd['dir_input'] / carpeta_padres
 
     dd['dir_input_proc'] = Path('data/input_proc/')
-    dd['dir_subpreg_aux'] = dd['dir_input_proc'] / curso / 'subpreg_recortadas'
+    dd['dir_subpreg_aux'] = dd['dir_input_proc'] / CURSO / 'subpreg_recortadas'
     dd['dir_subpreg'] = dd['dir_subpreg_aux'] / 'base'
     dd['dir_subpreg_aug'] = dd['dir_subpreg_aux'] / 'augmented'
 
 
     dd['dir_tabla_99'] = dd['dir_input_proc'] / 'output_tabla_99'
-    dd['dir_insumos'] = dd['dir_input_proc'] / curso /  'insumos'
+    dd['dir_insumos'] = dd['dir_input_proc'] / CURSO /  'insumos'
 
     dd['dir_train_test'] = dd['dir_data'] / 'input_modelamiento'
 

@@ -19,7 +19,7 @@
             "data_file": "train.csv",
             "batch_size": 128,
             "shuffle": true,
-            "cortar_bordes": true,
+            "cortar_bordes": false,
             "num_workers": 2,
             "validation_split": 0.15
         }
@@ -30,7 +30,7 @@
             "data_file": "test.csv",
             "batch_size": 16,
             "shuffle": false,
-            "cortar_bordes": true,
+            "cortar_bordes": false,
             "num_workers": 2,
 
             "validation_split": 0.0
