@@ -21,7 +21,7 @@ from torchvision import models
 import data_loader.data_loaders as module_data
 from simce.modelamiento import preparar_capas_modelo
 from tqdm import tqdm
-import config.proc_img as module_config
+from config.proc_img import get_directorios
 from config.proc_img import SEED
 import numpy as np
 ## Predicciones -----------------------------------------------------
@@ -36,7 +36,7 @@ np.random.seed(SEED)
 
 config_dict = read_json('saved/models/saved_server/maxvit/config.json')
 config = ConfigParser(config_dict)
-directorios = config.init_obj('directorios', module_config, curso='4b' )
+directorios = get_directorios()
 device, device_ids = prepare_device(config['n_gpu'])
 
 
@@ -55,7 +55,7 @@ model.load_state_dict(state_dict)
 model = model.to(device)
 
 model.eval()
-dir_train_test = config.init_obj('directorios', module_config, curso='4b', filtro='dir_train_test' )
+dir_train_test = get_directorios(filtro='dir_train_test')
 #fix_test(dir_train_test)
 testloader = config.init_obj('data_loader_test', module_data, model=model_name, 
                              return_directory=True, dir_data=dir_train_test)
