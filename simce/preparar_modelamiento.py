@@ -245,62 +245,7 @@ def transform_img(path_img, i):
     return trans_img
 
 
-def get_indices_tinta(ruta):
-    print(ruta)
-    bgr_img = cv2.imread(ruta)
-    mask_color = get_mask_imagen(bgr_img, lower_color=np.array([0,31,0]),
-                                  upper_color=np.array([179, 255, 255]), iters=1, eliminar_manchas=False)
-    
 
-    #kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2,2))
-    #morph2 = cv2.morphologyEx(mask_color, cv2.MORPH_CLOSE, kernel, iterations=3)
-
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5,5))
-    morph1 = cv2.morphologyEx(mask_color, cv2.MORPH_OPEN, kernel, iterations=3)
-
-    axis = 1
-    # Calculamos la media de cada fila:
-    sum_negro = np.sum(morph1 == 0, axis=axis)
-    
-    # Si la media es menor a 100, reemplazamos con 0 (negro):
-    # Esto permite eliminar manchas de color que a veces se dan
-    idx_low_rows = np.where(sum_negro < 15)[0]
-    morph1[idx_low_rows, :] = 255
-
-    # Define the border width in pixels
-    top, bottom, left, right = [3]*4
-
-    # Create a border around the image
-    bordered_mask = cv2.copyMakeBorder(morph1, top, bottom, left, right,
-                                        cv2.BORDER_CONSTANT, value=255).astype(np.uint8)
-    img = cv2.cvtColor(bgr_img,cv2.COLOR_BGR2GRAY) /255
-
-
-    contours, _ = cv2.findContours(bordered_mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-
-    big_contours = [
-        i for i in contours if 250 < cv2.contourArea(i) < 2000 ]
-    len(big_contours)
-    rect_img = img.copy()
-    bordered_rect_img = cv2.copyMakeBorder(rect_img, top, bottom, left, right, cv2.BORDER_CONSTANT, value=255)
-    indices = []
-
-    for contour in big_contours:
-        #x, y, w, h = cv2.boundingRect(contour)
-        
-        #cv2.rectangle(bordered_rect_img, (x, y), (x+w, y+h), (0, 0, 0), 3)
-        img_crop = bound_and_crop(bordered_rect_img, contour, buffer=-3, 
-                                  buffer_extra_lados=0)
-        idx_blanco = np.where(img_crop > 0.9)
-        img_crop[idx_blanco] = 1
-        indice = 1 - img_crop.mean()
-        indices.append(indice)
-    print(indices)
-
-
-    indices_relevantes = sorted(indices, reverse = True)[:2]  
-
-    return indices_relevantes
 
 # from config.proc_img import dir_input
 # folders_output = set([i.name for i in (dir_subpreg / 'CE').glob('*')])

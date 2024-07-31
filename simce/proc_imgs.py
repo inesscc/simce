@@ -423,16 +423,6 @@ def eliminar_franjas_negras(img_preg):
     return img_pregunta
 
 
-# def mantener_solo_recuadros_respuesta(cropped_img_sub):
-#     im2 = get_mask_imagen(cropped_img_sub,
-#                           lower_color=np.array(
-#                               [0, 0, 0]),
-#                           upper_color=np.array([179, 10, 255]),
-#                           eliminar_manchas='vertical', iters=1)
-#     nonzero = cv2.findNonZero(im2)
-
-#     img_pregunta = bound_and_crop(cropped_img_sub, nonzero, buffer=10)
-#     return img_pregunta
 
 
 def recorte_imagen(img_preg, x0=110, x1=20, y0=50, y1=50):
@@ -531,8 +521,8 @@ def bound_and_crop(img, c, buffer=0, buffer_extra_lados=0):
 
 
 def crop_and_save_subpreg(img_pregunta_crop, lineas_horizontales, i, file_out, verbose=False):
-    img_subrptas = img_pregunta_crop[max(0, lineas_horizontales[i]-20):
-                                        lineas_horizontales[i+1]+20,]
+    img_subrptas = img_pregunta_crop[lineas_horizontales[i]:
+                                        lineas_horizontales[i+1]]
     print(file_out)
     print(img_subrptas.shape)
      # Si la subpregunta es más larga que ancha, la rotamos a lo ancho:
