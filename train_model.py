@@ -1,6 +1,7 @@
 import argparse
 import collections
 import torch
+torch.cuda.is_available()
 import torch.nn as nn
 from config.proc_img import SEED
 from config.parse_config import ConfigParser
@@ -10,27 +11,40 @@ import data_loader.data_loaders as module_data
 from trainer import Trainer
 import model.metric as module_metric
 import numpy as np
+import torchvision.models as models
+from config.proc_img import get_directorios
+from simce.modelamiento import preparar_capas_modelo
 
-torch.manual_seed(SEED)
-torch.backends.cudnn.deterministic = True
-torch.backends.cudnn.benchmark = False
-np.random.seed(SEED)
+#config_dict = read_json('saved/models/saved_server/maxvit/config.json')
+#config = ConfigParser(config_dict)
 
-config_dict = read_json('config/model.json')
-config = ConfigParser(config_dict)
 
 def main(config):
+
+    torch.manual_seed(SEED)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    np.random.seed(SEED)
 
 
 
 
     logger = config.get_logger('train')
-    num_classes = 2
+    if config['weights']['type'] == 'none':
+        weights = None
+    else:
+        weights = config.init_obj('weights', models)
+    model = config.init_obj('arch', models, weights=weights)
+    model_name = config['arch']['type']
+    
+    model = preparar_capas_modelo(model, model_name)
 
-    model  = config.init_obj('arch', module_arch, num_classes=num_classes)
-    logger.info(model)
+    #logger.info(model)
+    print(f'{model_name=}')
+    dir_train_test = get_directorios(filtro='dir_train_test')
 
-    trainloader = config.init_obj('data_loader_train', module_data)
+    trainloader = config.init_obj('data_loader_train', module_data, model=model_name, dir_data=dir_train_test)
+    
     valid_data_loader = trainloader.split_validation()
 
 
@@ -42,12 +56,15 @@ def main(config):
     # Si hay más de una GPU, paraleliza el trabajo:
     if len(device_ids) > 1:
         model = torch.nn.DataParallel(model, device_ids=device_ids)
+        
+    
 
 
     # Define the loss function and optimizer
     weight = config['class_weights'] 
     weight = torch.tensor(weight).to(device)
     criterion = config.init_obj('loss', nn, weight=weight)
+    criterion = criterion.to(device)
     metrics = [getattr(module_metric, met) for met in config['metrics']]
 
     #optimizer = optim.Adam(model.parameters())
@@ -57,6 +74,7 @@ def main(config):
     optimizer = config.init_obj('optimizer', torch.optim, trainable_params)
     lr_scheduler = config.init_obj('lr_scheduler', torch.optim.lr_scheduler, optimizer)
 
+    torch.cuda.empty_cache()
     trainer = Trainer(model, criterion, metrics, optimizer,
                         config=config,
                         device=device,
