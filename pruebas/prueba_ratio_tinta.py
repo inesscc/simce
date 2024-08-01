@@ -91,17 +91,24 @@ def get_recuadros(mask):
     big_contours2 = [
         i for i in contours2 if 600 < cv2.contourArea(i) < 2000 ]
 
-
+    
     for contour in big_contours2:
         x, y, w, h = cv2.boundingRect(contour)
         
         cv2.rectangle(bordered_mask2, (x, y), (x+w, y+h), 255, -1)
 
-    return bordered_mask2, big_contours2
+    if len(big_contours2) >= len(big_contours):
+
+        return bordered_mask2, big_contours2
+    else:
+
+        return bordered_mask, big_contours
     
 
 
-ruta = 'gif/4206908_p27_2.jpg'
+ruta = test_final[test_final.ratio_tinta.isnull()].iloc[4].ruta_imagen_output
+ruta = test_final.sort_values('indice_tinta_top1').iloc[-10].ruta_imagen_output
+'data/input_proc/4b/subpreg_recortadas/base/CP/01168/4028778_p1.jpg'
 def get_indices_tinta(ruta):
 
     #bgr_img = cv2.imread(ruta)[20:-20, 15:-15]
@@ -123,7 +130,7 @@ def get_indices_tinta(ruta):
         # Detectamos tinta azul si es cuestionario de padres
         mask_tinta = get_mask_imagen(bgr_img, lower_color=np.array([67,46,0]),
                                     upper_color=np.array([156, 255, 255]), iters=1, eliminar_manchas=False)
-        if mask_tinta.mean() < 0.5:
+        if mask_tinta.mean() < 0.7:
             # Detectamos grises y negros si no detectamos tinta azul
             mask_tinta = get_mask_imagen(bgr_img, lower_color=np.array([0,0,225]),
                                         upper_color=np.array([179, 255, 255]), iters=1, eliminar_manchas=False,
@@ -133,7 +140,8 @@ def get_indices_tinta(ruta):
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
     mask_tinta = cv2.morphologyEx(mask_tinta, cv2.MORPH_CLOSE, kernel, iterations=2)
 
-    mask_tinta = cv2.dilate(mask_tinta, kernel, iterations=1)
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2,2))
+    mask_tinta = cv2.erode(mask_tinta, kernel, iterations=1)
     
     idx_blanco = np.where(mask_tinta == 255)
     mask_blanco_fill[idx_blanco] = 255
@@ -185,21 +193,24 @@ def get_indices_tinta(ruta):
         x = x - 3
         y = y - 3
 
-        # ratio_dims = w / h
-        # if  ratio_dims > 1.15 or ratio_dims < .85:
-        #     dif_px = np.abs(w - h) 
-        #     px_cortar = int(np.floor(dif_px/2))
-        #     # Si el ratio es mayor a 1, el recuadro es más ancho de lo que debería:
-        #     if ratio_dims > 1:   
-        #         w = w - px_cortar
-        #         x = x - px_cortar
-        #     # Si el ratio es menor a 1, el recuadro es más alto de lo que debería:
-        #     else:
-        #         h = h - px_cortar
-        #         y = y + px_cortar
+        ratio_dims = w / h
+        if ratio_dims > 5 or ratio_dims < .2:
+            continue
+
+        elif  ratio_dims > 1.15 or ratio_dims < .85:
+            dif_px = np.abs(w - h) 
+            px_cortar = int(np.floor(dif_px/2))
+            # Si el ratio es mayor a 1, el recuadro es más ancho de lo que debería:
+            if ratio_dims > 1:   
+                w = w - px_cortar
+                x = x - px_cortar
+            # Si el ratio es menor a 1, el recuadro es más alto de lo que debería:
+            else:
+                h = h - px_cortar
+                y = y + px_cortar
         
         cv2.rectangle(bordered_rect_img, (x, y), (x+w, y+h), 0, 3)
-        img_crop = bordered_rect_img[y+5:y+h-5, x+5:x+w-5]
+        img_crop = bordered_rect_img[y+3:y+h-3, x+3:x+w-3]
         idx_blanco = np.where(img_crop > 0.9)
         img_crop[idx_blanco] = 1
         
@@ -218,8 +229,9 @@ def get_indices_tinta(ruta):
     return indices_relevantes, intensidades_relevantes
 
 # Show the resulting contours on the image
-
-cv2.imshow('Contours', bordered_rect_img)
+ruta
+cv2.imshow('Contours', mask_blanco)
+cv2.waitKey(1) 
 cv2.destroyAllWindows()
 cv2.waitKey(1) 
 ruta
@@ -244,11 +256,15 @@ test_final = test.copy()
 for col in split.columns:
     col_split = pd.DataFrame(split[col].tolist(), columns = [f'{col}_top1', f'{col}_top2'])
     test_final = pd.concat([test_final, col_split], axis = 1)
-test_final.sort_values('indice_intensidad_top2')
-test_final[test_final.indice_intensidad_top2.isnull()].ruta_imagen_output.iloc[0]
-test_final = pd.concat([test, split], axis = 1)
-test_final[['ruta_imagen_output', 'indice_intensidad']]
-test_final['ratio_indices'] = test_final.indice_top1 / test_final.indice_top2
+#test_final.sort_values('indice_intensidad_top2')
+#test_final[test_final.indice_intensidad_top2.isnull()].ruta_imagen_output.iloc[0]
+#test_final = pd.concat([test, split], axis = 1)
+#test_final[['ruta_imagen_output', 'indice_intensidad']]
+test_final['ratio_tinta'] = test_final.indice_tinta_top1 / test_final.indice_tinta_top2
+test_final['ratio_intensidad'] = test_final.indice_intensidad_top1 / test_final.indice_intensidad_top2
+test_final.ratio_intensidad.describe()
+
+
 test_final[['ratio_indices', 'indice_top1', 'indice_top2']]
 test_final.ratio_indices = test_final.ratio_indices.replace(np.inf, -1)
 #Oficialmente es doble marca, pero encontramos una marca:
