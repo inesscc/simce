@@ -13,7 +13,10 @@ from simce.proc_imgs import bound_and_crop
 import config.proc_img as module_config
 # Creamos directorio para imágenes aumentadas:
 
-def get_img_existentes(fraccion_sample: float, directorios, curso) -> pd.DataFrame:
+
+
+
+def get_img_existentes_pred(directorios, curso) -> pd.DataFrame:
     '''
     Genera dataframe con archivos existentes (que sí pudieron ser procesados), con la siguiente lógica:
 
@@ -22,28 +25,15 @@ def get_img_existentes(fraccion_sample: float, directorios, curso) -> pd.DataFra
     clases y hacer crecer demasiado el dataset)
     '''
     
-    padres99 = f'casos_99_entrenamiento_compilados_{curso}_padres.csv'
-    est99 = f'casos_99_entrenamiento_compilados_{curso}_estudiantes.csv'
+    padres99 = f'casos_99_compilados_{curso}_padres.csv'
+    est99 = f'casos_99_compilados_{curso}_estudiantes.csv'
 
-    if (directorios['dir_tabla_99'] / padres99).is_file():
-        df99p = pd.read_csv(directorios['dir_tabla_99'] / padres99)
+    # if (directorios['dir_tabla_99'] / padres99).is_file():
+    df99p = pd.read_csv(directorios['dir_tabla_99'] / padres99)
     
     df99e = pd.read_csv(directorios['dir_tabla_99'] / est99)
 
-
-    # Obtenemos falsas sospechas de estudiantes para filtrar casos relevantes
-    df99e['falsa_sospecha'] = ((df99e['dm_sospecha'] == 1) & (df99e['dm_final'] == 0))
-    est_falsa_sospecha = df99e[df99e.falsa_sospecha.eq(1)]
-
-    # Obtenemos frac_sample de los otros casos para alimentar el dataset:
-    otros_est = df99e[df99e.falsa_sospecha.eq(0)].sample(frac=fraccion_sample, random_state=SEED)
-
-    if (directorios['dir_tabla_99'] / padres99).is_file():
-        dfs_99 = [est_falsa_sospecha, otros_est, df99p]
-    else:
-        dfs_99 = [est_falsa_sospecha, otros_est]
-
-    df99 = pd.concat(dfs_99).reset_index(drop=True)
+    df99 = pd.concat([df99p, df99e]).reset_index(drop=True)
 
     # Filtramos archivos que efectivamente fue posible procesar:
     df_exist = df99[df99.ruta_imagen_output.apply(lambda x: Path(x).is_file())].reset_index()
@@ -118,6 +108,24 @@ def gen_train_test(n_augment_rounds, fraccion_sample, config):
     return print('Tablas exportadas para todos los cursos exitosamente!')
     
 
+def gen_pred_set(config, curso):
+
+
+
+    directorios = config.init_obj('directorios', module_config, curso=curso )
+    df_exist = get_img_existentes_pred(directorios, curso)
+
+        
+    # df_sospecha, df_sampleado = separar_dataframes(df_exist_curso)
+
+    train, test = train_test_split(df_exist_curso, stratify=df_exist_curso['falsa_sospecha'],
+                                    test_size=.2, random_state=SEED)
+
+    df_aug = gen_df_aumentado(train, directorios_curso, n_augment_rounds=n_augment_rounds)
+
+    export_train_test(train, df_aug, test, directorios_curso, curso=curso, df_sampleado=None)
+    return print('Tablas exportadas para todos los cursos exitosamente!')
+    
 
     # Traemos re-etiquetado 
 
@@ -271,3 +279,44 @@ def transform_img(path_img, i):
 #     df_sospecha = df_exist[df_exist.dm_sospecha.ne(0)]
 
 #     return df_sospecha, df_sampleado
+
+# def get_img_existentes(fraccion_sample: float, directorios, curso) -> pd.DataFrame:
+#     '''
+#     Genera dataframe con archivos existentes (que sí pudieron ser procesados), con la siguiente lógica:
+
+#     - Obtiene todas las falsas sospechas (dm_sospecha == 1 y dm_final == 0) de padres y estudiantes
+#     - Obtiene fraccion_sample de las filas que no son falsa sospecha de estudiantes (para evitar desbalancear
+#     clases y hacer crecer demasiado el dataset)
+#     '''
+    
+#     padres99 = f'casos_99_entrenamiento_compilados_{curso}_padres.csv'
+#     est99 = f'casos_99_entrenamiento_compilados_{curso}_estudiantes.csv'
+
+#     if (directorios['dir_tabla_99'] / padres99).is_file():
+#         df99p = pd.read_csv(directorios['dir_tabla_99'] / padres99)
+    
+#     df99e = pd.read_csv(directorios['dir_tabla_99'] / est99)
+
+
+#     # Obtenemos falsas sospechas de estudiantes para filtrar casos relevantes
+#     df99e['falsa_sospecha'] = ((df99e['dm_sospecha'] == 1) & (df99e['dm_final'] == 0))
+#     est_falsa_sospecha = df99e[df99e.falsa_sospecha.eq(1)]
+
+#     # Obtenemos frac_sample de los otros casos para alimentar el dataset:
+#     otros_est = df99e[df99e.falsa_sospecha.eq(0)].sample(frac=fraccion_sample, random_state=SEED)
+
+#     if (directorios['dir_tabla_99'] / padres99).is_file():
+#         dfs_99 = [est_falsa_sospecha, otros_est, df99p]
+#     else:
+#         dfs_99 = [est_falsa_sospecha, otros_est]
+
+#     df99 = pd.concat(dfs_99).reset_index(drop=True)
+
+#     # Filtramos archivos que efectivamente fue posible procesar:
+#     df_exist = df99[df99.ruta_imagen_output.apply(lambda x: Path(x).is_file())].reset_index()
+
+
+#     print(f'{df_exist.shape=}')
+#     print(f'{df99.shape=}')
+
+#     return df_exist
