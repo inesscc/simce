@@ -10,52 +10,26 @@
         "args": {}
     },
     "weights": {
-        "type": "none",
+        "type": "MaxVit_T_Weights",
         "args": {}
     },
-    "data_loader_train": {
+    "data_loader": {
         "type": "TrainTestDataLoader",
         "args": {
-            "data_file": "train.csv",
-            "batch_size": 128,
-            "shuffle": true,
-            "cortar_bordes": false,
-            "num_workers": 2,
-            "validation_split": 0.15
-        }
-    },
-    "data_loader_test": {
-        "type": "TrainTestDataLoader",
-        "args": {
-            "data_file": "test.csv",
-            "batch_size": 16,
+            "data_file": "data_pred.csv",
+            "batch_size": 64,
             "shuffle": false,
             "cortar_bordes": false,
-            "num_workers": 2,
+            "num_workers": 4,
 
             "validation_split": 0.0
         }
     },
-    "optimizer_adam": {
-        "type": "Adam",
-        "args": {
-            "lr": 0.004,
-            "weight_decay": 0,
-            "amsgrad": true
-        }
-    },
-    "optimizer_sgd": {
-        "type": "SGD",
-        "args": {
-            "lr": 0.004,
-            "weight_decay": 0.001,
-            "momentum": 0.9
-        }
-    },
+
     "optimizer": {
         "type": "SGD",
         "args": {
-            "lr": 0.1,
+            "lr": 0.005,
             "weight_decay": 0.001,
             "momentum": 0.9
         }
@@ -70,8 +44,8 @@
     "lr_scheduler": {
         "type": "StepLR",
         "args": {
-            "step_size": 10,
-            "gamma": 0.1
+            "step_size": 2,
+            "gamma": 0.8
         }
     },
     "trainer": {
@@ -83,6 +57,7 @@
         "early_stop": 10,
         "tensorboard": false
     },
+
     "directorios": {
         "type": "get_directorios",
         "args": {}

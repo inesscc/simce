@@ -9,7 +9,7 @@ from pathlib import Path
 
 CURSO = Path('8b')
 # Expresión regular para capturar el identificador del estudiante en nombre de archivos
-regex_estudiante = r'/?(\d{7,})/?(_.*jpg)?'
+regex_estudiante = r'\d{7,}'
 
 # IMPORTANTE: parámetro que define cuántos píxeles espera como
 # mínimo entre línea y línea de cada subpregunta
@@ -40,6 +40,7 @@ def get_directorios(filtro=None):
 
     dd['dir_output'] = Path('data/output')
     dd['dir_modelos'] = dd['dir_output'] / 'modelos' 
+    dd['dir_predicciones'] = dd['dir_output'] / 'predicciones'
 
     
     
