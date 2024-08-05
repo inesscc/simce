@@ -230,7 +230,7 @@ def get_indices_tinta(ruta):
 
 # Show the resulting contours on the image
 ruta
-cv2.imshow('Contours', mask_blanco)
+cv2.imshow('Contours', bordered_rect_img)
 cv2.waitKey(1) 
 cv2.destroyAllWindows()
 cv2.waitKey(1) 

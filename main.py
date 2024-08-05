@@ -8,12 +8,9 @@ Created on Tue Apr  9 10:34:05 2024
 from simce.generar_insumos_img import generar_insumos_total
 from simce.proc_imgs import get_subpreguntas
 from simce.proc_tabla_99 import get_tablas_99_total
-from simce.preparar_modelamiento import gen_train_test
-from config.proc_img import N_AUGMENT_ROUNDS, FRAC_SAMPLE
+from simce.preparar_modelamiento import gen_pred_set
 from config.proc_img import  get_directorios, CURSO
-
-from config.parse_config import ConfigParser
-from simce.utils import read_json, crear_directorios
+from simce.utils import crear_directorios
 
 # import pandas as pd
 
@@ -23,25 +20,24 @@ from simce.utils import read_json, crear_directorios
 
 
 if __name__ == '__main__':
-    # Define si estamos obteniendo datos para entrenamiento o predicción
-    IS_TRAINING = True
+
     # 0. Creamos directorios
-    config_dict = read_json('config/model.json')
-    config = ConfigParser(config_dict)
+
     
     directorios = get_directorios()
     crear_directorios(directorios)
     # 1.  Generar insumos para procesamiento
-    #generar_insumos_total(directorios) 
+    generar_insumos_total(directorios) 
     # 2. Generar tablas con dobles marcas
-    #get_tablas_99_total(para_entrenamiento=IS_TRAINING, directorios=directorios)
+    get_tablas_99_total(directorios=directorios)
 
     # 3. Recortar subpreguntas
-    get_subpreguntas(tipo_cuadernillo='estudiantes', directorios=directorios, curso=str(CURSO), para_entrenamiento=IS_TRAINING)
+    get_subpreguntas(tipo_cuadernillo='estudiantes', directorios=directorios, curso=str(CURSO))
     #get_subpreguntas(tipo_cuadernillo='padres', directorios=directorios, curso=str(module_config.CURSO), para_entrenamiento=IS_TRAINING)
 
-    if IS_TRAINING:
-        #4. Obtener set de entrenamiento y test y aumentamos train
-        gen_train_test(n_augment_rounds=N_AUGMENT_ROUNDS, fraccion_sample=FRAC_SAMPLE, config=config)
+
+    #4. Obtener set de entrenamiento y test y aumentamos train
+    #gen_train_test(n_augment_rounds=N_AUGMENT_ROUNDS, fraccion_sample=FRAC_SAMPLE, config=config)
+    gen_pred_set(directorios, curso=CURSO)
 
 # %%
