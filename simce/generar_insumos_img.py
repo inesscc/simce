@@ -25,7 +25,7 @@ def get_n_paginas(directorio_imagenes):
     rbds = list(directorio_imagenes.iterdir())
     rbd1 = rbds[0]
 
-    estudiantes_rbd = {re.search(regex_estudiante, str(i)).group(1)
+    estudiantes_rbd = {re.search(f'({regex_estudiante})', str(i)).group(1)
                        for i in rbd1.rglob('*jpg')}
     n_files = len(list(rbd1.glob(f'{estudiantes_rbd.pop()}*')))
     n_pages = n_files * 2
@@ -37,7 +37,7 @@ def get_n_preguntas(directorio_imagenes, ignorar_primera_pagina=True):
     rbds = list(directorio_imagenes.iterdir())
     rbd1 = rbds[0]
 
-    estudiantes_rbd = {re.search(regex_estudiante, str(i)).group(1)
+    estudiantes_rbd = {re.search(f'({regex_estudiante})', str(i)).group(1)
                        for i in rbd1.rglob('*jpg')}
 
     total_imagenes = 0
@@ -155,7 +155,7 @@ def get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes, dir_sub
             print(num)
             print('############################')
 
-        estudiantes_rbd = {re.search(regex_estudiante, str(i)).group(1)
+        estudiantes_rbd = {re.search(f'({regex_estudiante})', str(i)).group(1)
                            for i in rbd.iterdir()}
 
         # Si queremos correr función para un estudiante específico:
@@ -395,7 +395,7 @@ def get_preg_por_hoja(n_pages, n_preguntas, directorio_imagenes, directorios, ni
         raise ValueError(f"nivel debe ser uno de los siguientes valores: {proc.VALID_INPUT}")
 
     primer_est = re.search(
-        regex_estudiante,
+        f'({regex_estudiante})',
         # primer estudiante del primer rbd:
         str(next(next(directorio_imagenes.iterdir()).iterdir()))).group(1)
     if nivel == 'cuadernillo':
@@ -436,7 +436,7 @@ def get_baseline(n_pages, n_preguntas, directorio_imagenes, dic_pagina, director
 
     df = pd.DataFrame([str(i) for i in rutas_output_total], columns=['ruta'])
 
-    df['est'] = df.ruta.str.extract(regex_estudiante)
+    df['est'] = df.ruta.str.extract(f'({regex_estudiante})')
     df['preg'] = df.ruta.str.extract(r'p(\d{1,2})').astype(int)
     df['subpreg'] = df.ruta.str.extract(r'p(\d{1,2}_\d{1,2})')
     # n° mediano de subpreguntas por pregunta, de acuerdo a datos obtenidos de

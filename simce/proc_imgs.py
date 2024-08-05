@@ -170,7 +170,7 @@ def save_pregunta_completa(img_pregunta_recuadros, dir_subpreg_rbd, estudiante, 
     cv2.imwrite(file_out, img_pregunta_recuadros)
     
 
-def get_subpreguntas(tipo_cuadernillo, directorios, curso='4b', para_entrenamiento=True, filter_rbd=None, filter_estudiante=None,
+def get_subpreguntas(tipo_cuadernillo, directorios, curso='4b', filter_rbd=None, filter_estudiante=None,
                      filter_rbd_int=False, muestra=False):
     '''
     Obtiene las cada una de las subpreguntas obtenidas de la función get_tablas_99(). Esto considera dos
@@ -199,10 +199,8 @@ def get_subpreguntas(tipo_cuadernillo, directorios, curso='4b', para_entrenamien
     
 
     # Definimos tabla a utilizar para seleccionar subpreguntas
-    if para_entrenamiento:
-        nombre_tabla_casos99 = f'casos_99_entrenamiento_compilados_{curso}_{tipo_cuadernillo}.csv'
-    else:
-        nombre_tabla_casos99 = f'casos_99_compilados_{curso}_{tipo_cuadernillo}.csv'
+
+    nombre_tabla_casos99 = f'casos_99_compilados_{curso}_{tipo_cuadernillo}.csv'
 
     df99 = pd.read_csv(
         dir_tabla_99 / nombre_tabla_casos99, dtype={'rbd_ruta': 'string'}).sort_values('ruta_imagen')
@@ -244,7 +242,7 @@ def get_subpreguntas(tipo_cuadernillo, directorios, curso='4b', para_entrenamien
         print('############################')
         print('\n')
 
-        estudiante = re.search(regex_estudiante, str(rbd)).group(1)
+        estudiante = re.search(f'({regex_estudiante})', str(rbd)).group(1)
 
         # páginas del cuardenillo
         pagina_pregunta = dic_pagina[pregunta_selec]

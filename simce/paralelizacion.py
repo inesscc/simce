@@ -15,7 +15,7 @@ from simce.proc_imgs import select_directorio, get_insumos, get_pages, get_subpr
     partir_imagen_por_mitad, get_contornos_grandes, dejar_solo_recuadros_subpregunta, get_mascara_lineas_horizontales
 from dotenv import load_dotenv
 load_dotenv()
-
+from simce.utils import timing
 VALID_INPUT = {'cuadernillo', 'pagina'}
 
 ## procesamiento imagen ----------------------------------
@@ -32,7 +32,7 @@ def process_single_image(df99, num, rbd, directorio_imagenes, dic_pagina, n_page
     # rbd = Path('data/input_raw/CP/02748/4077894_4.jpg')
     
     pregunta_selec = re.search(r'p(\d{1,2})', df99.iloc[num].preguntas).group(0)
-    estudiante = re.search(regex_estudiante, str(rbd)).group(1)
+    estudiante = re.search(f'({regex_estudiante})', str(rbd)).group(1)
     pagina_pregunta = dic_pagina[pregunta_selec]
     pages = get_pages(pagina_pregunta, n_pages)
     
@@ -163,17 +163,16 @@ def process_image_block(image_block):
 #process_image_block(image_blocks[0])
 #df99[df99['serie'] == 4077894]
 
-
-def process_general(directorio_imagenes, dirs, para_entrenamiento, 
+@timing
+def process_general(directorio_imagenes, dirs, 
          regex_estudiante,
          muestra, filter_rbd, filter_rbd_int, filter_estudiante, queue, curso,
          tipo_cuadernillo):
     print(f'Procesando cuadernillos {tipo_cuadernillo}')
     
-    if para_entrenamiento:
-        nombre_tabla_casos99 = f'casos_99_entrenamiento_compilados_{curso}_{tipo_cuadernillo}.csv'
-    else:
-        nombre_tabla_casos99 = f'casos_99_compilados_{curso}_{tipo_cuadernillo}.csv'
+
+
+    nombre_tabla_casos99 = f'casos_99_compilados_{curso}_{tipo_cuadernillo}.csv'
     df99 = pd.read_csv(dirs['dir_tabla_99'] / nombre_tabla_casos99, dtype={'rbd_ruta': 'string'}).sort_values('ruta_imagen')
 
     # Filtrar 

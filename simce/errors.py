@@ -7,7 +7,7 @@ Created on Thu May  2 16:17:41 2024
 
 from openpyxl import load_workbook, Workbook
 from pathlib import Path
-
+from simce.utils import timing
 
 def anotar_error(pregunta, error, nivel_error, e=None):
 
@@ -42,7 +42,7 @@ def agregar_error(queue, pregunta, error, nivel_error):
     """agrega la dupla a la fila para añadir el error al finalizar el multi-procesamiento"""
     queue.put((pregunta, error, nivel_error))
 
-
+@timing
 def escribir_errores(queue):
     """une todos los errores generados en las iteraciones de los diferentes procesos"""
     if not Path('problemas_datos.xlsx').is_file():

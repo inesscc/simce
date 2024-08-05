@@ -1,15 +1,8 @@
 from config.proc_img import SEED
 import pandas as pd
-from sklearn.model_selection import train_test_split
+
 from pathlib import Path
-import torchvision.transforms.v2 as v2
-from PIL import Image
-import torch
-import random
-import cv2
-import numpy as np
-from simce.utils  import get_mask_imagen
-from simce.proc_imgs import bound_and_crop
+
 import config.proc_img as module_config
 # Creamos directorio para imágenes aumentadas:
 
@@ -44,87 +37,17 @@ def get_img_existentes_pred(directorios, curso) -> pd.DataFrame:
 
     return df_exist
 
-def incorporar_reetiquetas(df_exist: pd.DataFrame, directorios, curso) -> pd.DataFrame:
-    '''
-    Incorpora re-etiquetas para mejorar calidad del dataset
-    '''
 
-    reetiqueta = pd.read_excel(directorios['dir_insumos'] / 'datos_revisados.xlsx')
-    reetiqueta2 = pd.read_excel(directorios['dir_insumos'] / 'datos_revisados_p2_2.xlsx')
-    reetiqueta3 = pd.read_excel(directorios['dir_insumos'] / 'datos_revisados_p3.xlsx')
 
-    etiqueta_final =reetiqueta.set_index('ruta_imagen_output').etiqueta_final
-    data_eliminar = set(etiqueta_final[etiqueta_final.isin(['-', 99])].index)    
-    etiqueta_final = etiqueta_final[~etiqueta_final.isin(['-', 99])]
-    etiqueta_final.index = etiqueta_final.index.str.replace(str(directorios['dir_input_proc']), 
-                                                            str(directorios['dir_input_proc'] / curso))
- 
 
-    etiqueta_final2 =reetiqueta2.set_index('ruta_imagen_output').etiqueta_final
-    data_eliminar.update(set(etiqueta_final2[etiqueta_final2.isin(['-', 99])].index)  )
-    etiqueta_final2 = etiqueta_final2[~etiqueta_final2.isin(['-', 99])]
-    etiqueta_final2.index = etiqueta_final2.index.str.replace(str(directorios['dir_input_proc']),
-                                                               str(directorios['dir_input_proc'] / curso))
-    
-    etiqueta_final3 =reetiqueta3.set_index('ruta_imagen_output').etiqueta_final
-    data_eliminar.update(set(etiqueta_final3[etiqueta_final3.isin(['-', 99])].index)  )  
-    etiqueta_final3 = etiqueta_final3[~etiqueta_final3.isin(['-', 99])]
-    etiqueta_final3.index = etiqueta_final3.index.str.replace(str(directorios['dir_input_proc']), 
-                                                            str(directorios['dir_input_proc'] ))
-
-    df_exist['reetiqueta'] = df_exist.ruta_imagen_output.map(etiqueta_final)
-    df_exist['reetiqueta2'] = df_exist.ruta_imagen_output.map(etiqueta_final2)
-    df_exist['reetiqueta3'] = df_exist.ruta_imagen_output.map(etiqueta_final3)
-
-    df_exist['reetiqueta'] = df_exist.reetiqueta3.combine_first(df_exist.reetiqueta2).combine_first(df_exist.reetiqueta)
-    
-    df_exist['dm_final'] = df_exist.reetiqueta.combine_first(df_exist.dm_final).astype(int)
-
-    df_exist['falsa_sospecha'] = ((df_exist['dm_sospecha'] == 1) & (df_exist['dm_final'] == 0))
-
-    # Eliminamos datos confusos para el modelo
-    df_exist_final = df_exist[~df_exist.ruta_imagen_output.isin(data_eliminar)]
-
-    return df_exist_final
-
-def gen_train_test(n_augment_rounds, fraccion_sample, config):
-
-    for curso in ['4b', '8b']:
-
-        directorios_curso = config.init_obj('directorios', module_config, curso=curso )
-        df_exist_curso = get_img_existentes(fraccion_sample, directorios_curso, curso=curso )
-
-        if curso == '4b':
-            df_exist_curso = incorporar_reetiquetas(df_exist_curso,directorios_curso, curso)
-        
-        # df_sospecha, df_sampleado = separar_dataframes(df_exist_curso)
-
-        train, test = train_test_split(df_exist_curso, stratify=df_exist_curso['falsa_sospecha'],
-                                        test_size=.2, random_state=SEED)
-
-        df_aug = gen_df_aumentado(train, directorios_curso, n_augment_rounds=n_augment_rounds)
-
-        export_train_test(train, df_aug, test, directorios_curso, curso=curso, df_sampleado=None)
-    return print('Tablas exportadas para todos los cursos exitosamente!')
     
 
-def gen_pred_set(config, curso):
+def gen_pred_set(directorios, curso):
 
-
-
-    directorios = config.init_obj('directorios', module_config, curso=curso )
     df_exist = get_img_existentes_pred(directorios, curso)
+    df_exist.to_csv(directorios['dir_train_test'] / f'data_pred.csv', index=False)
 
-        
-    # df_sospecha, df_sampleado = separar_dataframes(df_exist_curso)
-
-    train, test = train_test_split(df_exist_curso, stratify=df_exist_curso['falsa_sospecha'],
-                                    test_size=.2, random_state=SEED)
-
-    df_aug = gen_df_aumentado(train, directorios_curso, n_augment_rounds=n_augment_rounds)
-
-    export_train_test(train, df_aug, test, directorios_curso, curso=curso, df_sampleado=None)
-    return print('Tablas exportadas para todos los cursos exitosamente!')
+    return print('Tablas para predicción exportadas exitosamente!')
     
 
     # Traemos re-etiquetado 
@@ -147,44 +70,62 @@ def gen_pred_set(config, curso):
 
 ############# generando imagenes #############
 
+# def gen_train_test(n_augment_rounds, fraccion_sample, config):
 
+#     for curso in ['4b', '8b']:
 
-def gen_df_aumentado(train: pd.DataFrame, directorios, n_augment_rounds:int) -> pd.DataFrame:
-    '''Genera n_augment_rounds copias de cada fila del set de entrenamiento con distintas transformaciones que
-     se generarán de acuerdo con una probabilidad '''
+#         directorios_curso = config.init_obj('directorios', module_config, curso=curso )
+#         df_exist_curso = get_img_existentes(fraccion_sample, directorios_curso, curso=curso )
+
+#         if curso == '4b':
+#             df_exist_curso = incorporar_reetiquetas(df_exist_curso,directorios_curso, curso)
+        
+#         # df_sospecha, df_sampleado = separar_dataframes(df_exist_curso)
+
+#         train, test = train_test_split(df_exist_curso, stratify=df_exist_curso['falsa_sospecha'],
+#                                         test_size=.2, random_state=SEED)
+
+#         df_aug = gen_df_aumentado(train, directorios_curso, n_augment_rounds=n_augment_rounds)
+
+#         export_train_test(train, df_aug, test, directorios_curso, curso=curso, df_sampleado=None)
+#     return print('Tablas exportadas para todos los cursos exitosamente!')
+
+# def gen_df_aumentado(train: pd.DataFrame, directorios, n_augment_rounds:int) -> pd.DataFrame:
+#     '''Genera n_augment_rounds copias de cada fila del set de entrenamiento con distintas transformaciones que
+#      se generarán de acuerdo con una probabilidad '''
     
-    df_aug = train[train.falsa_sospecha.eq(1)].copy()
+#     df_aug = train[train.falsa_sospecha.eq(1)].copy()
 
 
 
     
-    rutas = []
-    df_aug_final = pd.DataFrame()
-    # n_augments rondas de aumentado
-    for i in range(n_augment_rounds):
-        random.seed(SEED+i)
-        torch.manual_seed(SEED+i)
-        print(f'{i=}')
-        df_aug_final = pd.concat([df_aug_final, df_aug])
+#     rutas = []
+#     df_aug_final = pd.DataFrame()
+#     # n_augments rondas de aumentado
+#     for i in range(n_augment_rounds):
+#         random.seed(SEED+i)
+#         torch.manual_seed(SEED+i)
+#         print(f'{i=}')
+#         df_aug_final = pd.concat([df_aug_final, df_aug])
 
 
-        for img in range(df_aug.shape[0]):
-            dir_imagen_og = Path(df_aug.iloc[img].ruta_imagen_output)
+#         for img in range(df_aug.shape[0]):
+#             dir_imagen_og = Path(df_aug.iloc[img].ruta_imagen_output)
 
-            dir_imagen_aug = Path(str(dir_imagen_og).replace(directorios['dir_subpreg'].name, directorios['dir_subpreg_aug'].name))
+#             dir_imagen_aug = Path(str(dir_imagen_og).replace(directorios['dir_subpreg'].name, directorios['dir_subpreg_aug'].name))
             
-            trans_img = transform_img(dir_imagen_og, i)
-            dir_imagen_aug =  Path(str(dir_imagen_aug.with_suffix('')) + f'aug_{i+1}.jpg')
-            dir_imagen_aug.parent.mkdir(exist_ok=True, parents=True)
-            trans_img.save(dir_imagen_aug)
-            #print('imagen_guardada :D')
-            rutas.append(dir_imagen_aug)
+#             trans_img = transform_img(dir_imagen_og, i)
+#             dir_imagen_aug =  Path(str(dir_imagen_aug.with_suffix('')) + f'aug_{i+1}.jpg')
+#             dir_imagen_aug.parent.mkdir(exist_ok=True, parents=True)
+#             trans_img.save(dir_imagen_aug)
+#             #print('imagen_guardada :D')
+#             rutas.append(dir_imagen_aug)
     
-    df_aug_final['ruta_imagen_output'] = rutas  ## modificando ruta final output
+#     df_aug_final['ruta_imagen_output'] = rutas  ## modificando ruta final output
 
-    print('Imágenes aumentadas exportadas con éxito!')
+#     print('Imágenes aumentadas exportadas con éxito!')
 
-    return df_aug_final
+#     return df_aug_final
 
 def export_train_test(train, df_aug, test, directorios, curso, df_sampleado=None):
 
@@ -207,50 +148,50 @@ def export_train_test(train, df_aug, test, directorios, curso, df_sampleado=None
 
 #### funciones aux para generar transformaciones
 
-def random_addnoise(input_image, noise_factor = 0.1, p=.5):
-    """transforma la imagen agredando un ruido gausiano con probabilidad p"""
-    if random.random() < p:
-        inputs = v2.Compose([v2.ToImage(), v2.ToDtype(torch.float32, scale=True)])(input_image)
-        noise = inputs + torch.rand_like(inputs) * noise_factor
-        noise = torch.clip (noise,0,1.)
-        output_image = v2.ToPILImage()
-        image = output_image(noise)
-    else:
-        image = input_image
-    return image
+# def random_addnoise(input_image, noise_factor = 0.1, p=.5):
+#     """transforma la imagen agredando un ruido gausiano con probabilidad p"""
+#     if random.random() < p:
+#         inputs = v2.Compose([v2.ToImage(), v2.ToDtype(torch.float32, scale=True)])(input_image)
+#         noise = inputs + torch.rand_like(inputs) * noise_factor
+#         noise = torch.clip (noise,0,1.)
+#         output_image = v2.ToPILImage()
+#         image = output_image(noise)
+#     else:
+#         image = input_image
+#     return image
 
 
 
 
-def transform_img(path_img, i):
-    """Transformaciones a imagen para aumento de casos de sospecha de doble marca en entrenamiento"""
-    orig_img = Image.open(path_img)
+# def transform_img(path_img, i):
+#     """Transformaciones a imagen para aumento de casos de sospecha de doble marca en entrenamiento"""
+#     orig_img = Image.open(path_img)
 
-    if i == 0:
-        trans_img = v2.RandomHorizontalFlip(1)(orig_img)    
-       # trans_img = v2.ColorJitter(brightness=0.1, contrast=0.2, saturation=0.2, hue=0.01)(trans_img)         
-    elif i == 1:
-        trans_img = v2.RandomVerticalFlip(1)(orig_img) 
-       # trans_img = v2.ColorJitter(brightness=0.1, contrast=0.2, saturation=0.2, hue=0.01)(trans_img)
-    elif i == 2:
-        trans_img = v2.RandomHorizontalFlip(1)(orig_img)  
-        trans_img = v2.RandomVerticalFlip(1)(trans_img) 
-       # trans_img = v2.ColorJitter(brightness=0.1, contrast=0.2, saturation=0.2, hue=0.01)(trans_img)
-    elif i == 3:
-        trans_img = random_addnoise(orig_img)
-       # trans_img = v2.ColorJitter(brightness=0.1, contrast=0.2, saturation=0.2, hue=0.01)(trans_img)
-    elif i == 4:
+#     if i == 0:
+#         trans_img = v2.RandomHorizontalFlip(1)(orig_img)    
+#        # trans_img = v2.ColorJitter(brightness=0.1, contrast=0.2, saturation=0.2, hue=0.01)(trans_img)         
+#     elif i == 1:
+#         trans_img = v2.RandomVerticalFlip(1)(orig_img) 
+#        # trans_img = v2.ColorJitter(brightness=0.1, contrast=0.2, saturation=0.2, hue=0.01)(trans_img)
+#     elif i == 2:
+#         trans_img = v2.RandomHorizontalFlip(1)(orig_img)  
+#         trans_img = v2.RandomVerticalFlip(1)(trans_img) 
+#        # trans_img = v2.ColorJitter(brightness=0.1, contrast=0.2, saturation=0.2, hue=0.01)(trans_img)
+#     elif i == 3:
+#         trans_img = random_addnoise(orig_img)
+#        # trans_img = v2.ColorJitter(brightness=0.1, contrast=0.2, saturation=0.2, hue=0.01)(trans_img)
+#     elif i == 4:
 
-        trans_img = v2.GaussianBlur(kernel_size = (3, 5), sigma = (1, 2)) (orig_img)
-       # trans_img = v2.ColorJitter(brightness=0.1, contrast=0.2, saturation=0.2, hue=0.01)(trans_img)
-    elif i >= 5:
-        trans_img = v2.ColorJitter(brightness=0.08, contrast=0.15, saturation=0.15, hue=0.005)(orig_img)
-    else:
+#         trans_img = v2.GaussianBlur(kernel_size = (3, 5), sigma = (1, 2)) (orig_img)
+#        # trans_img = v2.ColorJitter(brightness=0.1, contrast=0.2, saturation=0.2, hue=0.01)(trans_img)
+#     elif i >= 5:
+#         trans_img = v2.ColorJitter(brightness=0.08, contrast=0.15, saturation=0.15, hue=0.005)(orig_img)
+#     else:
 
-        raise 'Función acepta hasta 5 rondas de data augmentation'
+#         raise 'Función acepta hasta 5 rondas de data augmentation'
 
     
-    return trans_img
+#     return trans_img
 
 
 
@@ -320,3 +261,47 @@ def transform_img(path_img, i):
 #     print(f'{df99.shape=}')
 
 #     return df_exist
+
+
+# def incorporar_reetiquetas(df_exist: pd.DataFrame, directorios, curso) -> pd.DataFrame:
+#     '''
+#     Incorpora re-etiquetas para mejorar calidad del dataset
+#     '''
+
+#     reetiqueta = pd.read_excel(directorios['dir_insumos'] / 'datos_revisados.xlsx')
+#     reetiqueta2 = pd.read_excel(directorios['dir_insumos'] / 'datos_revisados_p2_2.xlsx')
+#     reetiqueta3 = pd.read_excel(directorios['dir_insumos'] / 'datos_revisados_p3.xlsx')
+
+#     etiqueta_final =reetiqueta.set_index('ruta_imagen_output').etiqueta_final
+#     data_eliminar = set(etiqueta_final[etiqueta_final.isin(['-', 99])].index)    
+#     etiqueta_final = etiqueta_final[~etiqueta_final.isin(['-', 99])]
+#     etiqueta_final.index = etiqueta_final.index.str.replace(str(directorios['dir_input_proc']), 
+#                                                             str(directorios['dir_input_proc'] / curso))
+ 
+
+#     etiqueta_final2 =reetiqueta2.set_index('ruta_imagen_output').etiqueta_final
+#     data_eliminar.update(set(etiqueta_final2[etiqueta_final2.isin(['-', 99])].index)  )
+#     etiqueta_final2 = etiqueta_final2[~etiqueta_final2.isin(['-', 99])]
+#     etiqueta_final2.index = etiqueta_final2.index.str.replace(str(directorios['dir_input_proc']),
+#                                                                str(directorios['dir_input_proc'] / curso))
+    
+#     etiqueta_final3 =reetiqueta3.set_index('ruta_imagen_output').etiqueta_final
+#     data_eliminar.update(set(etiqueta_final3[etiqueta_final3.isin(['-', 99])].index)  )  
+#     etiqueta_final3 = etiqueta_final3[~etiqueta_final3.isin(['-', 99])]
+#     etiqueta_final3.index = etiqueta_final3.index.str.replace(str(directorios['dir_input_proc']), 
+#                                                             str(directorios['dir_input_proc'] ))
+
+#     df_exist['reetiqueta'] = df_exist.ruta_imagen_output.map(etiqueta_final)
+#     df_exist['reetiqueta2'] = df_exist.ruta_imagen_output.map(etiqueta_final2)
+#     df_exist['reetiqueta3'] = df_exist.ruta_imagen_output.map(etiqueta_final3)
+
+#     df_exist['reetiqueta'] = df_exist.reetiqueta3.combine_first(df_exist.reetiqueta2).combine_first(df_exist.reetiqueta)
+    
+#     df_exist['dm_final'] = df_exist.reetiqueta.combine_first(df_exist.dm_final).astype(int)
+
+#     df_exist['falsa_sospecha'] = ((df_exist['dm_sospecha'] == 1) & (df_exist['dm_final'] == 0))
+
+#     # Eliminamos datos confusos para el modelo
+#     df_exist_final = df_exist[~df_exist.ruta_imagen_output.isin(data_eliminar)]
+
+#     return df_exist_final

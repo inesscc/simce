@@ -5,8 +5,9 @@ Created on Thu May  9 17:20:37 2024
 @author: jeconchao
 """
 import pandas as pd
-from config.proc_img import  variables_identificadoras, SEED, CURSO, regex_extraer_rbd_de_ruta, dic_ignorar_p1, regex_p1, \
-nombre_tabla_estud_origen, nombre_tabla_estud_final, nombre_tabla_padres_origen, nombre_tabla_padres_final, regex_estudiante 
+from config.proc_img import  variables_identificadoras, SEED, CURSO, ENCODING, LIMPIAR_RUTA, \
+regex_extraer_rbd_de_ruta, dic_ignorar_p1, regex_p1, \
+nombre_tabla_estud_origen, nombre_tabla_padres_origen, regex_estudiante 
 from simce.utils import timing
 import re
 import json
@@ -18,30 +19,30 @@ random.seed(SEED)
 np.random.seed(SEED)
 
 @timing
-def get_tablas_99_total(directorios, para_entrenamiento=True ):
+def get_tablas_99_total(directorios):
     
     print('Generando tabla estudiantes...')
 
-    get_tablas_99(tipo_cuadernillo='estudiantes', para_entrenamiento=para_entrenamiento,
+    get_tablas_99(tipo_cuadernillo='estudiantes', 
                   directorios=directorios)
     print('Generando tabla padres...')
 
-    get_tablas_99(tipo_cuadernillo='padres', para_entrenamiento=para_entrenamiento,
+    get_tablas_99(tipo_cuadernillo='padres', 
                   directorios=directorios)
 
-def get_tablas_99(tipo_cuadernillo, directorios, para_entrenamiento=True):
+def get_tablas_99(tipo_cuadernillo, directorios):
 
     if tipo_cuadernillo == 'estudiantes':
 
 
         tabla_origen = nombre_tabla_estud_origen
-        tabla_final = nombre_tabla_estud_final
+
 
     elif tipo_cuadernillo == 'padres':
 
 
         tabla_origen = nombre_tabla_padres_origen
-        tabla_final = nombre_tabla_padres_final
+
 
     with open(directorios['dir_insumos'] / 'insumos.json') as f:
         insumos = json.load(f)
@@ -54,30 +55,23 @@ def get_tablas_99(tipo_cuadernillo, directorios, para_entrenamiento=True):
     dic_cuadernillo = insumos[tipo_cuadernillo]['dic_cuadernillo']
 
 
-    Origen_DobleMarca = pd.read_csv(directorios['dir_input'] / tabla_origen, delimiter=';')
+    Origen_DobleMarca = pd.read_csv(directorios['dir_input'] / tabla_origen, delimiter=';', encoding=ENCODING)
 
-    # Tabla de 8vo requiere encoding latin-1 para tabla final:
-    if '8vo' in tabla_final:
-        encoding = 'latin-1'
-    else:
-        encoding = 'utf-8'
-    Final_DobleMarca = pd.read_csv(directorios['dir_input'] / tabla_final, delimiter=';', encoding=encoding)
 
-    nombres_col = [i for i in Final_DobleMarca.columns.to_list() if re.search(r'p\d+', i)]
 
-    casos_99 = procesar_casos_99(Final_DobleMarca, nombres_col, dic_cuadernillo,
-                                 tipo_cuadernillo)
+    nombres_col = [i for i in Origen_DobleMarca.columns.to_list() if re.search(r'p\d+', i)]
+
     casos_99_origen = procesar_casos_99(Origen_DobleMarca, nombres_col, dic_cuadernillo,
                                         tipo_cuadernillo)
+    
+    casos_99_origen = casos_99_origen.rename(columns={'respuestas': 'dm_sospecha'})
 
-    df_final = gen_tabla_entrenamiento(casos_99, casos_99_origen)
-    print(f'{df_final.shape[0]=}')
 
-    df_final['rbd_ruta'] = df_final.ruta_imagen.astype('string').str.extract(regex_extraer_rbd_de_ruta)
+    casos_99_origen['rbd_ruta'] = casos_99_origen.ruta_imagen.astype('string').str.extract(regex_extraer_rbd_de_ruta)
 
-    df_final = df_final.reset_index()
+    df_final = casos_99_origen.reset_index()
 
-    if str(CURSO) == '8b':
+    if LIMPIAR_RUTA:
         df_final.ruta_imagen = df_final.ruta_imagen.str.replace(r'\\\d{7}', '', regex=True, n=1)
         
     df_final['ruta_imagen_output'] = (directorios['dir_subpreg'] / 
@@ -86,15 +80,9 @@ def get_tablas_99(tipo_cuadernillo, directorios, para_entrenamiento=True):
                                         (df_final.serie.astype(str) + '_' + df_final.preguntas + '.jpg') )
 
 
-    # Exportando tablas:
-    if para_entrenamiento:
 
-        df_final.to_csv(
-            directorios['dir_tabla_99'] / f'casos_99_entrenamiento_compilados_{CURSO}_{tipo_cuadernillo}.csv', index=False)
-    else:
-
-        df_final.to_csv(
-            directorios['dir_tabla_99'] / f'casos_99_compilados_{CURSO}_{tipo_cuadernillo}.csv', index=False)
+    df_final.to_csv(
+        directorios['dir_tabla_99'] / f'casos_99_compilados_{CURSO}_{tipo_cuadernillo}.csv', index=False)
 
     print('Tabla compilada generada exitosamente!')
 
