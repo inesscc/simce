@@ -11,8 +11,11 @@ from tqdm import tqdm
 from config.proc_img import get_directorios
 from config.proc_img import SEED
 import numpy as np
+import pandas as pd
+import argparse
+import collections
 ## Predicciones -----------------------------------------------------
-# config_dict = read_json('saved/models/saved_server/maxvit/config.json')
+# config_dict = read_json('config/config_pred.json')
 # config = ConfigParser(config_dict)
 def main(config):
     torch.manual_seed(SEED)
@@ -20,8 +23,7 @@ def main(config):
     torch.backends.cudnn.benchmark = False
     np.random.seed(SEED)
 
-
-    directorios = get_directorios()
+    dirs = get_directorios()
     device, _ = prepare_device(config['n_gpu'])
 
     model  = config.init_obj('arch', models)
@@ -38,10 +40,10 @@ def main(config):
     model = model.to(device)
 
     model.eval()
-    dir_train_test = get_directorios(filtro='dir_train_test')
 
-    testloader = config.init_obj('data_loader_test', module_data, model=model_name, 
-                                return_directory=True, dir_data=dir_train_test)
+
+    loader = config.init_obj('data_loader', module_data, model=model_name, 
+                                return_directory=True, dir_data=dirs['dir_train_test'])
 
 
 
@@ -50,12 +52,11 @@ def main(config):
     # Initialize lists to store predictions and true labels
     predictions = []
     probs = []
-    true_labels = []
     lst_directories = []
 
     with torch.no_grad():
         # Iterate over the test data
-        for n,(images, directories) in enumerate(tqdm(testloader)):
+        for n,(images, directories) in enumerate(tqdm(loader)):
             # Move the images and labels to the same device as the model
             images = images.to(device)
 
@@ -78,33 +79,32 @@ def main(config):
 
     print('Predicciones listas!')
     probs_float = [i.item() for i in probs]
-    probs_float
-    import pandas as pd
 
-    test = pd.read_csv(dir_train_test / 'test_8b.csv')
-    test_rev = pd.read_excel('data/otros/resultados_maxvit2_rev.xlsx')[['ruta_imagen_output', 'etiqueta_final']]
-    # test_rev2 = pd.read_excel('data/otros/datos_revisados_p3.xlsx')[['ruta_imagen_output', 'etiqueta_final']]
-    # test_rev = test_rev[~test_rev.ruta_imagen_output.isin(test_rev2.ruta_imagen_output)]
-    # test_rev_total = pd.concat([test_rev, test_rev2])
-    #test = test.merge(test_rev, on='ruta_imagen_output', how='left')
-    #test['dm_final2'] = test.etiqueta_final.combine_first(test.dm_final)
 
-    #train = pd.read_csv(dir_train_test / 'train.csv')
-
+    resto_datos = pd.read_csv(dirs['dir_train_test'] / 'data_pred.csv')
     preds = pd.DataFrame({'pred': predictions,
-                'true': true_labels,
                 'proba': probs_float,
                 'dirs': lst_directories})
 
     #preds['dirs'] = test.ruta_imagen_output
 
-    preds_tot = preds.merge(test, left_on='dirs', right_on='ruta_imagen_output', how='left')
+    preds_tot = preds.merge(resto_datos, left_on='dirs', right_on='ruta_imagen_output', how='left')
+    preds_tot.drop(columns=['index', 'dm_sospecha']).sort_values('proba', ascending=False).to_excel(dirs['dir_predicciones'] / 'predicciones_modelo.xlsx')
+    print('Predicciones exportadas exitosamente!')
 
-
-    preds_tot[preds_tot.acierto.eq(0) & preds_tot.deciles.cat.codes.gt(10)]
-
-    preds_tot_export = preds_tot[['ruta_imagen_output', 'ruta_imagen'  'pred', 'proba']]
-    preds_tot_export = preds_tot_export[preds_tot_export.acierto.ne(1)]
-    preds_tot_export['etiqueta_final'] = ''
-    preds_tot_export.drop(columns=['acierto']).sort_values('proba', ascending=False).to_excel('data/otros/resultados_maxvit_8b.xlsx')
-
+if __name__ == '__main__':
+    args = argparse.ArgumentParser(description='Módulo de predicciones. Aquí se predice y se calculan indicadores de porcentaje e intensidad de tinta')
+    args.add_argument('-c', '--config', default=None, type=str,
+                      help='directorio del archivo de configuración (default: None)')
+    args.add_argument('-r', '--resume', default=None, type=str,
+                      help='path to latest checkpoint (default: None)')
+    args.add_argument('-d', '--device', default=None, type=str,
+                      help='indices of GPUs to enable (default: all)')
+    
+    CustomArgs = collections.namedtuple('CustomArgs', 'flags type target')
+    options = [
+        CustomArgs(['--lr', '--learning_rate'], type=float, target='optimizer;args;lr'),
+        CustomArgs(['--bs', '--batch_size'], type=int, target='data_loader;args;batch_size')
+    ]
+    config = ConfigParser.from_args(args, options)
+    main(config)
