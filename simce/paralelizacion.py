@@ -194,7 +194,8 @@ def process_general(directorio_imagenes, dirs,
     df99.ruta_imagen = df99.ruta_imagen.str.replace('\\', '/')
     dir_preg99 = [dirs['dir_input'] / i for i in df99.ruta_imagen]
 
-    n_pages, _, subpreg_x_preg, _, dic_pagina, _ = get_insumos(tipo_cuadernillo, dir_insumos=dirs['dir_insumos'])
+    n_pages, _, subpreg_x_preg, _, dic_pagina, _ = get_insumos(tipo_cuadernillo,
+                                                                dir_insumos=dirs['dir_insumos'])
 
     # Dividir en bloques para procesamiento paralelo
     num_workers = cpu_count() -1

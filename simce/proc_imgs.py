@@ -45,6 +45,7 @@ def select_directorio(tipo_cuadernillo, directorios):
 
     if tipo_cuadernillo == 'estudiantes':
         directorio_imagenes = directorios['dir_estudiantes']
+
     elif tipo_cuadernillo == 'padres':
         directorio_imagenes = directorios['dir_padres']
 

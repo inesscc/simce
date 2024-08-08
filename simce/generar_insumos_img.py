@@ -7,19 +7,21 @@ Created on Thu May 16 17:46:31 2024
 
 import numpy as np
 import cv2
-from config.proc_img import regex_estudiante, regex_hoja_cuadernillo, IGNORAR_PRIMERA_PAGINA
+from config.proc_img import regex_estudiante, regex_hoja_cuadernillo, nombre_col_campo_bd, \
+      carpeta_estudiantes, carpeta_padres, IGNORAR_PRIMERA_PAGINA, nombre_tabla_para_insumos, \
+          n_filas_ignorar_tabla_insumos, nombre_col_val_permitidos
 from simce.errors import anotar_error
 from simce.utils import timing
 from itertools import islice
 import pandas as pd
 import re
-
-
 from simce.utils import get_mask_imagen
 import simce.proc_imgs as proc
 import json
 from shutil import rmtree
-import config.proc_img as module_config
+import re
+
+
 
 def get_n_paginas(directorio_imagenes):
     rbds = list(directorio_imagenes.iterdir())
@@ -452,24 +454,52 @@ def get_baseline(n_pages, n_preguntas, directorio_imagenes, dic_pagina, director
 
     return df_resumen
 
+def get_subpreg_x_preg(df_preguntas):
+    
+    df_preguntas['preg'] = df_preguntas[nombre_col_campo_bd].str.extract('^p(\d+)').astype(int)
+    subpreg_x_preg = df_preguntas['preg'].value_counts().sort_index()
+    subpreg_x_preg.index = 'p' + subpreg_x_preg.index.astype('string') 
+    return subpreg_x_preg.to_dict()
 
+
+def get_recuadros_x_subpreg(value):
+    list_valores = value.split('\n')
+
+    return len([i for i in list_valores if not re.search('(vac[ií]o)|99', i, re.IGNORECASE)])
 def generar_insumos(tipo_cuadernillo, directorios):
+
 
     directorio_imagenes = proc.select_directorio(tipo_cuadernillo, directorios)
 
+    # El nombre de la carpeta que refiere a padres o estudiantes es también el nombre de la hoja en el Excel
+    sheet_name = directorio_imagenes.name
+
+    df_para_insumos = pd.read_excel(directorios['dir_input'] / nombre_tabla_para_insumos,
+                    skiprows=n_filas_ignorar_tabla_insumos, sheet_name=sheet_name)
+    df_para_insumos = df_para_insumos[df_para_insumos[nombre_col_campo_bd].notnull()]
+    df_preguntas = df_para_insumos[df_para_insumos[nombre_col_campo_bd].str.contains('p\d+')].copy()
+
+
+
+    
+
     n_pages = get_n_paginas(directorio_imagenes)
-    n_preguntas = get_n_preguntas(directorio_imagenes, ignorar_primera_pagina=IGNORAR_PRIMERA_PAGINA)
+    n_preguntas = df_para_insumos[nombre_col_campo_bd].str.extract('(p\d+)').nunique().iloc[0]
     dic_cuadernillo = get_preg_por_hoja(n_pages, n_preguntas, directorio_imagenes, directorios, nivel='cuadernillo')
     dic_pagina = get_preg_por_hoja(n_pages, n_preguntas, directorio_imagenes, directorios, nivel='pagina')
-    subpreg_x_preg = get_baseline(n_pages, n_preguntas, directorio_imagenes, dic_pagina, directorios)
-    n_subpreg_tot = str(subpreg_x_preg.sum())
-
+    subpreg_x_preg = get_subpreg_x_preg(df_preguntas)
+    n_subpreg_tot = df_para_insumos[nombre_col_campo_bd].str.contains('^p\d').sum()
+    n_recuadros_x_subpreg = (df_preguntas
+                                .set_index('p'+df_preguntas.preg.astype('string'))[nombre_col_val_permitidos]
+                                .apply(lambda x: get_recuadros_x_subpreg(x))
+                                .to_dict())
     insumos_tipo_cuadernillo = {'n_pages': n_pages,
-                                'n_preguntas': n_preguntas,
-                                'n_subpreg_tot': n_subpreg_tot,
+                                'n_preguntas': str(n_preguntas),
+                                'n_subpreg_tot': str(n_subpreg_tot),
                                 'dic_cuadernillo': dic_cuadernillo,
                                 'dic_pagina': dic_pagina,
-                                'subpreg_x_preg': subpreg_x_preg.to_dict()}
+                                'subpreg_x_preg': subpreg_x_preg,
+                                'n_recuadros_x_subpreg': n_recuadros_x_subpreg}
 
     return insumos_tipo_cuadernillo
 
