@@ -8,22 +8,28 @@ Created on Thu May 16 17:46:31 2024
 import numpy as np
 import cv2
 from config.proc_img import regex_estudiante, regex_hoja_cuadernillo, nombre_col_campo_bd, \
-      carpeta_estudiantes, carpeta_padres, IGNORAR_PRIMERA_PAGINA, nombre_tabla_para_insumos, \
+             IGNORAR_PRIMERA_PAGINA, nombre_tabla_para_insumos, \
           n_filas_ignorar_tabla_insumos, nombre_col_val_permitidos
-from simce.errors import anotar_error
 from simce.utils import timing
-from itertools import islice
 import pandas as pd
 import re
 from simce.utils import get_mask_imagen
 import simce.proc_imgs as proc
 import json
-from shutil import rmtree
-import re
+import os
 
 
+def get_n_paginas(directorio_imagenes: str)->int:
+    '''Obtiene el n° de páginas totales del cuadernillo SIMCE. Para esto obtiene
+    todos los archivos de un alumno y multiplica el total de archivos por 2.
+    
+    Args:
+        directorio_imagenes: string que contiene el directorio en que se encuentran imágenes
+            de cuadernillos.
 
-def get_n_paginas(directorio_imagenes):
+    Returns:
+        n_pages: n° de páginas totales del cuadernillo.
+    '''
     rbds = list(directorio_imagenes.iterdir())
     rbd1 = rbds[0]
 
@@ -35,120 +41,89 @@ def get_n_paginas(directorio_imagenes):
     return n_pages
 
 
-def get_n_preguntas(directorio_imagenes, ignorar_primera_pagina=True):
-    rbds = list(directorio_imagenes.iterdir())
-    rbd1 = rbds[0]
-
-    estudiantes_rbd = {re.search(f'({regex_estudiante})', str(i)).group(1)
-                       for i in rbd1.rglob('*jpg')}
-
-    total_imagenes = 0
-    for n, file in enumerate(sorted(list(rbd1.glob(f'{estudiantes_rbd.pop()}*')))):
-
-        img_preg = cv2.imread(str(file), 1)
-
-        img_crop = proc.recorte_imagen(img_preg, 0, 200, 50, 160)
-        # Eliminamos franjas negras en caso de existir
-        img_sin_franja = proc.eliminar_franjas_negras(img_crop)
-
-        # Divimos imagen en dos páginas del cuadernillo
-        img_p1, img_p2 = proc.partir_imagen_por_mitad(img_sin_franja)
-
-        for p, media_img in enumerate([img_p1, img_p2]):
-
-            # Importante, nos saltamos primera página, ya que no contiene preguntas
-            if n == 0 and p == 1 and ignorar_primera_pagina:
-                continue
-
-            mask_naranjo = get_mask_imagen(media_img)
-
-            # Find my contours
-            big_contours = proc.get_contornos_grandes(mask_naranjo)
-
-            total_imagenes += len(big_contours)
-            print(total_imagenes)
-
-    return total_imagenes 
-
-
-def calcular_pregunta_actual(pages, p, dic_q):
+def calcular_pregunta_actual(pages: tuple[int, int], p: int, dic_q: dict)-> int:
     '''Método programático para obtener pregunta del cuadernillo que se está
     procesando. Dado que siempre una página tiene preguntas que vienen en orden
     ascendente y la otra en orden descendente (por la lógica de cuadernillo), hubo
     que incorporar esto en el algoritmo
 
     Args:
-        pages (tuple): tupla que contiene la página izquierda y la página derecha de la página del
-        cuadernillo que se está procesando. Ejemplo: (10,3) para la página 2 del cuadernillo
-        estudiantes 2023
+        pages: tupla que contiene la página izquierda y la página derecha de la página del
+                cuadernillo que se está procesando. Ejemplo: (10,3) para la página 2 del cuadernillo
+                estudiantes 2023
 
-        p (int): integer que toma valor 0 ó 1. Si es 0 es la primera página del cuadernillo, si es  1, es
-        la segunda.
+        p: integer que toma valor 0 ó 1. Si es 0 es la primera página del cuadernillo, si es  1, es
+            la segunda.
 
-        dic_q (dict): diccionario que contiene dos llaves, q1 y q2. q1 es la pregunta actual desde el lado
-        bajo y q2 es la pregunta actual desde el lado alto del cuadernillo.
+        dic_q: diccionario que contiene dos llaves, q_bajo y q_alto. q_bajo es la pregunta actual desde el lado
+                bajo y q_alto es la pregunta actual desde el lado alto del cuadernillo.
 
     Returns:
         q: pregunta actual siendo procesada
-        dic_q: diccionario actualizado con pregunta alta y pregunta baja
 
     '''
 
     # si es la pág + alta del cuadernillo:
     if pages[p] > pages[1-p]:
-        dic_q['q2'] -= 1
-        q = dic_q['q2']
+        dic_q['q_alto'] -= 1
+        return dic_q['q_alto']
     # si es la pág más baja del cuardenillo
     elif (pages[p] < pages[1-p]) & (pages[p] != 1):
-        dic_q['q1'] += 1
-        q = dic_q['q1']
+        dic_q['q_bajo'] += 1
+        return dic_q['q_bajo']
     else:  # Para la portada
-        q = 0
-
-    return q, dic_q
+        return 0
 
 
-def get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes, dir_subpreg, dic_pagina=None,
-                              filter_rbd=None, filter_estudiante=None,
-                              filter_rbd_int=False, nivel=None,
-                              ignorar_primera_pagina=True):
+def generar_diccionarios_x_pagina(n_pages: int, n_preguntas:int, directorio_imagenes:os.PathLike,
+                              nivel:str,
+                              filter_rbd:None|list|str=None, filter_estudiante:None|list|str=None,
+                             ignorar_primera_pagina:bool=True)->dict:
     '''
-    Versión de función get_subpreguntas() diseñada para obtener todas las subpreguntas de cada alumno/a
-    que recibe. Se utiliza principalmente para insumar los diccionarios automáticos, en particular, número
-    de subpreguntas por pregunta, preguntas por página del cuadernillo y preguntas por imagen del
-    cuadernillo. Función exporta imágenes para cada subpregunta de cada pregunta que procesa.
+    Función similar a get_subpreguntas() en el módulo de [procesamiento de imágenes](proc_imgs.md) diseñada para obtener
+    todas las preguntas en uno o más cuadernillos específicos.
+    Se utiliza para insumar los diccionarios automáticos, en particular, preguntas por página del cuadernillo y 
+    preguntas por imagen del cuadernillo. 
 
     Args:
-        n_pages (int): n° de páginas que tiene el cuestionario
+        n_pages: n° de páginas que tiene el cuestionario
 
-        n_pages (int): n° de preguntas que tiene el cuestionario
+        n_preguntas: n° de preguntas que tiene el cuestionario
 
-        directorio_imagenes (pathlib.Path): directorio desde el que se recogen imágenes a procesar
+        directorio_imagenes: directorio desde el que se recogen imágenes a procesar
 
+        nivel: variable que se utiliza cuando se generan insumos.
+
+        filter_rbd: permite filtrar uno o más RBDs específicos y solo realizar la operación sobre estos.
+
+        filter_estudiante: permite filtrar uno o más estudiantes específicos y solo realizar la operación sobre estos.
+
+        ignorar_primera_pagina: booleano que indica si se debe ignorar la primera página a la hora de 
+            generar los diccionarios automáticos (en general primera página contiene ejemplos que debemos ignorar.)
+
+        
 
     Returns:
-        None
+        diccionario_nivel: diccionario donde las llaves son cada una de las preguntas del cuadernillo y los 
+            valores son el n° de página o imagen que le corresponde, según si nivel es "página" o "cuadernillo",
+            respectivamente 
 
     '''
 
-    # TODO: eliminar parámetros de filtro de función
+
     # Si queremos correr función para rbd específico
     if filter_rbd:
-        # Si queremos correr función desde un rbd en adelante
-        if filter_rbd_int:
-            directorios = [i for i in directorio_imagenes.iterdir()
-                           if int(i.name) >= filter_rbd]
+
         # Si queremos correr función solo para el rbd ingresado
-        else:
-            if isinstance(filter_rbd, str):
-                filter_rbd = [filter_rbd]
-            directorios = [i for i in directorio_imagenes.iterdir() if i.name in filter_rbd]
+
+        if isinstance(filter_rbd, str):
+            filter_rbd = [filter_rbd]
+        directorios = [i for i in directorio_imagenes.iterdir() if i.name in filter_rbd]
     else:
         directorios = directorio_imagenes.iterdir()
 
     # Permite armar diccionario con mapeo pregunta -> página cuadernillo (archivo input)
-    if nivel:
-        diccionario_nivel = dict()
+    diccionario_nivel = dict()
 
     for num, rbd in enumerate(directorios):
         if not filter_estudiante:
@@ -169,25 +144,23 @@ def get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes, dir_sub
 
         for estudiante in estudiantes_rbd:
 
-            n_subpreg = 0
 
             # páginas del cuardenillo
             pages = (n_pages, 1)
 
             dic_q = {
                 # pregunta inicial páginas bajas
-                'q1': 0,
+                'q_bajo': 0,
                 # pregunta inicial páginas altas
-                'q2': n_preguntas + 1}
+                'q_alto': n_preguntas + 1}
 
-            dir_subpreg_rbd = (dir_subpreg / f'{directorio_imagenes.name}/{rbd.name}/')
-            dir_subpreg_rbd.mkdir(parents=True, exist_ok=True)
+
             # Para cada imagen del cuadernillo de un estudiante (2 pág x img):
             for num_pag, dir_pag in enumerate(sorted(list(rbd.glob(f'{estudiante}*')))):
                 # Creamos directorio para guardar imágenes
 
                 # Obtenemos páginas del cuadernillo actual:
-                pages = get_current_pages_cuadernillo(num_pag, pages)
+                pages = get_paginas_actuales_cuadernillo(num_pag, pages)
 
                 # Obtengo carpeta del rbd y archivo del estudiante a
                 # partir del path:
@@ -218,104 +191,46 @@ def get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes, dir_sub
                     # Obtengo contornos
                     big_contours = proc.get_contornos_grandes(mask_naranjo)
 
-                    if not nivel:
-                        q_base = proc.get_pregunta_inicial_pagina(dic_pagina, pages[p])
+
 
                     # Para cada contorno de pregunta:
-                    for num_preg, c in enumerate(big_contours):
+                    for pregunta in (big_contours):
 
-                        # Obtengo coordenadas de contornos y corto imagen
-                        img_pregunta = proc.bound_and_crop(media_img, c)
-
-
-                        if nivel:
-                            # Obtengo n° de pregunta en base a lógica de cuadernillo:
-                            q, dic_q = calcular_pregunta_actual(pages, p, dic_q)
-                        else:
-                            q = q_base + num_preg
-
-                        if nivel:
-                            diccionario_nivel = poblar_diccionario_preguntas(q, diccionario_nivel,
-                                                                             nivel=nivel,
-                                                                             dir_pag=dir_pag,
-                                                                             page=pages[p])
-                            continue
-
-                        try:
-                            # Obtenemos subpreguntas:
-                            img_pregunta_crop = proc.recorte_imagen(
-                                img_pregunta)
-                            #  print(q)
-
-                            img_crop_col = proc.get_mascara_lineas_horizontales(img_pregunta_crop)
-            
-                            lineas_horizontales = proc.obtener_lineas_horizontales(
-                                img_crop_col[:-10, :-10],
-                                  minLineLength=np.round(img_crop_col.shape[1] * .6))
-
-                            if lineas_horizontales is not None:
-
-                                n_subpreg += len(lineas_horizontales) - 1
-
-                                for i in range(len(lineas_horizontales)-1):
-                                    try:
-
-                                        file_out = str(
-                                            dir_subpreg_rbd / f'{estudiante}_p{q}_{i+1}.jpg')
-                                        proc.crop_and_save_subpreg(img_pregunta_crop[:-10, :-10],
-                                                                   lineas_horizontales,
-                                                                   i, file_out)
-
-                                    # Si hay error en procesamiento subpregunta
-                                    except Exception as e:
-
-                                        preg_error = str(
-                                            dir_subpreg_rbd / f'{estudiante}_p{q}_{i+1}')
-                                        anotar_error(
-                                            pregunta=preg_error,
-                                            error='Subregunta no pudo ser procesada',
-                                            e=e, i=i)
-
-                                    continue
-
-                            else:
-                                print('Pregunta no cuenta con subpreguntas, se guardará imagen')
-                                file_out = str(
-                                    dir_subpreg_rbd / f'{estudiante}_p{q}.jpg')
-                                cv2.imwrite(file_out, img_pregunta)
-
-                                # Si hay error en procesamiento pregunta
-                        except Exception as e:
-
-                            preg_error = str(
-                                dir_subpreg_rbd / f'{estudiante}_p{q}')
-                            anotar_error(
-                                pregunta=preg_error, error='Pregunta no pudo ser procesada', e=e)
-
-                            continue
-
-    if nivel:
-        return diccionario_nivel
-
-    else:
-        return 'Éxito!'
+                        # Obtengo n° de pregunta en base a lógica de cuadernillo:
+                        q = calcular_pregunta_actual(pages, p, dic_q) # Ojo, función actualiza dic_q
 
 
-def get_current_pages_cuadernillo(num_pag, pages):
+
+                        diccionario_nivel = poblar_diccionario_preguntas(q, diccionario_nivel,
+                                                                            nivel=nivel,
+                                                                            dir_pag=dir_pag,
+                                                                            page=pages[p])
+
+
+
+    return diccionario_nivel
+
+
+
+def get_paginas_actuales_cuadernillo(num_pag:int, pages: tuple[int, int])->tuple[int, int]:
     '''Método programático para obtener páginas del cuadernillo que se están
     procesando en la imagen actualmente abierta. Dado que siempre una página tiene preguntas
-    que vienen en orden ascendente y la otra en orden descendente (por la lógica de cuadernillo), hubo
-    que incorporar esto en el algoritmo. Se actualiza en cada iteración del loop
+    que vienen en orden ascendente y la otra en orden descendente (por la lógica de cuadernillo), se incorpora
+    esto en el algoritmo. Se actualiza en cada iteración del loop.
+
+    Examples:
+        >>> get_paginas_actuales_cuadernillo(3, (10, 3))
+        (4, 9)
 
     Args:
-        num_pag (int): número de imagen del cuadernillo que se está procesando. Parte en 0.
+        num_pag: número de imagen del cuadernillo que se está procesando. Parte en 0.
 
-        pages (tuple): tupla que contiene páginas del cuadernillo en la iteración anterior.
+        pages: tupla que contiene páginas del cuadernillo en la iteración anterior.
         Ejemplo: (10,3) para la página 2 del cuadernillo estudiantes 2023
 
 
     Returns:
-        pages (tuple): tupla actualizada con páginas del cuadernillo siendo procesadas actualmente
+        pages: tupla actualizada con páginas del cuadernillo siendo procesadas actualmente
 
 
     '''
@@ -371,28 +286,32 @@ def poblar_diccionario_preguntas(q, diccionario, nivel='cuadernillo',
     return diccionario
 
 
-def get_preg_por_hoja(n_pages, n_preguntas, directorio_imagenes, directorios, nivel='cuadernillo' ):
-    '''Función que pobla diccionario completo que mapea preguntas del cuestionario a su hoja o imagen
+def get_preg_por_hoja(n_pages:int, n_preguntas:int,
+                       directorio_imagenes:os.PathLike, nivel:str='cuadernillo' )->dict:
+    '''Función que puebla diccionario completo que mapea preguntas del cuestionario a su hoja o imagen
     correspondiente en el cuadernillo. Utiliza como insumo el número de páginas del cuadernillo y el n°
     de preguntas del cuestionario.
 
+
     Args:
-        n_pages (int): número de páginas del cuadernillo
+        n_pages: número de páginas del cuadernillo
 
-        n_preguntas (int): número de preguntas del cuadernillo
+        n_preguntas: número de preguntas del cuadernillo
 
-        directorio_imagenes (pathlib.Path): directorio donde se encuentran imágenes del tipo de
+        directorio_imagenes: directorio donde se encuentran imágenes del tipo de
         cuadernillo que se está procesando (padres o estudiantes).
 
-        nivel (str): indica si se está obteniendo diccionario a nivel cuadernillo o página.
+        nivel: indica si se está obteniendo diccionario a nivel cuadernillo o página.
 
 
     Returns:
-        dic (dict): tupla actualizada con páginas del cuadernillo siendo procesadas actualmente
+        diccionario_nivel: diccionario donde las llaves son cada una de las preguntas del cuadernillo y los 
+            valores son el n° de página o imagen que le corresponde, según si nivel es "página" o "cuadernillo",
+            respectivamente.
 
 
     '''
-    dir_subpreg = directorios['dir_subpreg']
+
     if nivel not in proc.VALID_INPUT:
         raise ValueError(f"nivel debe ser uno de los siguientes valores: {proc.VALID_INPUT}")
 
@@ -400,59 +319,14 @@ def get_preg_por_hoja(n_pages, n_preguntas, directorio_imagenes, directorios, ni
         f'({regex_estudiante})',
         # primer estudiante del primer rbd:
         str(next(next(directorio_imagenes.iterdir()).iterdir()))).group(1)
-    if nivel == 'cuadernillo':
-        dic = get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes,
-                                        filter_estudiante=primer_est,
-                                        nivel=nivel, ignorar_primera_pagina=IGNORAR_PRIMERA_PAGINA,
-                                        dir_subpreg=dir_subpreg)
-    elif nivel == 'pagina':
-        dic = get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes,
-                                        filter_estudiante=primer_est, nivel=nivel,
-                                        ignorar_primera_pagina=IGNORAR_PRIMERA_PAGINA,
-                                        dir_subpreg=dir_subpreg)
-    return dic
+
+    diccionario_nivel = generar_diccionarios_x_pagina(n_pages, n_preguntas, directorio_imagenes,
+                                    filter_estudiante=primer_est, nivel=nivel,
+                                    ignorar_primera_pagina=IGNORAR_PRIMERA_PAGINA)
+    return diccionario_nivel
 
 
-def get_baseline(n_pages, n_preguntas, directorio_imagenes, dic_pagina, directorios):
-    rbds = set()
-    paths = []
-    dir_subpreg = directorios['dir_subpreg']
 
-    for rbd in (islice(directorio_imagenes.iterdir(), 2)):
-        print(rbd)
-        paths.extend(list(rbd.iterdir()))
-        rbds.update([rbd.name])
-
-    get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes,
-                              dic_pagina=dic_pagina, filter_rbd=rbds,
-                              ignorar_primera_pagina=IGNORAR_PRIMERA_PAGINA,
-                              dir_subpreg=dir_subpreg)
-
-    dir_subpreg_rbd = (dir_subpreg / f'{directorio_imagenes.name}')
-    rutas_output = [dir_subpreg_rbd / i for i in rbds]
-
-    rutas_output_total = []
-
-    for ruta in rutas_output:
-        rutas_output_total.extend(list(ruta.iterdir()))
-
-    df = pd.DataFrame([str(i) for i in rutas_output_total], columns=['ruta'])
-
-    df['est'] = df.ruta.str.extract(f'({regex_estudiante})')
-    df['preg'] = df.ruta.str.extract(r'p(\d{1,2})').astype(int)
-    df['subpreg'] = df.ruta.str.extract(r'p(\d{1,2}_\d{1,2})')
-    # n° mediano de subpreguntas por pregunta, de acuerdo a datos obtenidos de
-    # alumnos en primeros 3 colegios
-    df_resumen = (df.groupby(['est']).preg.value_counts()
-                  .groupby('preg').median().sort_values()
-                  .sort_index().astype(int))
-
-    df_resumen.index = 'p'+df_resumen.index.astype('string')
-
-    # Eliminamos archivos creados para generar insumos
-    [rmtree(str(i)) for i in rutas_output]
-
-    return df_resumen
 
 def get_subpreg_x_preg(df_preguntas):
     
@@ -462,7 +336,26 @@ def get_subpreg_x_preg(df_preguntas):
     return subpreg_x_preg.to_dict()
 
 
-def get_recuadros_x_subpreg(value):
+def get_recuadros_x_subpreg(value: str)->int:
+    '''Extrae de las celdas el número de opciones posibles en cada pregunta
+
+    Examples:
+        >>> get_recuadros_x_subpreg(
+        "0: vacio
+        1: Nada capaz
+        2: Poco capaz
+        3: Bastante capaz
+        4: Muy capaz
+        99: doble marca")
+        4
+    
+    Args:
+        value: string de la celda que contiene valores posibles de subpregunta, proveniente de Excel
+
+    Returns:
+        N° de recuadros en subpregunta para la que se está calculando. 
+
+    '''
     list_valores = value.split('\n')
 
     return len([i for i in list_valores if not re.search('(vac[ií]o)|99', i, re.IGNORECASE)])
@@ -485,8 +378,10 @@ def generar_insumos(tipo_cuadernillo, directorios):
 
     n_pages = get_n_paginas(directorio_imagenes)
     n_preguntas = df_para_insumos[nombre_col_campo_bd].str.extract('(p\d+)').nunique().iloc[0]
-    dic_cuadernillo = get_preg_por_hoja(n_pages, n_preguntas, directorio_imagenes, directorios, nivel='cuadernillo')
-    dic_pagina = get_preg_por_hoja(n_pages, n_preguntas, directorio_imagenes, directorios, nivel='pagina')
+    dic_cuadernillo = get_preg_por_hoja(n_pages, n_preguntas,
+                                         directorio_imagenes , nivel='cuadernillo')
+    dic_pagina = get_preg_por_hoja(n_pages, n_preguntas,
+                                    directorio_imagenes, nivel='pagina')
     subpreg_x_preg = get_subpreg_x_preg(df_preguntas)
     n_subpreg_tot = df_para_insumos[nombre_col_campo_bd].str.contains('^p\d').sum()
     n_recuadros_x_subpreg = (df_preguntas
@@ -522,6 +417,96 @@ def generar_insumos_total(directorios):
 
     print('Insumos generados exitosamente!')
 
+
+
+# def get_n_preguntas(directorio_imagenes: str, ignorar_primera_pagina:bool=True)->int:
+#     '''Obtiene el n° de páginas totales del cuadernillo SIMCE. Para esto obtiene
+#     todos los archivos de un alumno y multiplica el total de archivos por 2.
+    
+#     Args:
+#         directorio_imagenes: string que contiene el directorio en que se encuentran imágenes
+#             de cuadernillos.
+#         ignorar_primera_pagina: 
+            
+#     Returns:
+#         n_pages: n° de páginas totales del cuadernillo.
+#     '''
+
+#     rbds = list(directorio_imagenes.iterdir())
+#     rbd1 = rbds[0]
+
+#     estudiantes_rbd = {re.search(f'({regex_estudiante})', str(i)).group(1)
+#                        for i in rbd1.rglob('*jpg')}
+
+#     total_imagenes = 0
+#     for n, file in enumerate(sorted(list(rbd1.glob(f'{estudiantes_rbd.pop()}*')))):
+
+#         img_preg = cv2.imread(str(file), 1)
+
+#         img_crop = proc.recorte_imagen(img_preg, 0, 200, 50, 160)
+#         # Eliminamos franjas negras en caso de existir
+#         img_sin_franja = proc.eliminar_franjas_negras(img_crop)
+
+#         # Divimos imagen en dos páginas del cuadernillo
+#         img_p1, img_p2 = proc.partir_imagen_por_mitad(img_sin_franja)
+
+#         for p, media_img in enumerate([img_p1, img_p2]):
+
+#             # Importante, nos saltamos primera página, ya que no contiene preguntas
+#             if n == 0 and p == 1 and ignorar_primera_pagina:
+#                 continue
+
+#             mask_naranjo = get_mask_imagen(media_img)
+
+#             # Find my contours
+#             big_contours = proc.get_contornos_grandes(mask_naranjo)
+
+#             total_imagenes += len(big_contours)
+#             print(total_imagenes)
+
+#     return total_imagenes 
+
+
+# def get_baseline(n_pages, n_preguntas, directorio_imagenes, dic_pagina, directorios):
+#     rbds = set()
+#     paths = []
+#     dir_subpreg = directorios['dir_subpreg']
+
+#     for rbd in (islice(directorio_imagenes.iterdir(), 2)):
+#         print(rbd)
+#         paths.extend(list(rbd.iterdir()))
+#         rbds.update([rbd.name])
+
+#     get_subpreguntas_completo(n_pages, n_preguntas, directorio_imagenes,
+#                               dic_pagina=dic_pagina, filter_rbd=rbds,
+#                               ignorar_primera_pagina=IGNORAR_PRIMERA_PAGINA,
+#                               dir_subpreg=dir_subpreg)
+
+#     dir_subpreg_rbd = (dir_subpreg / f'{directorio_imagenes.name}')
+#     rutas_output = [dir_subpreg_rbd / i for i in rbds]
+
+#     rutas_output_total = []
+
+#     for ruta in rutas_output:
+#         rutas_output_total.extend(list(ruta.iterdir()))
+
+#     df = pd.DataFrame([str(i) for i in rutas_output_total], columns=['ruta'])
+
+#     df['est'] = df.ruta.str.extract(f'({regex_estudiante})')
+#     df['preg'] = df.ruta.str.extract(r'p(\d{1,2})').astype(int)
+#     df['subpreg'] = df.ruta.str.extract(r'p(\d{1,2}_\d{1,2})')
+#     # n° mediano de subpreguntas por pregunta, de acuerdo a datos obtenidos de
+#     # alumnos en primeros 3 colegios
+#     df_resumen = (df.groupby(['est']).preg.value_counts()
+#                   .groupby('preg').median().sort_values()
+#                   .sort_index().astype(int))
+
+#     df_resumen.index = 'p'+df_resumen.index.astype('string')
+
+#     # Eliminamos archivos creados para generar insumos
+#     [rmtree(str(i)) for i in rutas_output]
+
+#     return df_resumen
 
 if __name__ == '__main__':
     generar_insumos_total()
