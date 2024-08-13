@@ -15,8 +15,8 @@ import pandas as pd
 import argparse
 import collections
 ## Predicciones -----------------------------------------------------
-# config_dict = read_json('config/config_pred.json')
-# config = ConfigParser(config_dict)
+#config_dict = read_json('config/config_pred.json')
+#config = ConfigParser(config_dict)
 def main(config):
     torch.manual_seed(SEED)
     torch.backends.cudnn.deterministic = True
@@ -31,6 +31,7 @@ def main(config):
 
     loader = config.init_obj('data_loader', module_data, model=model_name, 
                                 return_directory=True, dir_data=dirs['dir_train_test'])
+    loader.num_workers = 0
     predictions, probs_float, lst_directories = obtener_predicciones(loader, device, model)
     resto_datos = pd.read_csv(dirs['dir_train_test'] / 'data_pred.csv')
     preds = pd.DataFrame({'pred': predictions,

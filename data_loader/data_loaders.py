@@ -7,7 +7,7 @@ import torch
 
 class TrainTestDataLoader(BaseDataLoader):
 
-    def __init__(self, data_file, dir_data, batch_size, model, cortar_bordes, shuffle=True, validation_split=0.0, num_workers=2,
+    def __init__(self, data_file, dir_data, batch_size, model, cortar_bordes, shuffle=True, validation_split=0.0, num_workers=0,
                  return_directory=False, return_labels=False ):
         self.model = model
         self.cortar_bordes = cortar_bordes
