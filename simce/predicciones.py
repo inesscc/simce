@@ -4,6 +4,9 @@ from torchvision import models
 from simce.modelamiento import preparar_capas_modelo
 from simce.utils import prepare_device
 
+import pathlib
+temp = pathlib.PosixPath
+pathlib.PosixPath = pathlib.WindowsPath
 
 def exportar_predicciones(preds, resto_datos, dirs):
     preds_tot = preds.merge(resto_datos, left_on='dirs', right_on='ruta_imagen_output', how='left')
@@ -19,7 +22,7 @@ def prepare_model(config, device):
     model = preparar_capas_modelo(model, model_name)
 
     ruta_modelo = 'saved/models/saved_server/maxvit/model_best_nuevo.pt'
-    checkpoint = torch.load(ruta_modelo)
+    checkpoint = torch.load(ruta_modelo, map_location= device.type)
     state_dict = checkpoint['state_dict']
     if config['n_gpu'] > 1:
         model = torch.nn.DataParallel(model)
@@ -49,7 +52,7 @@ def obtener_predicciones(loader, device, model):
             # Make predictions
             
             outputs = model(images)
-
+            print(outputs)
             probabilities = torch.nn.functional.softmax(outputs.data, dim=1)
             max_probabilities = probabilities.max(dim=1)[0]
             
@@ -61,6 +64,7 @@ def obtener_predicciones(loader, device, model):
 
             probs.extend(max_probabilities)
             lst_directories.extend(directories)
+            break
 
     print('Predicciones listas!')
     probs_float = [i.item() for i in probs]
