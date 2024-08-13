@@ -13,16 +13,27 @@ from simce.errors import anotar_error
 import pandas as pd
 import re
 from dotenv import load_dotenv
-
 from simce.utils import get_mask_imagen, eliminar_o_rellenar_manchas
 import json
-
+import os
 load_dotenv()
 
 VALID_INPUT = {'cuadernillo', 'pagina'}
 
 
-def get_insumos(tipo_cuadernillo, dir_insumos):
+def get_insumos(tipo_cuadernillo:str, dir_insumos:os.PathLike):
+    '''Carga insumos obtenidos en el [módulo de generación de insumos](../generar_insumos_img)
+
+    Args:
+        tipo_cuadernillo: tipo de cuadernillo a revisar: "estudiantes" o "padres".
+
+        dir_insumos: directorio en el que se encuentran datos de insumos.
+    
+    Returns:
+        insumos_total: tupla que contiene cada uno de los insumos, es decir:
+            n_pages, n_preguntas, subpreg_x_preg, dic_cuadernillo, dic_pagina, n_subpreg_tot.
+
+    '''
     with open(dir_insumos / 'insumos.json') as f:
         insumos = json.load(f)
 
@@ -36,7 +47,9 @@ def get_insumos(tipo_cuadernillo, dir_insumos):
     dic_pagina = insumos_usar['dic_pagina']
     n_subpreg_tot = insumos_usar['n_subpreg_tot']
 
-    return n_pages, n_preguntas, subpreg_x_preg, dic_cuadernillo, dic_pagina, n_subpreg_tot
+    insumos_total = n_pages, n_preguntas, subpreg_x_preg, dic_cuadernillo, dic_pagina, n_subpreg_tot
+
+    return insumos_total
 
 
 def select_directorio(tipo_cuadernillo, directorios):

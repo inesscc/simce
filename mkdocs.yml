@@ -6,8 +6,11 @@ theme:
 
 plugins:
   - mkdocstrings
+  - autorefs
+  - search
 
 nav:
   - Documentación Proyecto SIMCE: index.md
-  - Manual de referencia generación de insumos: generar_insumos_img.md
-  - Manual de referencia recorte de subpreguntas: proc_imgs.md
+  - 'Manuales de referencia':
+    - 'Generación de insumos': 'generar_insumos_img.md'
+    - 'Recorte de subpreguntas': 'proc_imgs.md'
