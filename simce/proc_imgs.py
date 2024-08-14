@@ -21,7 +21,7 @@ load_dotenv()
 VALID_INPUT = {'cuadernillo', 'pagina'}
 
 
-def get_insumos(tipo_cuadernillo:str, dir_insumos:os.PathLike):
+def get_insumos(tipo_cuadernillo:str, dir_insumos:os.PathLike)-> tuple:
     '''Carga insumos obtenidos en el [módulo de generación de insumos](../generar_insumos_img)
 
     Args:
@@ -32,6 +32,7 @@ def get_insumos(tipo_cuadernillo:str, dir_insumos:os.PathLike):
     Returns:
         insumos_total: tupla que contiene cada uno de los insumos, es decir:
             n_pages, n_preguntas, subpreg_x_preg, dic_cuadernillo, dic_pagina, n_subpreg_tot.
+
 
     '''
     with open(dir_insumos / 'insumos.json') as f:
@@ -52,19 +53,19 @@ def get_insumos(tipo_cuadernillo:str, dir_insumos:os.PathLike):
     return insumos_total
 
 
-def select_directorio(tipo_cuadernillo, directorios):
-    '''Selecciona directorio de datos según si se está procesando el cuadernillo
-    de padres o de estudiantes'''
 
-    if tipo_cuadernillo == 'estudiantes':
-        directorio_imagenes = directorios['dir_estudiantes']
 
-    elif tipo_cuadernillo == 'padres':
-        directorio_imagenes = directorios['dir_padres']
+def dejar_solo_recuadros_subpregunta(img_pregunta: np.ndarray)-> np.ndarray:
+    ''' Toma imagen recortada de una pregunta completa y vuelve a recortarla, usando máscaras
+        de forma que solo queden los recuadros de las respuestas de la pregunta, dejando fuera el texto.
+    
+        Args:
+            img_pregunta: imagen de una pregunta completa.
 
-    return directorio_imagenes
-
-def dejar_solo_recuadros_subpregunta(img_pregunta):
+        Returns:
+            img_recuadros: imagen de recuadros de una pregunta completa
+    
+    '''
     img_pregunta_crop = img_pregunta[60:-30, 30:-30]
     mask_recuadro = get_mask_imagen(img_pregunta_crop,
                            lower_color=np.array([0, 0, 224]),
@@ -87,35 +88,36 @@ def dejar_solo_recuadros_subpregunta(img_pregunta):
 
     nonzero = cv2.findNonZero(morph_hor)
 
-    img_recuadro = bound_and_crop(img_pregunta_crop, nonzero, buffer=70)
+    img_recuadros = bound_and_crop(img_pregunta_crop, nonzero, buffer=70)
 
 
-    return img_recuadro
+    return img_recuadros
 
-def borrar_texto_oscuro(gray, limite=200):
-    gray_mean = gray.mean(axis=1) 
-    gray_mean_mul10 = np.append(gray_mean, [gray_mean.mean()]* (10 - gray.shape[0] % 10))
-    dark_areas = gray_mean_mul10.reshape(-1, 10).mean(axis=1)
-    pixeles_borrar = np.where(dark_areas< limite)[0] * 10
 
-    for p in pixeles_borrar:
-        gray[p:p+10] = 255
-    return gray
 
-def get_mascara_lineas_horizontales(img_pregunta_recuadros):
+def get_mascara_lineas_horizontales(img_recuadros:np.ndarray)->np.ndarray:
+    ''' Genera máscara que detecta líneas horizontales que separan subpreguntas, para una imagen de recuadros de una pregunta
+    completa.
+    
+        Args:
+            img_recuadros: imagen de recuadros de una pregunta completa.
+        Returns:
+            mask_lineas_horizontales: máscara que contiene detección de líneas horizontales entre subpreguntas.
+    
+    '''
 
-    px_naranjo = get_mask_imagen(img_pregunta_recuadros,
+    px_naranjo = get_mask_imagen(img_recuadros,
                                    lower_color=np.array(
                                        [0, 111, 109]),
                                    upper_color=np.array([18, 255, 255]),
                                    iters=1, revert=True)
 
-    px_azul = get_mask_imagen(img_pregunta_recuadros, 
+    px_azul = get_mask_imagen(img_recuadros, 
                                    lower_color=np.array([0, 0, 0]),
                                      upper_color=np.array([114, 255, 255]),
                                      eliminar_manchas=None, iters=0)
     
-    px_negro = get_mask_imagen(img_pregunta_recuadros, 
+    px_negro = get_mask_imagen(img_recuadros, 
                                 lower_color=np.array([0, 0, 204]),
                                     upper_color=np.array([179, 255, 255]),
                                     eliminar_manchas=None, iters=0)
@@ -124,7 +126,7 @@ def get_mascara_lineas_horizontales(img_pregunta_recuadros):
     idx_azul = np.where(px_azul == 0)
     idx_negro =  np.where(px_negro == 0)
 
-    gray = cv2.cvtColor(img_pregunta_recuadros, cv2.COLOR_BGR2GRAY)
+    gray = cv2.cvtColor(img_recuadros, cv2.COLOR_BGR2GRAY)
     gray[idx_azul ] = 255
     gray[idx_negro] = 255
     gray[idx_naranjo ] = 0
@@ -171,42 +173,59 @@ def get_mascara_lineas_horizontales(img_pregunta_recuadros):
     return mask_lineas_horizontales
 
 
-def save_pregunta_completa(img_pregunta_recuadros, dir_subpreg_rbd, estudiante, pregunta_selec):
+def save_pregunta_completa(img_recuadros:np.ndarray,
+                            dir_subpreg_rbd:os.PathLike,
+                            estudiante:str, pregunta_selec:str):
+    '''Guarda pregunta completa en casos de preguntas que no tienen subpreguntas.
+        **No retorna nada**
+
+    Args:
+        img_recuadros: imagen de recuadros de una pregunta completa.
+        dir_subpreg_rbd: directorio donde se guarda imágenes de subpreguntas y preguntas
+        estudiante: identificador del estudiante asociado a pregunta
+        pregunta_selec: pregunta siendo exportada actualmente
+
+
+    
+    '''
     print('Pregunta no cuenta con subpreguntas, se guardará imagen')
     file_out = str(
         dir_subpreg_rbd / f'{estudiante}_{pregunta_selec}.jpg')
     
     # Si la pregunta es más larga que ancha, la dejamos a lo ancho:
-    if img_pregunta_recuadros.shape[0] > img_pregunta_recuadros.shape[1]:
-        img_pregunta_recuadros = cv2.rotate(img_pregunta_recuadros, cv2.ROTATE_90_CLOCKWISE)
+    if img_recuadros.shape[0] > img_recuadros.shape[1]:
+        img_recuadros = cv2.rotate(img_recuadros, cv2.ROTATE_90_CLOCKWISE)
 
-    n_subpreg = 1
-    cv2.imwrite(file_out, img_pregunta_recuadros)
+    #n_subpreg = 1
+    cv2.imwrite(file_out, img_recuadros)
     
 
-def get_subpreguntas(tipo_cuadernillo, directorios, curso='4b', filter_rbd=None, filter_estudiante=None,
-                     filter_rbd_int=False, muestra=False):
+def get_subpreguntas(tipo_cuadernillo: str, directorios:list[os.PathLike],
+                     curso:str='4b', filter_rbd:None|list[str]=None,
+                     filter_estudiante:None|list[str]=None,
+                     muestra:bool=False):
     '''
-    Obtiene las cada una de las subpreguntas obtenidas de la función get_tablas_99(). Esto considera dos
-    casos: si es para predicción obtendrá las imágenes de todas las sospechas de doble marca de la tabla
-    de origen y si es para entrenamiento, además considerará aproximadamente un 20% extra de marcas
-    normales (depende de variable para_entrenamiento. Variable global IS_TRAINING define esto).
-    Función exporta imágenes para cada subpregunta de la tabla de entrenamiento o predicción.
+    Recorta cada una de las subpreguntas obtenidas en el [módulo de procesamiento de tablas de doble marca](../proc_tabla_99).
+    Obtendrá las imágenes de todas las sospechas de doble marca de la tabla
+    de origen. Función exporta imágenes para cada subpregunta de la tabla de predicción. **No retorna nada.**
 
     Args:
-        tipo_cuadernillo (str): define si se está procesando para estudiantes o padres. Esto también
+        tipo_cuadernillo: define si se está procesando para estudiantes o padres. Esto también
         se utiliza para definir las rutas a consultar
 
-        para_entrenamiento (bool): define si el procesamiento se está realizando para generar una base de
-        entrenamiento o de predicción
+        directorios: list con directorios del proyecto
 
+        curso: string que identifica a curso actualmente siendo procesado.
 
-    Returns:
-        None
+        filter_rbd: permite filtrar uno o más RBDs específicos y solo realizar la operación sobre estos.
+
+        filter_estudiante: permite filtrar uno o más estudiantes específicos y solo realizar la operación sobre estos.
+
 
     '''
     # Obtenemos directorio de imágenes (padres o estudiantes)
-    directorio_imagenes = select_directorio(tipo_cuadernillo, directorios)
+    
+    directorio_imagenes = directorios[f'dir_{tipo_cuadernillo}']
     dir_tabla_99 = directorios['dir_tabla_99']
     dir_input = directorios['dir_input']
     dir_subpreg = directorios['dir_subpreg']
@@ -219,20 +238,12 @@ def get_subpreguntas(tipo_cuadernillo, directorios, curso='4b', filter_rbd=None,
     df99 = pd.read_csv(
         dir_tabla_99 / nombre_tabla_casos99, dtype={'rbd_ruta': 'string'}).sort_values('ruta_imagen')
 
-    if muestra:
 
-        rbd_disp = {i.name for i in directorio_imagenes.iterdir()}
-        df99 = df99[(df99.rbd_ruta.isin(rbd_disp))]
 
-    # Si queremos correr función para rbd específico
+    # Si queremos correr función para rbd específicos
     if filter_rbd:
-        # Si queremos correr función desde un rbd en adelante
-        if filter_rbd_int:
-            df99 = df99[(df99.rbd_ruta.astype(int).ge(filter_rbd))]
 
-        # Si queremos correr función solo para el rbd ingresado
-        else:
-            df99 = df99[(df99.rbd_ruta.isin(filter_rbd))]
+        df99 = df99[(df99.rbd_ruta.isin(filter_rbd))]
 
     if filter_estudiante:
         if isinstance(filter_estudiante, int):
@@ -325,17 +336,11 @@ def get_subpreguntas(tipo_cuadernillo, directorios, curso='4b', filter_rbd=None,
             print(f'{subpreg_selec=}')
             # Obtenemos subpreguntas:
 
-            #  print(q)
 
-            # img_crop_col = get_mask_imagen(img_pregunta_recuadros,
-            #                                lower_color=np.array(
-            #                                    [0, 111, 109]),
-            #                                upper_color=np.array([18, 255, 255]))
-
-            img_crop_col = get_mascara_lineas_horizontales(img_pregunta_recuadros)
+            mask_lineas_horizontales = get_mascara_lineas_horizontales(img_pregunta_recuadros)
             
             lineas_horizontales = obtener_lineas_horizontales(
-                img_crop_col, minLineLength=np.round(img_crop_col.shape[1] * .6))
+                mask_lineas_horizontales, minLineLength=np.round(mask_lineas_horizontales.shape[1] * .6))
 
             n_subpreg = len(lineas_horizontales) - 1
 
@@ -389,6 +394,8 @@ def get_subpreguntas(tipo_cuadernillo, directorios, curso='4b', filter_rbd=None,
 
 
 def get_pages(pagina_pregunta, n_pages):
+    """"""
+
     pages_original = n_pages, 1
     pages = (pages_original[0] - (pagina_pregunta - 1), pages_original[1] + (pagina_pregunta - 1))
     if pagina_pregunta % 2 == 0:
@@ -597,3 +604,39 @@ def procesamiento_antiguo(media_img):
     m = cv2.ximgproc.thinning(m, None, cv2.ximgproc.THINNING_GUOHALL)
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
     m = cv2.dilate(m, kernel, iterations=2)
+
+
+# def select_directorio(tipo_cuadernillo:str, directorios:os.PathLike):
+#     '''Selecciona directorio de datos según si se está procesando el cuadernillo
+#     de padres o de estudiantes
+    
+#     Args:
+#         tipo_cuadernillo: "estudiantes" o "padres"
+#     '''
+
+#     if tipo_cuadernillo == 'estudiantes':
+#         directorio_imagenes = directorios['dir_estudiantes']
+
+#     elif tipo_cuadernillo == 'padres':
+#         directorio_imagenes = directorios['dir_padres']
+
+#     return directorio_imagenes
+
+# def borrar_texto_oscuro(gray, limite=200):
+#     ''' Función que toma imagen recortada de una pregunta completa y vuelve a recortarla, usando máscaras
+#         de forma que solo queden los recuadros de las respuestas de la pregunta, dejando fuera el texto.
+    
+#         Args:
+#             img_pregunta: imagen de una pregunta completa.
+#         Returns:
+#             img_recuadro: imagen de recuadros de una pregunta completa
+    
+#     '''
+#     gray_mean = gray.mean(axis=1) 
+#     gray_mean_mul10 = np.append(gray_mean, [gray_mean.mean()]* (10 - gray.shape[0] % 10))
+#     dark_areas = gray_mean_mul10.reshape(-1, 10).mean(axis=1)
+#     pixeles_borrar = np.where(dark_areas< limite)[0] * 10
+
+#     for p in pixeles_borrar:
+#         gray[p:p+10] = 255
+#     return gray

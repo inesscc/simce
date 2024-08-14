@@ -236,7 +236,7 @@ def get_paginas_actuales_cuadernillo(num_pag:int, paginas_anteriores: tuple[int,
     '''
 
     if num_pag == 0:
-        pass
+        paginas_actuales = paginas_anteriores
     # si num_pag es par y no es la primera página
     elif (num_pag % 2 == 0):
         paginas_actuales = (paginas_anteriores[1]-1, paginas_anteriores[0] + 1)
@@ -393,7 +393,7 @@ def generar_insumos(tipo_cuadernillo:str, directorios:dict[str, os.PathLike])-> 
     '''
 
 
-    directorio_imagenes = proc.select_directorio(tipo_cuadernillo, directorios)
+    directorio_imagenes = directorios[f'dir_{tipo_cuadernillo}']
 
     # El nombre de la carpeta que refiere a padres o estudiantes es también el nombre de la hoja en el Excel
     sheet_name = directorio_imagenes.name
