@@ -3,6 +3,9 @@ import config.proc_img as module_config
 from config.parse_config import ConfigParser
 from simce.utils import read_json
 from config.proc_img import CURSO
+import os
+
+os.listdir('//10.10.100.28/4b_2023')
 config_dict = read_json('config/model.json')
 config = ConfigParser(config_dict)
 d = config.init_obj('directorios', module_config, curso=str(module_config.CURSO) )
