@@ -47,7 +47,7 @@ def get_directorios(curso=CURSO, filtro=None) -> dict:
             os.system(rf"NET USE P: \\{IP_NAS}\{FOLDER_DATOS}" )
         dd['dir_img_bruta'] = 'P:/'
     else:
-        # Solo aplica a desarrollo local
+        # Solo aplica a desarrollo local:
         dd['dir_img_bruta'] = dd['dir_input']  
     dd['dir_estudiantes'] = dd['dir_input'] / carpeta_estudiantes
     dd['dir_padres'] = dd['dir_input'] / carpeta_padres
