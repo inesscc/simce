@@ -6,6 +6,10 @@ Created on Tue Apr  9 10:50:14 2024
 """
 
 from pathlib import Path
+from dotenv import load_dotenv
+import os
+load_dotenv()
+
 
 CURSO = Path('4b')
 # Expresión regular para capturar el identificador del estudiante en nombre de archivos
@@ -33,6 +37,18 @@ def get_directorios(curso=CURSO, filtro=None) -> dict:
     dd = dict()
     dd['dir_data'] = Path('data/')
     dd['dir_input'] = dd['dir_data'] / 'input_raw' 
+
+    # En producción nos conectamos a disco NAS para acceso a imágenes
+    if os.getenv('ENV') == 'production':
+        IP_NAS = '10.10.100.28'
+        FOLDER_DATOS = '4b_2023'
+        # Nos conectamos a disco NAS:
+        if not Path('P:/').is_dir():
+            os.system(rf"NET USE P: \\{IP_NAS}\{FOLDER_DATOS}" )
+        dd['dir_img_bruta'] = 'P:/'
+    else:
+        # Solo aplica a desarrollo local
+        dd['dir_img_bruta'] = dd['dir_input']  
     dd['dir_estudiantes'] = dd['dir_input'] / carpeta_estudiantes
     dd['dir_padres'] = dd['dir_input'] / carpeta_padres
 
