@@ -17,6 +17,7 @@ def main(args):
     Args:
         args.curso (str): identificador del curso a predecir
     """
+
     if args.curso:
         CURSO = args.curso
     else:
@@ -25,7 +26,7 @@ def main(args):
     directorios = get_directorios(curso=CURSO)
     crear_directorios(directorios)
     # 1.  Generar insumos para procesamiento
-    generar_insumos_total(directorios) 
+    generar_insumos_total(directorios, args=args) 
     # 2. Generar tablas con dobles marcas
     get_tablas_99_total(directorios=directorios)
 
@@ -35,10 +36,10 @@ def main(args):
     queue = manager.Queue()         # Cola de tareas
     
     process_general(dirs = dirs, regex_estudiante= regex_estudiante, 
-                    queue = queue, curso=CURSO, tipo_cuadernillo='padres')
+                    queue = queue, curso=CURSO, args=args, tipo_cuadernillo='padres')
     
     process_general(dirs = dirs, regex_estudiante= regex_estudiante, 
-                    queue = queue, curso=CURSO, tipo_cuadernillo='estudiantes')
+                    queue = queue, curso=CURSO, args=args, tipo_cuadernillo='estudiantes')
     
 
     escribir_errores(queue)
@@ -50,6 +51,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Módulo de recorte de imágenes. Aquí se obtiene el recorte de cada subpregunta y se generan tablas con las imágenes \
                                    a predecir')
     parser.add_argument('--curso', help='(opcional) identificador del curso a predecir')
+
+    parser.add_argument("-v", "--verbose", help="Se imprime más texto si se activa",
+                    action="store_true")
 
     args = parser.parse_args()
 

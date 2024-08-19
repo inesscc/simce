@@ -15,12 +15,13 @@ from simce.proc_imgs import get_insumos, get_pages, get_subpregs_distintas, elim
 from dotenv import load_dotenv
 load_dotenv()
 from simce.utils import timing
+import argparse
 VALID_INPUT = {'cuadernillo', 'pagina'}
 
 ## procesamiento imagen ----------------------------------
 
 def process_single_image(preguntas, num: int, rbd, dic_pagina:dict, n_pages: int, subpreg_x_preg: dict, 
-                         dir_subpreg, tipo_cuadernillo:str, regex_estudiante:str, queue):
+                         dir_subpreg, tipo_cuadernillo:str, regex_estudiante:str, args:argparse.Namespace, queue):
     
     """
     Genera el recorte de una pregunta/subpregunta. Primero verificamos que la imagen no posea franjas negras en ningun costado del cuestionario.
@@ -71,7 +72,8 @@ def process_single_image(preguntas, num: int, rbd, dic_pagina:dict, n_pages: int
         return 'Ocurrió un error: archivo no existe'
 
     file = rbd.name
-    print(f'{file=}')
+    if args.verbose:
+        print(f'{file=}')
     # Leemos imagen
     img_preg = cv2.imread(str(rbd), 1) 
     img_crop = recorte_imagen(img_preg, 0, 150, 50, 160)
@@ -119,7 +121,8 @@ def process_single_image(preguntas, num: int, rbd, dic_pagina:dict, n_pages: int
                     return 'Éxito!'
 
                 subpreg_selec = preguntas.iloc[num].split('_')[1]
-                print(f'{subpreg_selec=}')
+                if args.verbose:
+                    print(f'{subpreg_selec=}')
                 
                 # Obtenemos subpreguntas:
                 #img_pregunta_crop = recorte_imagen(img_pregunta)
@@ -184,11 +187,12 @@ def process_image_block(image_block:list):
     Returns:
         
     """
-    queue, preguntas, directorio_imagenes, dic_pagina, n_pages, subpreg_x_preg, dir_subpreg, tipo_cuadernillo, regex_estudiante = image_block
+    queue, preguntas, directorio_imagenes, dic_pagina, n_pages, \
+          subpreg_x_preg, dir_subpreg, tipo_cuadernillo, regex_estudiante, args = image_block
 
     for num, rbd in enumerate(directorio_imagenes):
         process_single_image(preguntas, num, rbd, dic_pagina, n_pages,
-                             subpreg_x_preg, dir_subpreg, tipo_cuadernillo, regex_estudiante,
+                             subpreg_x_preg, dir_subpreg, tipo_cuadernillo, regex_estudiante, args,
                              queue)
 
 #process_image_block(image_blocks[0])
@@ -196,6 +200,7 @@ def process_image_block(image_block:list):
 
 @timing
 def process_general(dirs:dict, regex_estudiante: str, queue, curso: str, tipo_cuadernillo: str,
+                    args:argparse.Namespace,
                     muestra= None, filter_rbd= None, filter_rbd_int= False, filter_estudiante= None):
     
     """
@@ -256,7 +261,7 @@ def process_general(dirs:dict, regex_estudiante: str, queue, curso: str, tipo_cu
     print(f'## Cantidad de preguntas en cada bloque: {block_size}')
     
     image_blocks = [(queue, df99[i:i + block_size].preguntas, dir_preg99[i:i + block_size], dic_pagina, n_pages, 
-                     subpreg_x_preg, dirs['dir_subpreg'], tipo_cuadernillo, regex_estudiante) for i in range(0, len(dir_preg99), block_size)]
+                     subpreg_x_preg, dirs['dir_subpreg'], tipo_cuadernillo, regex_estudiante, args) for i in range(0, len(dir_preg99), block_size)]
 
     # Usar multiprocessing Pool
     with Pool(num_workers) as pool:
