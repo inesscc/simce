@@ -17,7 +17,7 @@ from simce.utils import get_mask_imagen
 import simce.proc_imgs as proc
 import json
 import os
-
+import argparse
 
 def get_n_paginas(directorio_imagenes: str)->int:
     '''Obtiene el n° de páginas totales del cuadernillo SIMCE. Para esto obtiene
@@ -76,9 +76,10 @@ def calcular_pregunta_actual(pages: tuple[int, int], p: int, dic_q: dict)-> int:
 
 
 def generar_diccionarios_x_pagina(n_pages: int, n_preguntas:int, directorio_imagenes:os.PathLike,
-                              nivel:str,
+                              nivel:str, args: list,
                               filter_rbd:None|list|str=None, filter_estudiante:None|list|str=None,
-                             ignorar_primera_pagina:bool=True)->dict:
+                             ignorar_primera_pagina:bool=True,
+                             )->dict:
     '''
     Función similar a get_subpreguntas() en el módulo de [procesamiento de imágenes](proc_imgs.md) diseñada para obtener
     todas las preguntas en uno o más cuadernillos específicos.
@@ -127,6 +128,7 @@ def generar_diccionarios_x_pagina(n_pages: int, n_preguntas:int, directorio_imag
 
     for num, rbd in enumerate(directorios):
         if not filter_estudiante:
+            
             print('############################')
             print(rbd)
             print(num)
@@ -165,9 +167,9 @@ def generar_diccionarios_x_pagina(n_pages: int, n_preguntas:int, directorio_imag
                 # Obtengo carpeta del rbd y archivo del estudiante a
                 # partir del path:
                 file = dir_pag.parts[-1]
-
-                print(f'{file=}')
-                print(f'{num_pag=}')
+                if args.verbose:
+                    print(f'{file=}')
+                    print(f'{num_pag=}')
 
                 # Creamos directorio si no existe
 
@@ -276,7 +278,7 @@ def poblar_diccionario_preguntas(q: int, dic_paginas:dict, nivel:str='cuadernill
     '''
 
     if nivel == 'cuadernillo':
-        print(dir_pag)
+        # print(dir_pag)
         hoja_cuadernillo = re.search(regex_hoja_cuadernillo, dir_pag.name).group(1)
         dic_paginas[f'p{q}'] = hoja_cuadernillo
     elif nivel == 'pagina':
@@ -286,7 +288,9 @@ def poblar_diccionario_preguntas(q: int, dic_paginas:dict, nivel:str='cuadernill
 
 
 def get_preg_por_hoja(n_pages:int, n_preguntas:int,
-                       directorio_imagenes:os.PathLike, nivel:str='cuadernillo' )->dict:
+                       directorio_imagenes:os.PathLike, args:argparse.Namespace,
+                         nivel:str='cuadernillo'
+                         )->dict:
     '''Función que puebla diccionario completo que mapea preguntas del cuestionario a su hoja o imagen
     correspondiente en el cuadernillo. Utiliza como insumo el número de páginas del cuadernillo y el n°
     de preguntas del cuestionario.
@@ -320,7 +324,7 @@ def get_preg_por_hoja(n_pages:int, n_preguntas:int,
         str(next(next(directorio_imagenes.iterdir()).iterdir()))).group(1)
 
     diccionario_nivel = generar_diccionarios_x_pagina(n_pages, n_preguntas, directorio_imagenes,
-                                    filter_estudiante=primer_est, nivel=nivel,
+                                    filter_estudiante=primer_est, nivel=nivel, args=args,
                                     ignorar_primera_pagina=IGNORAR_PRIMERA_PAGINA)
     return diccionario_nivel
 
@@ -377,7 +381,8 @@ def get_recuadros_x_subpreg(value: str)->int:
     return n_recuadros_x_subpreg
 
 
-def generar_insumos(tipo_cuadernillo:str, directorios:dict[str, os.PathLike])-> dict[str, str]:
+def generar_insumos(tipo_cuadernillo:str, directorios:dict[str, os.PathLike],
+                    args:argparse.Namespace)-> dict[str, str]:
     '''
     Función principal. Genera todos los insumos para un tipo de cuadernillo específico (estudiantes o padres), es decir:
         n° de páginas, n° de preguntas, n° de subpreguntas, imagen asociada a cada pregunta, página asociada a cada pregunta,
@@ -406,9 +411,9 @@ def generar_insumos(tipo_cuadernillo:str, directorios:dict[str, os.PathLike])-> 
     n_pages = get_n_paginas(directorio_imagenes)
     n_preguntas = df_para_insumos[nombre_col_campo_bd].str.extract('(p\d+)').nunique().iloc[0]
     dic_cuadernillo = get_preg_por_hoja(n_pages, n_preguntas,
-                                         directorio_imagenes , nivel='cuadernillo')
+                                         directorio_imagenes , args=args, nivel='cuadernillo')
     dic_pagina = get_preg_por_hoja(n_pages, n_preguntas,
-                                    directorio_imagenes, nivel='pagina')
+                                    directorio_imagenes, args=args, nivel='pagina')
     subpreg_x_preg = get_subpreg_x_preg(df_preguntas)
     n_subpreg_tot = df_para_insumos[nombre_col_campo_bd].str.contains('^p\d').sum()
     n_recuadros_x_subpreg = (df_preguntas
@@ -427,7 +432,7 @@ def generar_insumos(tipo_cuadernillo:str, directorios:dict[str, os.PathLike])-> 
 
 
 @timing
-def generar_insumos_total(directorios:dict[str, os.PathLike]):
+def generar_insumos_total(directorios:dict[str, os.PathLike], args:argparse.Namespace):
     '''Corre [función que genera insumos](../generar_insumos_img#simce.generar_insumos_img.generar_insumos) para 
     estudiantes y padres y luego los exporta como json. **Solo retorna un print que confirma que datos se exportaron**.
 
@@ -438,10 +443,11 @@ def generar_insumos_total(directorios:dict[str, os.PathLike]):
     '''
     print('Generando insumos estudiantes...')
 
-    insumos_est = generar_insumos(tipo_cuadernillo='estudiantes', directorios=directorios)
+    insumos_est = generar_insumos(tipo_cuadernillo='estudiantes', directorios=directorios,
+                                  args=args)
     print('Generando insumos padres...')
 
-    insumos_padres = generar_insumos(tipo_cuadernillo='padres', directorios=directorios)
+    insumos_padres = generar_insumos(tipo_cuadernillo='padres', directorios=directorios, args=args)
 
     insumos = {'estudiantes': insumos_est,
                'padres': insumos_padres}

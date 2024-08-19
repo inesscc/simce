@@ -16,6 +16,7 @@ from dotenv import load_dotenv
 from simce.utils import get_mask_imagen, eliminar_o_rellenar_manchas
 import json
 import os
+import argparse
 load_dotenv()
 
 VALID_INPUT = {'cuadernillo', 'pagina'}
@@ -175,7 +176,7 @@ def get_mascara_lineas_horizontales(img_recuadros:np.ndarray)->np.ndarray:
 
 def save_pregunta_completa(img_recuadros:np.ndarray,
                             dir_subpreg_rbd:os.PathLike,
-                            estudiante:str, pregunta_selec:str):
+                            estudiante:str, pregunta_selec:str, args:argparse.Namespace):
     '''Guarda pregunta completa en casos de preguntas que no tienen subpreguntas.
         **No retorna nada**
 
@@ -188,7 +189,8 @@ def save_pregunta_completa(img_recuadros:np.ndarray,
 
     
     '''
-    print('Pregunta no cuenta con subpreguntas, se guardará imagen')
+    if args.verbose:
+        print('Pregunta no cuenta con subpreguntas, se guardará imagen')
     file_out = str(
         dir_subpreg_rbd / f'{estudiante}_{pregunta_selec}.jpg')
     
@@ -200,10 +202,9 @@ def save_pregunta_completa(img_recuadros:np.ndarray,
     cv2.imwrite(file_out, img_recuadros)
     
 
-def get_subpreguntas(tipo_cuadernillo: str, directorios:list[os.PathLike],
+def get_subpreguntas(tipo_cuadernillo: str, directorios:list[os.PathLike],  args: dict,
                      curso:str='4b', filter_rbd:None|list[str]=None,
-                     filter_estudiante:None|list[str]=None,
-                     muestra:bool=False):
+                     filter_estudiante:None|list[str]=None):
     '''
     Recorta cada una de las subpreguntas obtenidas en el [módulo de procesamiento de tablas de doble marca](../proc_tabla_99).
     Obtendrá las imágenes de todas las sospechas de doble marca de la tabla
@@ -328,7 +329,7 @@ def get_subpreguntas(tipo_cuadernillo: str, directorios:list[os.PathLike],
 
             # Exportamos pregunta si no tiene subpreguntas:
             if subpreg_x_preg[pregunta_selec] == 1:
-                save_pregunta_completa(img_pregunta_recuadros, dir_subpreg_rbd, estudiante, pregunta_selec)
+                save_pregunta_completa(img_pregunta_recuadros, dir_subpreg_rbd, estudiante, pregunta_selec, args)
                 continue
 
 
@@ -539,18 +540,19 @@ def bound_and_crop(img, c, buffer=0, buffer_extra_lados=0):
     return img_crop
 
 
-def crop_and_save_subpreg(img_pregunta_crop, lineas_horizontales, i, file_out, verbose=False):
+def crop_and_save_subpreg(img_pregunta_crop, lineas_horizontales, i, file_out, args):
     img_subrptas = img_pregunta_crop[lineas_horizontales[i]:
                                         lineas_horizontales[i+1]]
-    print(file_out)
-    print(img_subrptas.shape)
+    if args.verbose:
+        print(file_out)
+        print(img_subrptas.shape)
      # Si la subpregunta es más larga que ancha, la rotamos a lo ancho:
     if img_subrptas.shape[0] > img_subrptas.shape[1]:
         img_subrptas = cv2.rotate(img_subrptas, cv2.ROTATE_90_CLOCKWISE)
 
     # print(file_out)
     cv2.imwrite(file_out, img_subrptas)
-    if verbose:
+    if args.verbose:
         print(f'{file_out} guardado!')
 
 
