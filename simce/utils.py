@@ -35,8 +35,10 @@ def timing(f):
 
 def crear_directorios(directorios):
 
-    for i in directorios.values():
-        i.mkdir(exist_ok=True, parents=True)
+    for k,v  in directorios.items():
+        # No creamos directorio imágenes brutas, porque ya debieran existir
+        if k != 'dir_img_bruta':
+            v.mkdir(exist_ok=True, parents=True)
     print('Directorios generados exitosamente!')
 
 

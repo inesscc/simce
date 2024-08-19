@@ -16,8 +16,10 @@ from dotenv import load_dotenv
 load_dotenv()
 from simce.utils import timing
 import argparse
+from pathlib import Path
 VALID_INPUT = {'cuadernillo', 'pagina'}
 
+files = [i.name for i in Path('data/input_raw').rglob('*.jpg')]
 ## procesamiento imagen ----------------------------------
 
 def process_single_image(preguntas, num: int, rbd, dic_pagina:dict, n_pages: int, subpreg_x_preg: dict, 
@@ -72,6 +74,9 @@ def process_single_image(preguntas, num: int, rbd, dic_pagina:dict, n_pages: int
         return 'Ocurrió un error: archivo no existe'
 
     file = rbd.name
+    if file not in files:
+        return ''
+
     if args.verbose:
         print(f'{file=}')
     # Leemos imagen
