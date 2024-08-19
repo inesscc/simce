@@ -68,7 +68,7 @@ def process_single_image(preguntas, num: int, rbd, dic_pagina:dict, n_pages: int
                       pregunta=str(preg_error),
                       error=f'No existen archivos disponibles para serie {preg_error.name}',
                       nivel_error=tipo_cuadernillo)
-        return 'Ocurrió un error'
+        return 'Ocurrió un error: archivo no existe'
 
     file = rbd.name
     print(f'{file=}')
@@ -241,7 +241,7 @@ def process_general(dirs:dict, regex_estudiante: str, queue, curso: str, tipo_cu
         df99 = df99[df99.serie.isin(filter_estudiante)]
         
     df99.ruta_imagen = df99.ruta_imagen.str.replace('\\', '/')
-    dir_preg99 = [dirs['dir_input'] / i for i in df99.ruta_imagen]
+    dir_preg99 = [dirs['dir_img_bruta'] / i for i in df99.ruta_imagen]
 
     n_pages, _, subpreg_x_preg, _, dic_pagina, _ = get_insumos(tipo_cuadernillo,
                                                                 dir_insumos=dirs['dir_insumos'])
