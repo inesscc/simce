@@ -13,4 +13,5 @@ nav:
   - Documentación Proyecto SIMCE: index.md
   - 'Manuales de referencia':
     - 'Generación de insumos': 'generar_insumos_img.md'
+    - 'Procesamiento tabla dobles marcas': 'proc_tabla_99.md'
     - 'Recorte de subpreguntas': 'proc_imgs.md'
