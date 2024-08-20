@@ -45,7 +45,7 @@ def get_directorios(curso=CURSO, filtro=None) -> dict:
         # Nos conectamos a disco NAS:
         if not Path('P:/').is_dir():
             os.system(rf"NET USE P: \\{IP_NAS}\{FOLDER_DATOS}" )
-        dd['dir_img_bruta'] = 'P:/'
+        dd['dir_img_bruta'] = Path('P:/')
     else:
         # Solo aplica a desarrollo local:
         dd['dir_img_bruta'] = dd['dir_input']  
