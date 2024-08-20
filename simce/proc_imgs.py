@@ -363,7 +363,7 @@ def get_subpreguntas(tipo_cuadernillo: str, directorios:list[os.PathLike],  args
                     dir_subpreg_rbd /
                     f'{estudiante}_{pregunta_selec}_{int(subpreg_selec)}.jpg')
                 crop_and_save_subpreg(img_pregunta_recuadros, lineas_horizontales,
-                                      i=int(subpreg_selec)-1, file_out=file_out)
+                                      i=int(subpreg_selec)-1, file_out=file_out, args=args)
 
             # Si hay error en procesamiento subpregunta
             except Exception as e:
