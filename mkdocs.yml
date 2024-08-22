@@ -29,3 +29,5 @@ nav:
     - 'Procesamiento tabla dobles marcas': 'proc_tabla_99.md'
     - 'Recorte de subpreguntas': 'proc_imgs.md'
     - 'Procesamiento paralelizado': 'paralelizacion.md'
+    - 'Predicción': 'predicciones.md'
+    - 'Indicadores de tinta': 'indicadores_tinta.md'

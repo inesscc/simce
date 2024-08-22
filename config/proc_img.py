@@ -102,8 +102,9 @@ regex_hoja_cuadernillo = r'_(\d+)'
 
 
 # PROCESAMIENTO POSIBLES DOBLES MARCAS -----
-nombre_tabla_estud_origen = f'{carpeta_estudiantes}_Origen_DobleMarca.csv'
-nombre_tabla_padres_origen = f'{carpeta_padres}_Origen_DobleMarca.csv'
+nombres_tablas_origen = {'padres': f'{carpeta_padres}_Origen_DobleMarca.csv',
+                 'estudiantes': f'{carpeta_estudiantes}_Origen_DobleMarca.csv'}
+
 
 
 # Nombre de tabla que contiene n° de subpreguntas, n° de recuadros por subpregunta:

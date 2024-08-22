@@ -200,7 +200,7 @@ def process_image_block(image_block:list):
     
     Args:
         image_block: lista con los objetos a usar en cada uno de los bloques, posee los insumos, 
-        path de las imagenes y queue.
+            path de las imagenes y queue.
 
     """
     queue, preguntas, directorio_imagenes, dic_pagina, n_pages, \
