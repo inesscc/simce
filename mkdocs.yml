@@ -1,7 +1,20 @@
 site_name: SIMCE Docs
 
 theme:
-  name: "material"
+  name: material
+  palette: 
+
+    # Palette toggle for light mode
+    - scheme: default
+      toggle:
+        icon: material/brightness-7 
+        name: Cambiar a modo oscurso
+
+    # Palette toggle for dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Cambiar a modo normal
 
 
 plugins:
@@ -15,3 +28,4 @@ nav:
     - 'Generación de insumos': 'generar_insumos_img.md'
     - 'Procesamiento tabla dobles marcas': 'proc_tabla_99.md'
     - 'Recorte de subpreguntas': 'proc_imgs.md'
+    - 'Procesamiento paralelizado': 'paralelizacion.md'

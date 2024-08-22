@@ -24,28 +24,28 @@ def main(args):
     else:
         from config.proc_img import  CURSO
         
-    directorios = get_directorios(curso=CURSO)
-    crear_directorios(directorios)
-    # 1.  Generar insumos para procesamiento
-    generar_insumos_total(directorios, args=args) 
-    # 2. Generar tablas con dobles marcas
-    get_tablas_99_total(directorios=directorios)
+    dirs = get_directorios(curso=CURSO)
+    crear_directorios(dirs)
 
-    dirs = get_directorios()
+    # 1.  Generar insumos para procesamiento
+    generar_insumos_total(dirs, args=args) 
+    # 2. Generar tablas con dobles marcas
+    get_tablas_99_total(directorios=dirs)
+
     
     manager = Manager()             # Objeto para gestionar datos compartidos entre procesos
     queue = manager.Queue()         # Cola de tareas
     
     process_general(dirs = dirs, regex_estudiante= regex_estudiante, 
                     queue = queue, curso=CURSO, args=args, tipo_cuadernillo='padres')
-    
+
     process_general(dirs = dirs, regex_estudiante= regex_estudiante, 
                     queue = queue, curso=CURSO, args=args, tipo_cuadernillo='estudiantes')
     
 
     escribir_errores(queue)
 
-    gen_pred_set(directorios, curso=CURSO)
+    #gen_pred_set(directorios, curso=CURSO)
 
 
 if __name__ == "__main__":

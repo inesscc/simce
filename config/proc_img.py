@@ -30,7 +30,7 @@ carpeta_padres = 'CP'
 
 
 
-def get_directorios(curso=CURSO, filtro=None) -> dict:
+def get_directorios(curso, filtro=None) -> dict:
     '''Acá se indican todos los directorios del proyecto. Luego, la función crear_directorios() toma todos
     los directorios de este diccionario y los crea. La opción filtro permite cargar solo algunos directorios,
     en caso de requerirse. Si el filtro '''

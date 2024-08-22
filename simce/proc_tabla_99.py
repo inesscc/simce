@@ -14,12 +14,17 @@ import json
 import random
 import numpy as np
 from pathlib import Path
-
+import os
 random.seed(SEED)
 np.random.seed(SEED)
 
 @timing
-def get_tablas_99_total(directorios):
+def get_tablas_99_total(directorios:list[os.PathLike]):
+    '''Obtiene y exporta tabla de dobles marcas para estudiantes y padres.
+        **No retorna nada**
+        
+    Args:
+        directorios: lista de directorios del proyecto.'''
     
     print('Generando tabla estudiantes...')
 
@@ -31,6 +36,7 @@ def get_tablas_99_total(directorios):
                   directorios=directorios)
 
 def get_tablas_99(tipo_cuadernillo, directorios):
+    '''a'''
 
     if tipo_cuadernillo == 'estudiantes':
 
@@ -88,6 +94,8 @@ def get_tablas_99(tipo_cuadernillo, directorios):
 
 
 def procesar_casos_99(df_rptas, nombres_col, dic_cuadernillo, tipo_cuadernillo):
+    '''
+    hola'''
 
     ignorar_p1 = dic_ignorar_p1[tipo_cuadernillo]
 
@@ -116,6 +124,7 @@ def procesar_casos_99(df_rptas, nombres_col, dic_cuadernillo, tipo_cuadernillo):
 
 
 def gen_tabla_entrenamiento(casos_99, casos_99_origen):
+    '''hola'''
 
     casos_99_origen['dm_final'] = casos_99.respuestas
     casos_99_origen['dm_final'] = casos_99_origen['dm_final'].fillna(0).astype(int)
