@@ -17,8 +17,8 @@ import collections
 from pathlib import Path
 
 ## Predicciones -----------------------------------------------------
-config_dict = read_json('config/config_pred.json')
-config = ConfigParser(config_dict)
+# config_dict = read_json('config/config_pred.json')
+# config = ConfigParser(config_dict)
 def main(config):
     torch.manual_seed(SEED)
     torch.backends.cudnn.deterministic = True

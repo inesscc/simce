@@ -21,8 +21,11 @@ from functools import wraps
 from time import time
 from PIL import Image
 import random
+from os import PathLike
 
+# Mide tiempo que toma en correr una función. Es un wrapper.
 def timing(f):
+  
     @wraps(f)
     def wrap(*args, **kw):
         ts = time()
@@ -33,7 +36,12 @@ def timing(f):
         return result
     return wrap
 
-def crear_directorios(directorios):
+def crear_directorios(directorios: list[PathLike]):
+    """Crea los directorios del proyecto. ***No retorna nada**
+
+    Args:
+        directorios: lista que contiene directorios del proyecto.
+    """    
 
     for k,v  in directorios.items():
         # No creamos directorio imágenes brutas, porque ya debieran existir
@@ -43,23 +51,25 @@ def crear_directorios(directorios):
 
 
 
-def ls(ruta=getcwd()):
-    """Funcion para obtener la ruta de los archivos dentro de la carpeta indicada."""
-    return [abspath(arch.path) for arch in scandir(ruta) if arch.is_file()]
 
-
-def get_mask_imagen(media_img, lower_color=np.array([13, 11, 0]), upper_color=np.array([29, 255, 255]),
-                    iters=4, eliminar_manchas='horizontal', revert=False):
+def get_mask_imagen(media_img: np.ndarray, lower_color:np.array=np.array([13, 11, 0]), upper_color:np.array=np.array([29, 255, 255]),
+                    iters:int=4, eliminar_manchas:str='horizontal', revert:bool=False)->np.ndarray:
     """
     Genera una máscara binaria para una imagen dada, basada en un rango de color en el espacio de color HSV.
 
     Args:
-    media_img (np.ndarray): La imagen de entrada en formato BGR.
-    lower_color (np.ndarray, optional): El límite inferior del rango de color en formato HSV. Por defecto es np.array([13, 31, 0]), que corresponde al color naranjo.
-    upper_color (np.ndarray, optional): El límite superior del rango de color en formato HSV. Por defecto es np.array([29, 255, 255]), que corresponde al color naranjo.
+        media_img: La imagen de entrada en formato BGR.
+        lower_color: El límite inferior del rango de color en formato HSV.
+            Por defecto es np.array([13, 31, 0]), que corresponde al color naranjo.
+        upper_color: El límite superior del rango de color en formato HSV. Por defecto es np.array([29, 255, 255]), 
+            que corresponde al color naranjo.
+        iters: n° de iteraciones en la dilatación durante la detección.
+        eliminar_manchas: indica si se eliminan manchas a lo largo de columnas (valor "vertical") o filas (valor "horizontal").
+        revert: si es True, se revierten los colores de la máscara.
 
     Returns:
-    mask (numpy.ndarray): Una máscara binaria donde los píxeles de la imagen que están dentro del rango de color especificado son blancos, y todos los demás píxeles son negros.
+        mask: Una máscara binaria donde los píxeles de la imagen que están dentro del rango de color especificado son blancos,
+            y todos los demás píxeles son negros.
     """
     # Convierte la imagen de entrada de BGR a HSV
     hsv = cv2.cvtColor(media_img, cv2.COLOR_BGR2HSV)
@@ -86,46 +96,58 @@ def get_mask_imagen(media_img, lower_color=np.array([13, 11, 0]), upper_color=np
     return mask
 
 
-def eliminar_o_rellenar_manchas(mask, orientacion, limite, rellenar=False):
-        
-        mask = mask.copy()
-        
-        if rellenar:
-            val_replace = 255
-        else:
-            val_replace = 0
+def eliminar_o_rellenar_manchas(mask:np.ndarray, orientacion:str, limite:int, rellenar:bool=False)->np.ndarray:
+    """Elimina manchas en máscaras, volviéndolas más robustas. La diferencia entre rellenar y eliminar es que cuando
+        rellenamos reemplazamos píxeles blancos por negros y cuando eliminamos reemplazamos píxeles negros por blancos.
 
+    Args:
+        mask: máscara a la que se le reemplazarán las manchas.
+        orientacion: indica si se eliminan manchas a lo largo de columnas (valor "vertical") o filas (valor "horizontal").
+        limite: cuántos píxeles tienen que haber para que sean considerados una mancha.
+        rellenar: Indica si vamos a rellenar o eliminar manchas. Default es False.
+
+    Returns:
+        mask_depurada: máscara con las manchas eliminadas/rellenadas.
+    """    
+        
+    mask_depurada = mask.copy()
     
-        if orientacion == 'vertical':
-            axis = 0
-            # Calculamos la media de cada columna
-            mean_col = mask.mean(axis=axis)
+    if rellenar:
+        val_replace = 255
+    else:
+        val_replace = 0
 
-            if rellenar:
-                comparison = mean_col > limite
-            else:
-                comparison = mean_col < limite
-            # Si la media es menor a 100, reemplazamos con 0 (negro):
-            # Esto permite eliminar manchas de color que a veces se dan
-            idx_low_rows = np.where(comparison)[0]
-            mask[:, idx_low_rows] = val_replace
-        elif orientacion == 'horizontal':
-            axis = 1
-            # Calculamos la media de cada fila:
-            mean_row = mask.mean(axis=axis)
 
-            if rellenar:
-                comparison = mean_row >= limite
-            else:
-                comparison = mean_row <= limite
-            # Si la media es menor a 100, reemplazamos con 0 (negro):
-            # Esto permite eliminar manchas de color que a veces se dan
-            idx_low_rows = np.where(comparison)[0]
-            mask[idx_low_rows, :] = val_replace
+    if orientacion == 'vertical':
+        axis = 0
+        # Calculamos la media de cada columna
+        mean_col = mask_depurada.mean(axis=axis)
+
+        if rellenar:
+            comparison = mean_col > limite
         else:
-            return print('Valor inválido para eliminar manchas')
-        
-        return mask
+            comparison = mean_col < limite
+        # Si la media es menor a 100, reemplazamos con 0 (negro):
+        # Esto permite eliminar manchas de color que a veces se dan
+        idx_low_rows = np.where(comparison)[0]
+        mask_depurada[:, idx_low_rows] = val_replace
+    elif orientacion == 'horizontal':
+        axis = 1
+        # Calculamos la media de cada fila:
+        mean_row = mask_depurada.mean(axis=axis)
+
+        if rellenar:
+            comparison = mean_row >= limite
+        else:
+            comparison = mean_row <= limite
+        # Si la media es menor a 100, reemplazamos con 0 (negro):
+        # Esto permite eliminar manchas de color que a veces se dan
+        idx_low_rows = np.where(comparison)[0]
+        mask_depurada[idx_low_rows, :] = val_replace
+    else:
+        return print('Valor inválido para eliminar manchas')
+    
+    return mask_depurada
 
 class RandomRotation:
     def __init__(self, degrees, p):
@@ -166,9 +188,16 @@ def inf_loop(data_loader):
         yield from loader
 
 
-def prepare_device(n_gpu_use):
+def prepare_device(n_gpu_use:int)->tuple[str,list[int]]:
     """
-    setup GPU device if available. get gpu device indices which are used for DataParallel
+     Configura el dispositivo GPU si está disponible. Obtener los índices de los dispositivos GPU
+        que se utilizan para DataParallel.
+        
+    Args:
+        n_gpu_use: cuántas GPUs se especificó que serán utilizadas
+    Returns:
+        device: indica si se usará CPU o GPU
+        list_ids: IDs de las GPUs disponibles.
     """
     n_gpu = torch.cuda.device_count()
     if n_gpu_use > 0 and n_gpu == 0:

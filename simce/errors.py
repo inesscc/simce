@@ -16,15 +16,15 @@ def anotar_error(pregunta, error, nivel_error, e=None):
     if e:
         print(e)
 
-    if not Path('problemas_datos.xlsx').is_file():
+    if not Path('problemas_imagenes.xlsx').is_file():
         wb = Workbook()
         ws = wb.active
         ws['A1'] = 'Pregunta'
         ws['B1'] = 'Error'
         ws['C1'] = 'Nivel'
-        wb.save('problemas_datos.xlsx')
+        wb.save('problemas_imagenes.xlsx')
 
-    wb = load_workbook(filename='problemas_datos.xlsx')
+    wb = load_workbook(filename='problemas_imagenes.xlsx')
 
     ws = wb.active
 
@@ -33,7 +33,7 @@ def anotar_error(pregunta, error, nivel_error, e=None):
     if pregunta not in pregs_con_error:
         print('ANOTANDO ERROR -----')
         ws.append([pregunta, error, nivel_error])
-        wb.save('problemas_datos.xlsx')
+        wb.save('problemas_imagenes.xlsx')
     else:
         print('ERROR YA ANOTADO ANTERIORMENTE, no fue anotado.')
 
@@ -45,20 +45,20 @@ def agregar_error(queue, pregunta, error, nivel_error):
 @timing
 def escribir_errores(queue):
     """une todos los errores generados en las iteraciones de los diferentes procesos"""
-    if not Path('problemas_datos.xlsx').is_file():
+    if not Path('problemas_imagenes.xlsx').is_file():
         wb = Workbook()
         ws = wb.active
         ws['A1'] = 'Pregunta'
         ws['B1'] = 'Error'
         ws['C1'] = 'Nivel'
-        wb.save('problemas_datos.xlsx')
+        wb.save('problemas_imagenes.xlsx')
 
-    wb = load_workbook(filename='problemas_datos.xlsx')
+    wb = load_workbook(filename='problemas_imagenes.xlsx')
     ws = wb.active
 
     while not queue.empty():
         pregunta, error, nivel_error = queue.get()
         ws.append([pregunta, error, nivel_error])
 
-    wb.save('problemas_datos.xlsx')
+    wb.save('problemas_imagenes.xlsx')
     

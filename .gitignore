@@ -1,11 +1,12 @@
 data/
+modelo_simce.pt
 scripts/
 gif/
 prob*
 K-Server*
 metricas_modelos.xlsx   
 debuggin_estudiantes.py
-problemas_datos.xlsx
+problemas_imagenes.xlsx
 venv/
 .vscode/
 # Byte-compiled / optimized / DLL files

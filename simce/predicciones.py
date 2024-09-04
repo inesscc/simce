@@ -53,7 +53,7 @@ def prepare_model(config: ConfigParser, device: device)-> tuple[MaxVit|DataParal
     model_name = config['arch']['type']
     model = preparar_capas_modelo(model, model_name)
     
-    ruta_modelo = 'saved/models/saved_server/maxvit/model_best_nuevo.pt'
+    ruta_modelo = 'modelo_simce.pt'
     checkpoint = torch.load(ruta_modelo, map_location= device.type)
     state_dict = checkpoint['state_dict']
     if config['n_gpu'] > 1:

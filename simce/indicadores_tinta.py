@@ -4,16 +4,25 @@ from simce.utils import get_mask_imagen
 import pandas as pd
 from os import PathLike
 
-def get_recuadros(mask):
-    """
-    hola
+def get_recuadros(mask_blanco: np.ndarray)->tuple[np.ndarray, list[np.ndarray]]:
+    """Detecta recuadros en imagen. Genera máscara que intenta obtener todos los recuadros correspondientes a la subpregunta
+        siendo procesada. Es un insumo inicial que luego sigue siendo procesado a lo largo de la función
+        [preparar_mascaras](#preparar_mascaras). Esta función basta para detectar la mayoría de recuadros, salvo cuando estos tienen
+        mucha tinta, haciendo desaparecer el color blanco.
+
+    Args:
+        mask_blanco: máscara que intenta identificar color blanco dentro de la imagen
     
-    """
+    Returns:
+        bordered_mask: máscara procesada que intenta identificar recuadros dentro de la imagen. 
+        
+        big_contours: contornos de recuadros. Son utilizados posteriormentes para marcarlos en la imagen.
+    """    
      # Define the border width in pixels
     top, bottom, left, right = [3]*4
 
     # Create a border around the image
-    bordered_mask = cv2.copyMakeBorder(mask, top, bottom, left, right,
+    bordered_mask = cv2.copyMakeBorder(mask_blanco, top, bottom, left, right,
                                         cv2.BORDER_CONSTANT, value=0).astype(np.uint8)
 
     contours, _ = cv2.findContours(bordered_mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
@@ -50,7 +59,18 @@ def get_recuadros(mask):
         return bordered_mask, big_contours
     
 
-def preparar_mascaras(ruta):
+def preparar_mascaras(ruta: PathLike)-> tuple[np.ndarray, np.ndarray]:
+    """Genera máscaras que detectan recuadros de imagen, para posteriormente calcular indicadores de tinta en función 
+    [calcular_indices_tinta](#calcular_indices_tinta).
+
+    Args:
+        ruta: ruta de imagen a leer para obtener máscara
+
+    Returns:
+        bordered_mask: máscara con detección de contornos.
+        
+        bordered_rect_img: imagen a la que se le calcularán los indicadores.
+    """    
 
     bgr_img = cv2.imread(ruta)
 
@@ -119,7 +139,7 @@ def preparar_mascaras(ruta):
 
     return bordered_mask, bordered_rect_img
 
-def calcular_indices_tinta(ruta:PathLike)-> tuple[list[float], list[float]]:
+def calcular_indices_tinta(ruta:PathLike)-> tuple[list[float, float], list[float, float]]:
     """
     Calcula índices de tinta para una subpregunta específica.
 
@@ -127,9 +147,9 @@ def calcular_indices_tinta(ruta:PathLike)-> tuple[list[float], list[float]]:
         ruta: ruta de la imagen a la que se le calcularán los indicadores
     
     Returns:
-        indices_relevantes:
+        indices_relevantes: lista con indicador de porcentaje de tinta de primer y segundo recuadros más altos.
          
-        intensidades_relevantes:
+        intensidades_relevantes: lista con indicador de intensidad de tinta de primer y segundo recuadros más altos.
     
     """
 
