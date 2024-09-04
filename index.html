@@ -10,7 +10,7 @@
       
       
       
-        <link rel="next" href="generar_insumos_img/">
+        <link rel="next" href="tutorial/">
       
       
       <link rel="icon" href="assets/images/favicon.png">
@@ -23,6 +23,9 @@
     
     
       <link rel="stylesheet" href="assets/stylesheets/main.3cba04c6.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -53,7 +56,14 @@
   </head>
   
   
-    <body dir="ltr">
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
   
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
@@ -104,6 +114,32 @@
         </div>
       </div>
     </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Cambiar a modo oscurso"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo oscurso" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Cambiar a modo normal"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo normal" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+</form>
+      
     
     
       <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
@@ -246,9 +282,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#comandos" class="md-nav__link">
+  <a href="#esquema-del-proyecto" class="md-nav__link">
     <span class="md-ellipsis">
-      Comandos
+      Esquema del proyecto
     </span>
   </a>
   
@@ -268,6 +304,66 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="tutorial/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tutorial de uso
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="outputs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Guía de outputs del proyecto
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="script_configuracion/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Cómo utilizar el script de configuración
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
     
     
     
@@ -276,10 +372,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
         
           
-          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -290,8 +386,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             Manuales de referencia
           </label>
@@ -325,11 +421,116 @@
   
   
     <li class="md-nav__item">
+      <a href="proc_tabla_99/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Procesamiento tabla dobles marcas
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="proc_imgs/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
     Recorte de subpreguntas
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="paralelizacion/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Procesamiento paralelizado
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="predicciones/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Predicción
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="indicadores_tinta/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Indicadores de tinta
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="utils/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Funciones transversales
   </span>
   
 
@@ -382,9 +583,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#comandos" class="md-nav__link">
+  <a href="#esquema-del-proyecto" class="md-nav__link">
     <span class="md-ellipsis">
-      Comandos
+      Esquema del proyecto
     </span>
   </a>
   
@@ -406,20 +607,85 @@
 
 
 <h1 id="modelo-de-deteccion-de-dobles-marcas-simce">Modelo de detección de dobles marcas SIMCE</h1>
-<p>La presente documentación enseña cómo correr el modelo y su organización. </p>
+<p>La presente documentación se encargará de explicar el código del proyecto SIMCE, así como su organización y cómo correr el modelo. La estructura del dodcumento es la siguiente:</p>
+<ol>
+<li><a href="#estructura-del-proyecto">Estructura del proyecto</a></li>
+<li><a href="#esquema-del-proyecto">Esquema del proyecto</a></li>
+<li><a href="tutorial/">Tutorial de uso</a></li>
+<li><a href="outputs/">Guía de outputs del proyecto</a></li>
+<li><a href="script_configuracion/">Uso del script de configuración</a></li>
+<li><a href="generar_insumos_img/">Manuales de referencia</a></li>
+</ol>
+<p>En el menú de la izquierda es posible navegar por el sitio y los distintos manuales de referencia.</p>
 <h2 id="estructura-del-proyecto">Estructura del proyecto</h2>
-<pre><code>mkdocs.yml    # The configuration file.
-docs/
-    index.md  # The documentation homepage.
-    ...       # Other markdown pages, images and other files.
+<p>A continuación se presenta la estructura del proyecto, con el fin de que sea posible entender qué hacen los distintos archivos y carpetas del proyecto.</p>
+<pre><code>simce/
+│
+├── get_recortes.py - script principal para obtener recortes de subpreguntas
+├── get_predicciones.py - script principal para obtener predicciones del modelo.
+├── modelo_simce.pt - archivo que contiene el modelo que predice dobles marcas
+│
+├── base/ - clases abstractas base
+│   ├── base_data_loader.py
+│   ├── base_model.py
+│   └── base_trainer.py
+│
+├── config/ - carpeta de configuraciones del proyecto
+│   ├── config_pred.json - configuración del modelo para predicción
+│   ├── parse_config.py - clase que maneja archivo de configuración y opciones CLI
+│   └── proc_img.py - configuraciones asociadas al recorte de subpreguntas.
+│
+├── data/ - carpeta con datos del modelo
+│
+├── data_loader/ - todo lo que tenga que ver con carga de datos en Torch va aquí
+│   └── data_loaders.py
+│
+├── dataset/ - clase que permite cargar dataset de imágenes en Torch
+│   └── dataset.py
+│
+├── docs/ - archivos de documentación del proyecto
+│   ├── index.md
+│   └── ...
+│
+├── logger/ - módulo para logging del modelo.
+│   ├── visualization.py
+│   ├── logger.py
+│   └── logger_config.json
+│    
+├── model/ - modelos, pérdidas, y métricas
+│   ├── model.py
+│   ├── metric.py
+│   └── loss.py
+│
+├── notebooks/ - notebooks con pruebas y análisis exploratorio 
+│
+├── saved/ - modelos entrenados y sus logs correspondientes
+│   ├── models/ - trained models are saved here
+│   └── log/ - default logdir for tensorboard and logging output
+│
+├── simce/ - funciones que procesan las distintas etapas del proyecto
+│   ├── errors.py - manejo de errores
+│   ├── generar_insumos_img.py - genera los insumos que posteriormente son utilizados en el recorte
+│   ├── indicadores_tinta.py - cálculo de indicadores de tinta
+│   ├── modelamiento.py - funciones utilizadas durante el modelamiento.
+│   ├── paralelizacion.py - funciones del recorte de subpreguntas que se ejecutan de forma paralelizada
+│   ├── predicciones.py - funciones para la predicción de datos nuevos
+│   ├── preparar_modelamiento.py - funciones que preparan datos para el modelamiento  
+│   ├── proc_imgs.py - funciones asociadas al procesamiento de imágenes previo al recorte
+│   └── proc_tabla_99.py - generación de tabla de dobles marcas
+│
+├── site/ - archivos asociados a sitio web de documentación
+│    ├── assets/
+│    └── ...
+│
+└── trainer/ - clase trainer, permite entrenar un modelo
+    └── trainer.py
 </code></pre>
-<h2 id="comandos">Comandos</h2>
-<ul>
-<li><code>mkdocs new [dir-name]</code> - Create a new project.</li>
-<li><code>mkdocs serve</code> - Start the live-reloading docs server.</li>
-<li><code>mkdocs build</code> - Build the documentation site.</li>
-<li><code>mkdocs -h</code> - Print help message and exit.</li>
-</ul>
+<h2 id="esquema-del-proyecto">Esquema del proyecto</h2>
+<p>Aquí podemos ver las distintas etapas que se ejecutan a lo largo de los códigos, junto con los respectivos outputs:la tabla de errores en el procesamiento de imágenes (<code>problemas_imagenes.xlsx</code>) y la tabla de predicciones e indicadores (<code>predicciones_modelo_final.xlsx</code>)</p>
+<p><br/><br/></p>
+<p><img alt="" src="flujo_proyecto.png#only-light" />
+<img alt="" src="flujo_proyecto_dark.png#only-dark" /></p>
 
 
 

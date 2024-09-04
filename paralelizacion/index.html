@@ -1,0 +1,1645 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../proc_imgs/">
+      
+      
+        <link rel="next" href="../predicciones/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.31">
+    
+    
+      
+        <title>Procesamiento paralelizado - SIMCE Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.3cba04c6.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#simce.paralelizacion" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="SIMCE Docs" class="md-header__button md-logo" aria-label="SIMCE Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SIMCE Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Procesamiento paralelizado
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Cambiar a modo oscurso"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo oscurso" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Cambiar a modo normal"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo normal" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="SIMCE Docs" class="md-nav__button md-logo" aria-label="SIMCE Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    SIMCE Docs
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Documentación Proyecto SIMCE
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tutorial de uso
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../outputs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Guía de outputs del proyecto
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../script_configuracion/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Cómo utilizar el script de configuración
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Manuales de referencia
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Manuales de referencia
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../generar_insumos_img/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Generación de insumos
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../proc_tabla_99/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Procesamiento tabla dobles marcas
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../proc_imgs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Recorte de subpreguntas
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Procesamiento paralelizado
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Procesamiento paralelizado
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#simce.paralelizacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      paralelizacion
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#simce.paralelizacion.process_general" class="md-nav__link">
+    <span class="md-ellipsis">
+      process_general
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#simce.paralelizacion.process_image_block" class="md-nav__link">
+    <span class="md-ellipsis">
+      process_image_block
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#simce.paralelizacion.process_single_image" class="md-nav__link">
+    <span class="md-ellipsis">
+      process_single_image
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../predicciones/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Predicción
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../indicadores_tinta/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Indicadores de tinta
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utils/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Funciones transversales
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#simce.paralelizacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      paralelizacion
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#simce.paralelizacion.process_general" class="md-nav__link">
+    <span class="md-ellipsis">
+      process_general
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#simce.paralelizacion.process_image_block" class="md-nav__link">
+    <span class="md-ellipsis">
+      process_image_block
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#simce.paralelizacion.process_single_image" class="md-nav__link">
+    <span class="md-ellipsis">
+      process_single_image
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  <h1>Procesamiento paralelizado</h1>
+
+<p>En este manual se repasan las funciones asociadas al procesamiento  paralelizado de las imágenes que permite su recorte utilizando los núcleos disponibles de la máquina. Aquí se produce el procesamiento de imágenes en la práctica, pero se llaman las funciones que de la sección de <a href="../proc_imgs/">recorte de subpreguntas</a>. </p>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<a id="simce.paralelizacion"></a>
+    <div class="doc doc-contents first">
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="simce.paralelizacion.process_general" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">process_general</span><span class="p">(</span><span class="n">dirs</span><span class="p">,</span> <span class="n">regex_estudiante</span><span class="p">,</span> <span class="n">queue</span><span class="p">,</span> <span class="n">curso</span><span class="p">,</span> <span class="n">tipo_cuadernillo</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">filter_rbd</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filter_estudiante</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+      <p>Genera el recorte de preguntas/subpreguntas, de forma paralelizada, para los registros obtenidos de la 
+    <a href="../proc_tabla_99#simce.proc_tabla_99.get_tablas_99">función que genera tabla de imágenes con dobles marcas</a>.
+    Para ello, se utilizan los insumos generados en
+    la <a href="../generar_insumos_img#simce.generar_insumos_img.generar_insumos">función de obtención de insumos</a>,
+    se cuenta 
+    el total de CPUs para realizar el procesamiento simultáneo, se dividen las preguntas equitativamente
+    para que cada núcleo posea aproximadamente la misma cantidad de preguntas a recortar, y finalmente
+    se aplica la <a href="../paralelizacion#simce.paralelizacion.process_image_block">función que procesa bloque de imágenes</a>
+      para realizar el procesamiento de cada pregunta en los diferentes 
+    bloques disponibles (se le aplica la misma funcion de procesamiento en cada uno de los bloques).
+    <strong>No retorna nada</strong>.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>dirs</code></td>
+            <td>
+                  <code>dict[str, <span title="os.PathLike">PathLike</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Diccionario con los directorios a usar</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>regex_estudiante</code></td>
+            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Expresion regular que nos ayuda a identificar el n° de serie del cuestionario </p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>queue</code></td>
+            <td>
+                  <code><span title="multiprocessing.Queue">Queue</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Cola de tareas gestionada por Manager() para intercambiar datos entre procesos de forma segura.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>curso</code></td>
+            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Nombre carpeta que identifica el curso en procesamiento.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>tipo_cuadernillo</code></td>
+            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>define si se está procesando para estudiantes o padres. Esto también se utiliza para definir las rutas a consultar</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>args</code></td>
+            <td>
+                  <code><span title="argparse.Namespace">Namespace</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>argumentos enviados desde la línea de comandos.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>filter_rbd</code></td>
+            <td>
+                  <code>None | str | list[str]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>permite filtrar uno o más RBDs específicos y solo realizar la operación sobre estos.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>filter_estudiante</code></td>
+            <td>
+                  <code>None | str | list[str]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>permite filtrar uno o más estudiantes específicos y solo realizar la operación sobre estos.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+            <details class="quote">
+              <summary>Source code in <code>simce/paralelizacion.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@timing</span>
+<span class="k">def</span> <span class="nf">process_general</span><span class="p">(</span><span class="n">dirs</span><span class="p">:</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">PathLike</span><span class="p">],</span> <span class="n">regex_estudiante</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">queue</span><span class="p">:</span><span class="n">Queue</span><span class="p">,</span> <span class="n">curso</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tipo_cuadernillo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                    <span class="n">args</span><span class="p">:</span><span class="n">argparse</span><span class="o">.</span><span class="n">Namespace</span><span class="p">,</span> <span class="n">filter_rbd</span><span class="p">:</span> <span class="kc">None</span><span class="o">|</span><span class="nb">str</span><span class="o">|</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+                    <span class="n">filter_estudiante</span><span class="p">:</span> <span class="kc">None</span><span class="o">|</span><span class="nb">str</span><span class="o">|</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Genera el recorte de preguntas/subpreguntas, de forma paralelizada, para los registros obtenidos de la </span>
+<span class="sd">        [función que genera tabla de imágenes con dobles marcas](../proc_tabla_99#simce.proc_tabla_99.get_tablas_99).</span>
+<span class="sd">        Para ello, se utilizan los insumos generados en</span>
+<span class="sd">        la [función de obtención de insumos](../generar_insumos_img#simce.generar_insumos_img.generar_insumos),</span>
+<span class="sd">        se cuenta </span>
+<span class="sd">        el total de CPUs para realizar el procesamiento simultáneo, se dividen las preguntas equitativamente</span>
+<span class="sd">        para que cada núcleo posea aproximadamente la misma cantidad de preguntas a recortar, y finalmente</span>
+<span class="sd">        se aplica la [función que procesa bloque de imágenes](../paralelizacion#simce.paralelizacion.process_image_block)</span>
+<span class="sd">          para realizar el procesamiento de cada pregunta en los diferentes </span>
+<span class="sd">        bloques disponibles (se le aplica la misma funcion de procesamiento en cada uno de los bloques).</span>
+<span class="sd">        **No retorna nada**.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dirs: Diccionario con los directorios a usar</span>
+
+<span class="sd">        regex_estudiante: Expresion regular que nos ayuda a identificar el n° de serie del cuestionario </span>
+
+<span class="sd">        queue: Cola de tareas gestionada por Manager() para intercambiar datos entre procesos de forma segura.</span>
+
+<span class="sd">        curso: Nombre carpeta que identifica el curso en procesamiento.</span>
+
+<span class="sd">        tipo_cuadernillo: define si se está procesando para estudiantes o padres. Esto también se utiliza para definir las rutas a consultar</span>
+<span class="sd">        args: argumentos enviados desde la línea de comandos.</span>
+
+<span class="sd">        filter_rbd: permite filtrar uno o más RBDs específicos y solo realizar la operación sobre estos.</span>
+
+<span class="sd">        filter_estudiante: permite filtrar uno o más estudiantes específicos y solo realizar la operación sobre estos.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Procesando cuadernillo </span><span class="si">{</span><span class="n">tipo_cuadernillo</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+
+
+    <span class="n">nombre_tabla_casos99</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;casos_99_compilados_</span><span class="si">{</span><span class="n">curso</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">tipo_cuadernillo</span><span class="si">}</span><span class="s1">.csv&#39;</span>
+    <span class="n">df99</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">dirs</span><span class="p">[</span><span class="s1">&#39;dir_tabla_99&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">nombre_tabla_casos99</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;rbd_ruta&#39;</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">})</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;ruta_imagen&#39;</span><span class="p">)</span>
+
+
+
+    <span class="k">if</span> <span class="n">filter_rbd</span><span class="p">:</span>
+
+        <span class="n">df99</span> <span class="o">=</span> <span class="n">df99</span><span class="p">[(</span><span class="n">df99</span><span class="o">.</span><span class="n">rbd_ruta</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">filter_rbd</span><span class="p">))]</span>
+
+    <span class="k">if</span> <span class="n">filter_estudiante</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filter_estudiante</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">filter_estudiante</span> <span class="o">=</span> <span class="p">[</span><span class="n">filter_estudiante</span><span class="p">]</span>
+        <span class="n">df99</span> <span class="o">=</span> <span class="n">df99</span><span class="p">[</span><span class="n">df99</span><span class="o">.</span><span class="n">serie</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">filter_estudiante</span><span class="p">)]</span>
+
+    <span class="n">df99</span><span class="o">.</span><span class="n">ruta_imagen</span> <span class="o">=</span> <span class="n">df99</span><span class="o">.</span><span class="n">ruta_imagen</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+    <span class="n">dir_preg99</span> <span class="o">=</span> <span class="p">[</span><span class="n">dirs</span><span class="p">[</span><span class="s1">&#39;dir_img_bruta&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">df99</span><span class="o">.</span><span class="n">ruta_imagen</span><span class="p">]</span>
+
+    <span class="n">n_pages</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">subpreg_x_preg</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">dic_pagina</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">get_insumos</span><span class="p">(</span><span class="n">tipo_cuadernillo</span><span class="p">,</span>
+                                                                <span class="n">dir_insumos</span><span class="o">=</span><span class="n">dirs</span><span class="p">[</span><span class="s1">&#39;dir_insumos&#39;</span><span class="p">])</span>
+
+    <span class="c1"># Dividir en bloques para procesamiento paralelo</span>
+    <span class="n">num_workers</span> <span class="o">=</span> <span class="n">cpu_count</span><span class="p">()</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;###########&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Cantidad de CPUs a usar </span><span class="si">{</span><span class="n">num_workers</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;###########&#39;</span><span class="p">)</span>
+
+    <span class="n">block_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dir_preg99</span><span class="p">)</span> <span class="o">//</span> <span class="n">num_workers</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;## Cantidad de preguntas en cada bloque: </span><span class="si">{</span><span class="n">block_size</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">image_blocks</span> <span class="o">=</span> <span class="p">[(</span><span class="n">queue</span><span class="p">,</span> <span class="n">df99</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span> <span class="o">+</span> <span class="n">block_size</span><span class="p">]</span><span class="o">.</span><span class="n">preguntas</span><span class="p">,</span> <span class="n">dir_preg99</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span> <span class="o">+</span> <span class="n">block_size</span><span class="p">],</span> <span class="n">dic_pagina</span><span class="p">,</span> <span class="n">n_pages</span><span class="p">,</span> 
+                     <span class="n">subpreg_x_preg</span><span class="p">,</span> <span class="n">dirs</span><span class="p">[</span><span class="s1">&#39;dir_subpreg&#39;</span><span class="p">],</span> <span class="n">tipo_cuadernillo</span><span class="p">,</span> <span class="n">regex_estudiante</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">dir_preg99</span><span class="p">),</span> <span class="n">block_size</span><span class="p">)]</span>
+
+    <span class="c1"># Usar multiprocessing Pool</span>
+    <span class="k">with</span> <span class="n">Pool</span><span class="p">(</span><span class="n">num_workers</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;-------------&#39;</span><span class="p">)</span>
+        <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">process_image_block</span><span class="p">,</span> <span class="n">image_blocks</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Éxito!&#39;</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="simce.paralelizacion.process_image_block" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">process_image_block</span><span class="p">(</span><span class="n">image_block</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+      <p>Envía a cada bloque la función <a href="../paralelizacion#simce.paralelizacion.process_single_image">process_single_image()</a>,
+la que se encarga de realizar los recortes a cada una de las imágenes disponibles en los bloques. <strong>No retorna nada</strong></p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>image_block</code></td>
+            <td>
+                  <code>list</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>lista con los objetos a usar en cada uno de los bloques, posee los insumos, 
+path de las imagenes y queue.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+            <details class="quote">
+              <summary>Source code in <code>simce/paralelizacion.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">process_image_block</span><span class="p">(</span><span class="n">image_block</span><span class="p">:</span><span class="nb">list</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Envía a cada bloque la función [process_single_image()](../paralelizacion#simce.paralelizacion.process_single_image),</span>
+<span class="sd">    la que se encarga de realizar los recortes a cada una de las imágenes disponibles en los bloques. **No retorna nada**</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        image_block: lista con los objetos a usar en cada uno de los bloques, posee los insumos, </span>
+<span class="sd">            path de las imagenes y queue.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">queue</span><span class="p">,</span> <span class="n">preguntas</span><span class="p">,</span> <span class="n">directorio_imagenes</span><span class="p">,</span> <span class="n">dic_pagina</span><span class="p">,</span> <span class="n">n_pages</span><span class="p">,</span> \
+          <span class="n">subpreg_x_preg</span><span class="p">,</span> <span class="n">dir_subpreg</span><span class="p">,</span> <span class="n">tipo_cuadernillo</span><span class="p">,</span> <span class="n">regex_estudiante</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="n">image_block</span>
+
+    <span class="k">for</span> <span class="n">num</span><span class="p">,</span> <span class="n">rbd</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">directorio_imagenes</span><span class="p">):</span>
+        <span class="n">process_single_image</span><span class="p">(</span><span class="n">preguntas</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">rbd</span><span class="p">,</span> <span class="n">dic_pagina</span><span class="p">,</span> <span class="n">n_pages</span><span class="p">,</span>
+                             <span class="n">subpreg_x_preg</span><span class="p">,</span> <span class="n">dir_subpreg</span><span class="p">,</span> <span class="n">tipo_cuadernillo</span><span class="p">,</span> <span class="n">regex_estudiante</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span>
+                             <span class="n">queue</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="simce.paralelizacion.process_single_image" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">process_single_image</span><span class="p">(</span><span class="n">preguntas</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">rbd</span><span class="p">,</span> <span class="n">dic_pagina</span><span class="p">,</span> <span class="n">n_pages</span><span class="p">,</span> <span class="n">subpreg_x_preg</span><span class="p">,</span> <span class="n">dir_subpreg</span><span class="p">,</span> <span class="n">tipo_cuadernillo</span><span class="p">,</span> <span class="n">regex_estudiante</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">queue</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+      <p>Genera el recorte de una pregunta/subpregunta. Primero se verifica que la imagen no posea franjas negras en
+ningún costado del cuestionario. Posteriormente, se divide la imagen en dos páginas del cuadernillo y
+se selecciona la página de la pregunta a recortar. En esta, se detectan los recuadros de las preguntas y
+se realiza un primer recorte según las coordenadas obtenidas. Luego se identifican los recuadros de respuesta y
+se vuelve a cortar la imagen.</p>
+<p>Si la pregunta seleccionada no posee subpreguntas, se obtiene el recorte de recuadros de respuesta 
+y se guarda la imagen.</p>
+<p>Si la pregunta seleccionada posee subpreguntas, se identifican las líneas horizontales separadoras de subpreguntas
+y se procede a guardar la imagen con la sección de la subpregunta de interés. </p>
+<p><strong>No retorna nada</strong></p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>preguntas</code></td>
+            <td>
+                  <code><span title="pandas.Series">Series</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>lista con preguntas a recortar</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>num</code></td>
+            <td>
+                  <code>int</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>ID de pregunta a recortar</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>rbd</code></td>
+            <td>
+                  <code><span title="os.PathLike">PathLike</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Ruta de la pregunta a recortar</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>dic_pagina</code></td>
+            <td>
+                  <code>dict</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Diccionario con mapeo de preguntas en la página del cuestionario</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>n_pages</code></td>
+            <td>
+                  <code>int</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Cantidad de páginas que posee el cuestionario en total</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>subpreg_x_preg</code></td>
+            <td>
+                  <code>dict</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Insumo con cantidad de subpreguntas por pregunta.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>dir_subpreg</code></td>
+            <td>
+                  <code><span title="os.PathLike">PathLike</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Directorio general en donde se guardarán las preguntas recortadas </p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>tipo_cuadernillo</code></td>
+            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>define si se está procesando para estudiantes o padres.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>regex_estudiante</code></td>
+            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Expresión regular que nos ayuda a identificar el n° de serie del cuestionario</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>queue</code></td>
+            <td>
+                  <code><span title="multiprocessing.Queue">Queue</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Cola de tareas gestionada por Manager() para intercambiar datos entre procesos de forma segura.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+            <details class="quote">
+              <summary>Source code in <code>simce/paralelizacion.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 25</span>
+<span class="normal"> 26</span>
+<span class="normal"> 27</span>
+<span class="normal"> 28</span>
+<span class="normal"> 29</span>
+<span class="normal"> 30</span>
+<span class="normal"> 31</span>
+<span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">process_single_image</span><span class="p">(</span><span class="n">preguntas</span><span class="p">:</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">num</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">rbd</span><span class="p">:</span><span class="n">PathLike</span><span class="p">,</span> <span class="n">dic_pagina</span><span class="p">:</span><span class="nb">dict</span><span class="p">,</span>
+                          <span class="n">n_pages</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">subpreg_x_preg</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> 
+                         <span class="n">dir_subpreg</span><span class="p">:</span><span class="n">PathLike</span><span class="p">,</span> <span class="n">tipo_cuadernillo</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">regex_estudiante</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> 
+                         <span class="n">args</span><span class="p">:</span><span class="n">argparse</span><span class="o">.</span><span class="n">Namespace</span><span class="p">,</span> <span class="n">queue</span><span class="p">:</span><span class="n">Queue</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Genera el recorte de una pregunta/subpregunta. Primero se verifica que la imagen no posea franjas negras en</span>
+<span class="sd">    ningún costado del cuestionario. Posteriormente, se divide la imagen en dos páginas del cuadernillo y</span>
+<span class="sd">    se selecciona la página de la pregunta a recortar. En esta, se detectan los recuadros de las preguntas y</span>
+<span class="sd">    se realiza un primer recorte según las coordenadas obtenidas. Luego se identifican los recuadros de respuesta y</span>
+<span class="sd">    se vuelve a cortar la imagen.</span>
+
+<span class="sd">    Si la pregunta seleccionada no posee subpreguntas, se obtiene el recorte de recuadros de respuesta </span>
+<span class="sd">    y se guarda la imagen.</span>
+
+<span class="sd">    Si la pregunta seleccionada posee subpreguntas, se identifican las líneas horizontales separadoras de subpreguntas</span>
+<span class="sd">    y se procede a guardar la imagen con la sección de la subpregunta de interés. </span>
+
+<span class="sd">    **No retorna nada**</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        preguntas: lista con preguntas a recortar</span>
+<span class="sd">        num: ID de pregunta a recortar</span>
+<span class="sd">        rbd: Ruta de la pregunta a recortar</span>
+<span class="sd">        dic_pagina: Diccionario con mapeo de preguntas en la página del cuestionario</span>
+<span class="sd">        n_pages: Cantidad de páginas que posee el cuestionario en total</span>
+<span class="sd">        subpreg_x_preg: Insumo con cantidad de subpreguntas por pregunta.</span>
+<span class="sd">        dir_subpreg: Directorio general en donde se guardarán las preguntas recortadas </span>
+<span class="sd">        tipo_cuadernillo: define si se está procesando para estudiantes o padres.</span>
+<span class="sd">        regex_estudiante: Expresión regular que nos ayuda a identificar el n° de serie del cuestionario</span>
+<span class="sd">        queue: Cola de tareas gestionada por Manager() para intercambiar datos entre procesos de forma segura.</span>
+
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># from pathlib import Path</span>
+    <span class="c1"># df99 = df99[df99[&#39;serie&#39;] == 4077894] #data\input_raw\CP\02748\4077894_4.jpg</span>
+    <span class="c1"># num = 1</span>
+    <span class="c1"># rbd = Path(&#39;data/input_raw/CP/02748/4077894_4.jpg&#39;)</span>
+
+    <span class="n">pregunta_selec</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;p(\d{1,2})&#39;</span><span class="p">,</span> <span class="n">preguntas</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">num</span><span class="p">])</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>          <span class="c1"># seleccion de pregunta</span>
+    <span class="n">estudiante</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="n">regex_estudiante</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">rbd</span><span class="p">))</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>               <span class="c1"># serie estudiante</span>
+    <span class="n">pagina_pregunta</span> <span class="o">=</span> <span class="n">dic_pagina</span><span class="p">[</span><span class="n">pregunta_selec</span><span class="p">]</span>                                     <span class="c1"># ubicacion pregunta</span>
+    <span class="n">pages</span> <span class="o">=</span> <span class="n">get_pages_cuadernillo</span><span class="p">(</span><span class="n">pagina_pregunta</span><span class="p">,</span> <span class="n">n_pages</span><span class="p">)</span>
+
+    <span class="n">dir_subpreg_rbd</span> <span class="o">=</span> <span class="p">(</span><span class="n">dir_subpreg</span> <span class="o">/</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">rbd</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">rbd</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>  <span class="c1"># obtencion path pregunta</span>
+
+    <span class="n">dir_subpreg_rbd</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">rbd</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="n">preg_error</span> <span class="o">=</span> <span class="n">dir_subpreg_rbd</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">estudiante</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="n">agregar_error</span><span class="p">(</span><span class="n">queue</span><span class="o">=</span> <span class="n">queue</span><span class="p">,</span>
+                      <span class="n">pregunta</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">preg_error</span><span class="p">),</span>
+                      <span class="n">error</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;No existen archivos disponibles para serie </span><span class="si">{</span><span class="n">preg_error</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                      <span class="n">nivel_error</span><span class="o">=</span><span class="n">tipo_cuadernillo</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;Ocurrió un error: archivo no existe&#39;</span>
+
+    <span class="n">file</span> <span class="o">=</span> <span class="n">rbd</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">if</span> <span class="n">file</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">file</span><span class="si">=}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="c1"># Leemos imagen</span>
+    <span class="n">img_completa</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">rbd</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span> 
+    <span class="n">img_completa_crop</span> <span class="o">=</span> <span class="n">recorte_imagen</span><span class="p">(</span><span class="n">img_completa</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">150</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">160</span><span class="p">)</span>
+
+    <span class="c1"># Eliminamos franjas negras en caso de existir</span>
+    <span class="n">img_completa_sin_franja</span> <span class="o">=</span> <span class="n">eliminar_franjas_negras</span><span class="p">(</span><span class="n">img_completa_crop</span><span class="p">)</span>
+
+    <span class="c1"># Divimos imagen en dos páginas del cuadernillo</span>
+    <span class="n">paginas_cuadernillo</span> <span class="o">=</span> <span class="n">partir_imagen_por_mitad</span><span class="p">(</span><span class="n">img_completa_sin_franja</span><span class="p">)</span>
+
+    <span class="c1"># Seleccionamos página que nos interesa, basado en diccionario de páginas</span>
+    <span class="n">media_img</span> <span class="o">=</span> <span class="n">paginas_cuadernillo</span><span class="p">[</span><span class="n">pages</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">pagina_pregunta</span><span class="p">)]</span>
+
+    <span class="k">if</span> <span class="n">media_img</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: No se pudo cargar la imagen&quot;</span><span class="p">)</span>
+        <span class="n">agregar_error</span><span class="p">(</span><span class="n">queue</span><span class="o">=</span> <span class="n">queue</span><span class="p">,</span>
+                      <span class="n">pregunta</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">dir_subpreg_rbd</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">estudiante</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">),</span>
+                      <span class="n">error</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;No se pudo cargar la mitad de la imagen&#39;</span><span class="p">,</span>
+                      <span class="n">nivel_error</span><span class="o">=</span><span class="n">tipo_cuadernillo</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="s1">&#39;Ocurrió un error&#39;</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Detecto recuadros naranjos</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">mask_naranjo</span> <span class="o">=</span> <span class="n">get_mask_imagen</span><span class="p">(</span><span class="n">media_img</span><span class="p">)</span>
+
+            <span class="c1"># Obtengo contornos</span>
+            <span class="n">big_contours</span> <span class="o">=</span> <span class="n">get_contornos_grandes</span><span class="p">(</span><span class="n">mask_naranjo</span><span class="p">)</span>
+
+            <span class="n">q_base</span> <span class="o">=</span> <span class="n">get_pregunta_inicial_pagina</span><span class="p">(</span><span class="n">dic_pagina</span><span class="p">,</span> <span class="n">pagina_pregunta</span><span class="p">)</span>
+            <span class="n">pregunta_selec_int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\d+&#39;</span><span class="p">,</span> <span class="n">pregunta_selec</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Obtengo coordenadas de contornos y corto imagen</span>
+                <span class="n">elemento_img_pregunta</span> <span class="o">=</span> <span class="n">big_contours</span><span class="p">[</span><span class="n">pregunta_selec_int</span> <span class="o">-</span> <span class="n">q_base</span><span class="p">]</span>
+                <span class="n">img_pregunta</span> <span class="o">=</span> <span class="n">bound_and_crop</span><span class="p">(</span><span class="n">media_img</span><span class="p">,</span> <span class="n">elemento_img_pregunta</span><span class="p">)</span>
+
+                <span class="n">img_recuadros_pregunta</span> <span class="o">=</span> <span class="n">dejar_solo_recuadros_subpregunta</span><span class="p">(</span><span class="n">img_pregunta</span><span class="p">)</span>
+
+                <span class="c1"># Exportamos pregunta si no tiene subpreguntas:</span>
+                <span class="k">if</span> <span class="n">subpreg_x_preg</span><span class="p">[</span><span class="n">pregunta_selec</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">save_pregunta_completa</span><span class="p">(</span><span class="n">img_recuadros_pregunta</span><span class="p">,</span> <span class="n">dir_subpreg_rbd</span><span class="p">,</span> <span class="n">estudiante</span><span class="p">,</span> <span class="n">pregunta_selec</span><span class="p">)</span>
+
+                    <span class="k">return</span> <span class="s1">&#39;Éxito!&#39;</span>
+
+                <span class="n">subpreg_selec</span> <span class="o">=</span> <span class="n">preguntas</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">num</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">subpreg_selec</span><span class="si">=}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+                <span class="c1"># Obtenemos subpreguntas:</span>
+                <span class="c1">#img_pregunta_crop = recorte_imagen(img_pregunta)</span>
+                <span class="c1"># img_crop_col = get_mask_imagen(img_pregunta_recuadros,</span>
+                <span class="c1">#                                lower_color=np.array(</span>
+                <span class="c1">#                                    [0, 111, 109]),</span>
+                <span class="c1">#                                upper_color=np.array([18, 255, 255]))</span>
+
+                <span class="c1"># Obtenemos lineas horizontales:</span>
+                <span class="n">mask_lineas_horizontales</span> <span class="o">=</span> <span class="n">get_mascara_lineas_horizontales</span><span class="p">(</span><span class="n">img_recuadros_pregunta</span><span class="p">)</span>
+
+                <span class="n">lineas_horizontales</span> <span class="o">=</span> <span class="n">obtener_lineas_horizontales</span><span class="p">(</span>
+                    <span class="n">mask_lineas_horizontales</span><span class="p">,</span> <span class="n">n_pixeles_entre_lineas</span><span class="o">=</span><span class="n">n_pixeles_entre_lineas</span><span class="p">,</span>
+                      <span class="n">minLineLength</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">mask_lineas_horizontales</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mf">.6</span><span class="p">))</span>
+                <span class="c1">#print(lineas_horizontales)</span>
+
+                <span class="n">n_subpreg</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lineas_horizontales</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+
+                <span class="k">if</span> <span class="n">n_subpreg</span> <span class="o">!=</span> <span class="n">subpreg_x_preg</span><span class="p">[</span><span class="n">pregunta_selec</span><span class="p">]:</span>
+                    <span class="n">preg_error</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">dir_subpreg_rbd</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">estudiante</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">dic_dif</span> <span class="o">=</span> <span class="n">get_subpregs_distintas</span><span class="p">(</span><span class="n">subpreg_x_preg</span><span class="p">,</span> <span class="n">dir_subpreg_rbd</span><span class="p">,</span> <span class="n">estudiante</span><span class="p">)</span>
+                    <span class="n">error</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;N° de subpreguntas incorrecto para serie </span><span class="si">{</span><span class="n">estudiante</span><span class="si">}</span><span class="s1">, se encontraron </span><span class="si">{</span><span class="n">n_subpreg</span><span class="si">}</span><span class="s1"> subpreguntas </span><span class="si">{</span><span class="n">dic_dif</span><span class="si">}</span><span class="s1">&#39;</span>
+                    <span class="n">agregar_error</span><span class="p">(</span><span class="n">queue</span><span class="o">=</span> <span class="n">queue</span><span class="p">,</span> <span class="n">pregunta</span><span class="o">=</span><span class="n">preg_error</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">error</span><span class="p">,</span> <span class="n">nivel_error</span><span class="o">=</span><span class="n">tipo_cuadernillo</span><span class="p">)</span>
+
+                <span class="c1"># Realizamos recorte y guardado de subpregunta</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">file_out</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">dir_subpreg_rbd</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">estudiante</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">pregunta_selec</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">subpreg_selec</span><span class="p">)</span><span class="si">}</span><span class="s1">.jpg&#39;</span><span class="p">)</span>
+                    <span class="n">crop_and_save_subpreg</span><span class="p">(</span><span class="n">img_recuadros_pregunta</span><span class="p">,</span> <span class="n">lineas_horizontales</span><span class="p">,</span>
+                                          <span class="n">i</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">subpreg_selec</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">file_out</span><span class="o">=</span><span class="n">file_out</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span>
+
+                <span class="c1"># Si hay error en procesamiento subpregunta</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                    <span class="n">preg_error</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">dir_subpreg_rbd</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">estudiante</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">pregunta_selec</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">subpreg_selec</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">agregar_error</span><span class="p">(</span><span class="n">queue</span><span class="o">=</span> <span class="n">queue</span><span class="p">,</span>
+                                <span class="n">pregunta</span><span class="o">=</span><span class="n">preg_error</span><span class="p">,</span> 
+                                <span class="n">error</span><span class="o">=</span><span class="s1">&#39;Subregunta no pudo ser procesada&#39;</span><span class="p">,</span>
+                                <span class="n">nivel_error</span><span class="o">=</span><span class="s1">&#39;Subpregunta&#39;</span><span class="p">,</span> 
+                                <span class="p">)</span>
+                    <span class="k">return</span> <span class="s1">&#39;Ups, ocurrio un error en la subpregunta&#39;</span>
+
+
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="n">preg_error</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">dir_subpreg_rbd</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">estudiante</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">pregunta_selec</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">agregar_error</span><span class="p">(</span><span class="n">queue</span><span class="o">=</span> <span class="n">queue</span><span class="p">,</span> <span class="n">pregunta</span><span class="o">=</span><span class="n">preg_error</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="s1">&#39;Pregunta no pudo ser procesada&#39;</span><span class="p">,</span> <span class="n">nivel_error</span><span class="o">=</span><span class="s1">&#39;Pregunta&#39;</span><span class="p">)</span>
+                <span class="k">return</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Ocurrió un error con la máscara&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="n">preg_error</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">dir_subpreg_rbd</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">estudiante</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">pregunta_selec</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">agregar_error</span><span class="p">(</span><span class="n">queue</span><span class="o">=</span> <span class="n">queue</span><span class="p">,</span> <span class="n">pregunta</span><span class="o">=</span><span class="n">preg_error</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="s1">&#39;Ocurrio un error con la mascara&#39;</span><span class="p">,</span> <span class="n">nivel_error</span><span class="o">=</span><span class="s1">&#39;Pregunta&#39;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Éxito!&#39;</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.fe8b6f2b.min.js"></script>
+      
+    
+  </body>
+</html>

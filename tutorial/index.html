@@ -9,21 +9,25 @@
       
       
       
+        <link rel="prev" href="..">
       
       
-      <link rel="icon" href="/assets/images/favicon.png">
+        <link rel="next" href="../outputs/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.31">
     
     
       
-        <title>SIMCE Docs</title>
+        <title>Tutorial de uso - SIMCE Docs</title>
       
     
     
-      <link rel="stylesheet" href="/assets/stylesheets/main.3cba04c6.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.3cba04c6.min.css">
       
         
-        <link rel="stylesheet" href="/assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -42,9 +46,9 @@
       
     
     
-      <link rel="stylesheet" href="/assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
-    <script>__md_scope=new URL("/",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -69,6 +73,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#get_recortespy" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -81,7 +90,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="/." title="SIMCE Docs" class="md-header__button md-logo" aria-label="SIMCE Docs" data-md-component="logo">
+    <a href=".." title="SIMCE Docs" class="md-header__button md-logo" aria-label="SIMCE Docs" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
@@ -101,7 +110,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              
+              Tutorial de uso
             
           </span>
         </div>
@@ -202,7 +211,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="/." title="SIMCE Docs" class="md-nav__button md-logo" aria-label="SIMCE Docs" data-md-component="logo">
+    <a href=".." title="SIMCE Docs" class="md-nav__button md-logo" aria-label="SIMCE Docs" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
@@ -220,7 +229,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/." class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -237,10 +246,28 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="/tutorial/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Tutorial de uso
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -249,6 +276,42 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#get_recortespy" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_recortes.py
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#get_prediccionespy" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_predicciones.py
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -260,7 +323,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/outputs/" class="md-nav__link">
+      <a href="../outputs/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -280,7 +343,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/script_configuracion/" class="md-nav__link">
+      <a href="../script_configuracion/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -335,7 +398,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/generar_insumos_img/" class="md-nav__link">
+      <a href="../generar_insumos_img/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -356,7 +419,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/proc_tabla_99/" class="md-nav__link">
+      <a href="../proc_tabla_99/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -377,7 +440,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/proc_imgs/" class="md-nav__link">
+      <a href="../proc_imgs/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -398,7 +461,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/paralelizacion/" class="md-nav__link">
+      <a href="../paralelizacion/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -419,7 +482,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/predicciones/" class="md-nav__link">
+      <a href="../predicciones/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -440,7 +503,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/indicadores_tinta/" class="md-nav__link">
+      <a href="../indicadores_tinta/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -461,7 +524,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/utils/" class="md-nav__link">
+      <a href="../utils/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -500,6 +563,32 @@
   
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#get_recortespy" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_recortes.py
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#get_prediccionespy" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_predicciones.py
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -510,8 +599,58 @@
             <div class="md-content" data-md-component="content">
               <article class="md-content__inner md-typeset">
                 
-  <h1>404 - Not found</h1>
+                  
 
+
+  <h1>Tutorial de uso</h1>
+
+<p>Acá se explica cómo correr el modelo y las distintas opciones presentes para los scripts que se hacen cargo de esto.</p>
+<h2 id="get_recortespy">get_recortes.py</h2>
+<p>El primer script se encarga del recorte y sistematización de subpreguntas. De acuerdo a lo presentado en el <a href="../#esquema-del-proyecto">flujo del proyecto</a>, esto considera la etapa de generación de insumos, procesamiento de la tabla de dobles marcas y selección y procesamiento de subpreguntas. Durante este proceso se genera la tabla <code>problemas_imagenes.xlsx</code>. Respecto a su uso, este es sencillo, los pasos son los siguientes:</p>
+<ol>
+<li>
+<p>Ubicarse en la raíz del proyecto. </p>
+</li>
+<li>
+<p>Correr el siguiente comando en la consola:</p>
+<p><code>python get_recortes.py</code></p>
+<p>Además, el script cuenta con dos argumentos opcionales. El primero es <code>--curso</code>, donde se le indica un <code>&lt;id_curso&gt;</code> que corresponde al identificador del curso siendo procesado. Por ejemplo, para cuarto básico, utilizamos:</p>
+<p><code>python get_recortes.py --curso 4b</code></p>
+<p>Ojo, el curso también puede ser indicado en el <a href="../script_configuracion/">script de configuración</a>, en la variable <code>CURSO</code>. Si el curso se indica en ambos archivos, tomará prioridad el que se indica en la línea de comandos. Además, el script de configuración maneja las variables más importantes del modelo, por lo que <strong>siempre es importante revisarlo y actualizarlo antes de correr este script</strong>.</p>
+<p>En segunda instancia, el código cuenta con el comando opcional <code>-v</code> o <code>--verbose</code>, que si se agrega, hará que se imprima más información en la consola respecto al procesamiento de las imágenes:</p>
+<p><code>python get_recortes.py -v</code></p>
+<p>o equivalentemente:</p>
+<p><code>python get_recortes.py --verbose</code></p>
+<p>Ojo, el código puede tomar varias horas en correr. Se imprimirá un mensaje en la consola cuando termine el procesamiento, indicando esto mismo.</p>
+</li>
+</ol>
+<h2 id="get_prediccionespy">get_predicciones.py</h2>
+<p>El primer script se encarga de la predicción y cálculo de indicadores de tinta, como puede verse en el <a href="../#esquema-del-proyecto">flujo del proyecto</a>. Durante este proceso se genera la tabla <code>predicciones_modelo_final.xlsx</code>. Respecto a su uso, este es sencillo, los pasos son los siguientes:</p>
+<ol>
+<li>
+<p>Ubicarse en la raíz del proyecto. </p>
+</li>
+<li>
+<p>Correr el siguiente comando en la consola:</p>
+<p><code>python get_predicciones.py --config &lt;ruta_config_file&gt;</code></p>
+<p>En este caso, <code>&lt;ruta_config_file&gt;</code> es la ruta al archivo de configuración del modelo. Por ejemplo:</p>
+<p><code>python get_predicciones.py --config config/config_pred.json</code></p>
+<p>En la sección de <a href="../script_configuracion/">explicación del script configuración</a> se explica en más detalle cómo funciona este script.</p>
+</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
               </article>
             </div>
           
@@ -545,10 +684,10 @@
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "/", "features": [], "search": "/assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="/assets/javascripts/bundle.fe8b6f2b.min.js"></script>
+      <script src="../assets/javascripts/bundle.fe8b6f2b.min.js"></script>
       
     
   </body>
