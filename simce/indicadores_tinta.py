@@ -139,7 +139,7 @@ def preparar_mascaras(ruta: PathLike)-> tuple[np.ndarray, np.ndarray]:
 
     return bordered_mask, bordered_rect_img
 
-def calcular_indices_tinta(ruta:PathLike)-> tuple[list[float, float], list[float, float]]:
+def calcular_indices_tinta(ruta:str|PathLike)-> tuple[list[float, float], list[float, float]]:
     """
     Calcula índices de tinta para una subpregunta específica.
 
@@ -206,7 +206,6 @@ def calcular_indices_tinta(ruta:PathLike)-> tuple[list[float, float], list[float
 
     return porcentajes_relevantes, intensidades_relevantes
 
-
 def get_indices_tinta_total(dirs: dict[str, PathLike]):
     """
     Toma tabla de predicciones y procede a calcular índices de tinta, que agrega a la tabla y luego
@@ -227,7 +226,7 @@ def get_indices_tinta_total(dirs: dict[str, PathLike]):
     """
     preds = pd.read_parquet(dirs['dir_predicciones'] / 'predicciones_modelo.parquet')
     preds['indices'] = preds.ruta_imagen_output.apply(lambda x: calcular_indices_tinta(x))
-
+    preds = preds.reset_index(drop=True)
     split = pd.DataFrame(preds['indices'].tolist(), columns = ['indice_tinta', 'indice_intensidad'])
     preds_final = preds.copy()
     for col in split.columns:
