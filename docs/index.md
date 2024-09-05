@@ -1,6 +1,6 @@
 # Modelo de detección de dobles marcas SIMCE
 
-La presente documentación se encargará de explicar el código del proyecto SIMCE, así como su organización y cómo correr el modelo. La estructura del dodcumento es la siguiente:
+La presente documentación se encargará de explicar el código del proyecto SIMCE, así como su organización y cómo correr el modelo. La estructura del documento es la siguiente:
 
 1. [Estructura del proyecto](#estructura-del-proyecto)
 2. [Esquema del proyecto](#esquema-del-proyecto)
@@ -33,7 +33,7 @@ A continuación se presenta la estructura del proyecto, con el fin de que sea po
     │
     ├── data/ - carpeta con datos del modelo
     │
-    ├── data_loader/ - todo lo que tenga que ver con carga de datos en Torch va aquí
+    ├── data_loader/ - carga de datos en Torch 
     │   └── data_loaders.py
     │
     ├── dataset/ - clase que permite cargar dataset de imágenes en Torch
