@@ -177,7 +177,7 @@ def get_mascara_lineas_horizontales(img_recuadros:np.ndarray)->np.ndarray:
 
 def save_pregunta_completa(img_recuadros:np.ndarray,
                             dir_subpreg_rbd:os.PathLike,
-                            estudiante:str, pregunta_selec:str, args:argparse.Namespace):
+                            estudiante:str, pregunta_selec:str, verbose=False):
     '''Guarda pregunta completa en casos de preguntas que no tienen subpreguntas.
         **No retorna nada**
 
@@ -193,7 +193,7 @@ def save_pregunta_completa(img_recuadros:np.ndarray,
 
     
     '''
-    if args.verbose:
+    if verbose:
         print('Pregunta no cuenta con subpreguntas, se guardará imagen')
     file_out = str(
         dir_subpreg_rbd / f'{estudiante}_{pregunta_selec}.jpg')
