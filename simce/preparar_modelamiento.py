@@ -1,4 +1,4 @@
-from config.proc_img import SEED
+from config.proc_img import SEED, nombre_tabla_predicciones
 import pandas as pd
 
 from pathlib import Path
@@ -45,7 +45,7 @@ def get_img_existentes_pred(directorios, curso) -> pd.DataFrame:
 def gen_pred_set(directorios, curso):
 
     df_exist = get_img_existentes_pred(directorios, curso)
-    df_exist.to_csv(directorios['dir_train_test'] / f'data_pred.csv', index=False)
+    df_exist.to_csv(directorios['dir_train_test'] / nombre_tabla_predicciones, index=False)
 
     return print('Tablas para predicción exportadas exitosamente!')
     
