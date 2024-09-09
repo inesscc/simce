@@ -27,20 +27,26 @@ def main(args):
     directorios = get_directorios(curso=CURSO)
     crear_directorios(directorios)
     # 1.  Generar insumos para procesamiento
-    generar_insumos_total(directorios, args=args) 
+    #generar_insumos_total(directorios, args=args) 
     # 2. Generar tablas con dobles marcas
-    get_tablas_99_total(directorios=directorios)
+    #get_tablas_99_total(directorios=directorios)
 
     dirs = get_directorios()
     
     manager = Manager()             # Objeto para gestionar datos compartidos entre procesos
     queue = manager.Queue()         # Cola de tareas
     
-    process_general(dirs = dirs, regex_estudiante= regex_estudiante, 
-                    queue = queue, curso=CURSO, args=args, tipo_cuadernillo='padres')
+    # process_general(dirs = dirs, regex_estudiante= regex_estudiante, 
+    #                 queue = queue, curso=CURSO, args=args, tipo_cuadernillo='padres')
     
+    # import pandas as pd
+    # nombre_tabla_casos99 = f'casos_99_compilados_4b_padres.csv'
+    # df99 = pd.read_csv(dirs['dir_tabla_99'] / nombre_tabla_casos99)
+    # ests = df99.serie.sample(100, random_state=2).to_list()
+    # df99 = df99[df99.serie.isin(ests)]
     process_general(dirs = dirs, regex_estudiante= regex_estudiante, 
-                    queue = queue, curso=CURSO, args=args, tipo_cuadernillo='estudiantes')
+                    queue = queue, curso=CURSO, args=args, tipo_cuadernillo='padres',
+                    filter_rbd=['04243','04244'])
     
 
     escribir_errores(queue)
@@ -53,7 +59,7 @@ if __name__ == "__main__":
                                    a predecir')
     parser.add_argument('--curso', help='(opcional) identificador del curso a predecir')
 
-    parser.add_argument("-v", "--verbose", help="Se imprime más texto si se activa",
+    parser.add_argument("-v", "--verbose", help="Se imprime más texto informativo si se activa",
                     action="store_true")
 
     args = parser.parse_args()

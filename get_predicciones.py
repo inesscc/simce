@@ -2,7 +2,7 @@ import torch
 torch.cuda.is_available()
 import pandas as pd
 from config.parse_config import ConfigParser
-from simce.utils import read_json, prepare_device
+from simce.utils import timing, prepare_device, read_json
 from simce.indicadores_tinta import get_indices_tinta 
 import data_loader.data_loaders as module_data
 
@@ -17,6 +17,7 @@ import collections
 ## Predicciones -----------------------------------------------------
 #config_dict = read_json('config/config_pred.json')
 #config = ConfigParser(config_dict)
+@timing
 def main(config):
     torch.manual_seed(SEED)
     torch.backends.cudnn.deterministic = True
