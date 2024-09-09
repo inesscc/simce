@@ -326,6 +326,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="predicciones_modelo_final.xlsx">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#indices-de-tinta" class="md-nav__link">
+    <span class="md-ellipsis">
+      Indices de tinta (*)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -585,6 +600,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="predicciones_modelo_final.xlsx">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#indices-de-tinta" class="md-nav__link">
+    <span class="md-ellipsis">
+      Indices de tinta (*)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -648,16 +678,16 @@
 <td><em>Probabilidad</em> de la etiqueta. Nos indica que tan seguro está el modelo de su etiqueta predicha, mientras más cercano a 1, más seguro esta el modelo de su decisión. Por otro lado, mientras más cercano a 0.5, menos seguro estará el modelo de la etiqueta indicada.</td>
 </tr>
 <tr>
-<td>indices</td>
-<td>Tupla de valores que nos indican el porcentaje e intensidad promedio de tinta presente en los dos recuadros con mayores valores.</td>
+<td>indices (*)</td>
+<td>Tupla de valores que nos indican la proporción e intensidad promedio de tinta presente en los dos recuadros con mayores valores.</td>
 </tr>
 <tr>
 <td>indice_tinta_top1</td>
-<td>Porcentaje de tinta promedio del recuadro con mayor valor.</td>
+<td>Proporción de tinta promedio del recuadro con mayor valor.</td>
 </tr>
 <tr>
 <td>indice_tinta_top2</td>
-<td>Porcentaje de tinta promedio del segundo recuadro con mayor valor.</td>
+<td>Proporción de tinta promedio del segundo recuadro con mayor valor.</td>
 </tr>
 <tr>
 <td>indice_intensidad_top1</td>
@@ -669,7 +699,7 @@
 </tr>
 <tr>
 <td>ratio_tinta</td>
-<td>Razón entre el porcentaje medio de tinta presente en los dos recuadros con más tinta (indice_tinta_top1/indice_tinta_top2). Si el valor es 1, nos indica que los dos recuadros evaluados poseen la misma cantidad de tinta rellana en el recuadro.</td>
+<td>Razón entre la proporción media de tinta presente en los dos recuadros con más tinta (indice_tinta_top1/indice_tinta_top2). Si el valor es 1, nos indica que los dos recuadros evaluados poseen la misma cantidad de tinta rellana en el recuadro.</td>
 </tr>
 <tr>
 <td>ratio_intensidad</td>
@@ -677,7 +707,35 @@
 </tr>
 </tbody>
 </table>
-<p>Las 9 columnas faltantes nos ayudan a describir la pregunta/subrepgunta analizada (ubicación directorio, serie, rbd, CodigoCurso, entre otras).</p>
+<p>Las 9 columnas faltantes nos ayudan a describir la pregunta/subrpregunta analizada (ubicación directorio, serie, rbd, CodigoCurso, entre otras).</p>
+<h4 id="indices-de-tinta">Indices de tinta (*)</h4>
+<p>Los indices de tinta se dividen en dos métricas principales; la proporción del recuadro que posee una marca y la intensidad con la que se realizó aquella marca. Veamos los siguientes ejemplos:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;"><img alt="tinta1" src="../tinta1.png#center" /></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><em>Figura 1</em></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;"><img alt="tinta2" src="../tinta2.jpg#center" /></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><em>Figura 2</em></td>
+</tr>
+</tbody>
+</table>
+<p>En la Figura 1, podemos notar que existen marcas realizadas con lápiz mina, en donde tenemos que una de ellas fue parcialmente borrada (3er recuadro). En esta imagen la proporción promedio de marca en los recuadros 2 y 3 fueron de  0.067 y 0.02, es decir, dentro del recuadro blanco, tenemos que el 6.7% y 2.0% posee <em>tinta</em> de lápiz. Por otro lado, sabemos que uno posee un <em>borrón</em> con goma, por lo que si bien se detectó una marca tinta, estas marcas poseen diferentes intensidades, para ser más exactos, tenemos que la intensidad del trazado es de 37.3% y 16.5% respectivamente. </p>
+<p>Ahora, fijándonos en la Figura 2, tenemos que las marcas fueron realizadas con lápiz pasta y que uno de los recuadros fue casi completamente marcado. En este caso, la proporción media de marca para los recuadros 1 y 4 corresponde al 79.5% y 17.0% y la intensidad del trazado es de 81.2%, 54.7% respectivamente.</p>
 
 
 
