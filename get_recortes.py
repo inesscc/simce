@@ -37,10 +37,12 @@ def main(args):
     queue = manager.Queue()         # Cola de tareas
     
     process_general(dirs = dirs, regex_estudiante= regex_estudiante, 
-                    queue = queue, curso=CURSO, args=args, tipo_cuadernillo='padres')
+                    queue = queue, curso=CURSO, args=args, tipo_cuadernillo='padres',
+                    filter_rbd=['04243','04244'])
 
     process_general(dirs = dirs, regex_estudiante= regex_estudiante, 
-                    queue = queue, curso=CURSO, args=args, tipo_cuadernillo='estudiantes')
+                    queue = queue, curso=CURSO, args=args, tipo_cuadernillo='estudiantes',
+                    filter_rbd=['04243','04244'])
     
 
     escribir_errores(queue)
@@ -53,7 +55,7 @@ if __name__ == "__main__":
                                    a predecir')
     parser.add_argument('--curso', help='(opcional) identificador del curso a predecir')
 
-    parser.add_argument("-v", "--verbose", help="Se imprime más texto si se activa",
+    parser.add_argument("-v", "--verbose", help="Se imprime más texto informativo si se activa",
                     action="store_true")
 
     args = parser.parse_args()

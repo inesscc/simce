@@ -19,7 +19,7 @@ from pathlib import Path
 from multiprocessing import Queue
 VALID_INPUT = {'cuadernillo', 'pagina'}
 
-files = [i.name for i in Path('data/input_raw').rglob('*.jpg')]
+#files = [i.name for i in Path('data/input_raw').rglob('*.jpg')]
 ## procesamiento imagen ----------------------------------
 
 def process_single_image(preguntas:pd.Series, num: int, rbd:PathLike, dic_pagina:dict,
@@ -80,8 +80,9 @@ def process_single_image(preguntas:pd.Series, num: int, rbd:PathLike, dic_pagina
         return 'Ocurrió un error: archivo no existe'
 
     file = rbd.name
-    if file not in files:
-        return ''
+
+    # if file not in files:
+    #     return ''
 
     if args.verbose:
         print(f'{file=}')
@@ -127,8 +128,8 @@ def process_single_image(preguntas:pd.Series, num: int, rbd:PathLike, dic_pagina
                 
                 # Exportamos pregunta si no tiene subpreguntas:
                 if subpreg_x_preg[pregunta_selec] == 1:
-                    save_pregunta_completa(img_recuadros_pregunta, dir_subpreg_rbd, estudiante, pregunta_selec,
-                                           args=args)
+                    save_pregunta_completa(img_recuadros_pregunta, dir_subpreg_rbd, estudiante, 
+                                           pregunta_selec, verbose=args.verbose)
                     
                     return 'Éxito!'
 

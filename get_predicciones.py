@@ -2,8 +2,13 @@ import torch
 torch.cuda.is_available()
 import pandas as pd
 from config.parse_config import ConfigParser
+<<<<<<< HEAD
+from simce.utils import timing, prepare_device, read_json
+from simce.indicadores_tinta import get_indices_tinta 
+=======
 from simce.utils import read_json, prepare_device
 from simce.indicadores_tinta import get_indices_tinta_total 
+>>>>>>> 0f671e2824c502afd93cc2009039d4cbd15be010
 import data_loader.data_loaders as module_data
 
 from simce.predicciones import obtener_predicciones, exportar_predicciones, prepare_model
@@ -17,8 +22,14 @@ import collections
 from pathlib import Path
 
 ## Predicciones -----------------------------------------------------
+<<<<<<< HEAD
+#config_dict = read_json('config/config_pred.json')
+#config = ConfigParser(config_dict)
+@timing
+=======
 # config_dict = read_json('config/config_pred.json')
 # config = ConfigParser(config_dict)
+>>>>>>> 0f671e2824c502afd93cc2009039d4cbd15be010
 def main(config):
     torch.manual_seed(SEED)
     torch.backends.cudnn.deterministic = True

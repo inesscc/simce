@@ -87,17 +87,14 @@ def get_directorios(curso, filtro=None) -> dict:
 
 # Determina si se ignora la primera página del cuadernillo
 IGNORAR_PRIMERA_PAGINA = True
-
 # Semilla para componentes aleatorias del código:
 SEED = 2024
-
 # Porcentaje de casos de doble marca que extraemos de estudiantes
 FRAC_SAMPLE = .05
-
 # n° de rondas de aumentado de datos (máximo 5):
 N_AUGMENT_ROUNDS = 5
-# OBTENCIÓN DE INSUMOS ----------------------------------------
 
+# OBTENCIÓN DE INSUMOS ----------------------------------------
 regex_hoja_cuadernillo = r'_(\d+)'
 
 

@@ -1,6 +1,10 @@
 site_name: SIMCE Docs
 
 theme:
+  features:
+    - content.code.copy
+    - content.code.select
+    - content.code.annotate
   name: material
   palette: 
 
@@ -16,6 +20,14 @@ theme:
         icon: material/brightness-4
         name: Cambiar a modo normal
 
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
 
 plugins:
   - mkdocstrings
@@ -24,9 +36,9 @@ plugins:
 
 nav:
   - Documentación Proyecto SIMCE: index.md
-  - Tutorial de uso: tutorial.md
+  - Tutorial de uso de scripts de procesamiento y predicción: tutorial.md
+  - Tutorial archivos de configuración: script_configuracion.md 
   - Guía de outputs del proyecto: outputs.md
-  - Cómo utilizar el script de configuración: script_configuracion.md 
   - 'Manuales de referencia':
     - 'Generación de insumos': 'generar_insumos_img.md'
     - 'Procesamiento tabla dobles marcas': 'proc_tabla_99.md'
