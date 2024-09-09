@@ -127,7 +127,8 @@ def process_single_image(preguntas:pd.Series, num: int, rbd:PathLike, dic_pagina
                 
                 # Exportamos pregunta si no tiene subpreguntas:
                 if subpreg_x_preg[pregunta_selec] == 1:
-                    save_pregunta_completa(img_recuadros_pregunta, dir_subpreg_rbd, estudiante, pregunta_selec)
+                    save_pregunta_completa(img_recuadros_pregunta, dir_subpreg_rbd, estudiante, pregunta_selec,
+                                           args=args)
                     
                     return 'Éxito!'
 

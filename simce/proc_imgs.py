@@ -7,8 +7,6 @@ Created on Thu May  2 17:22:37 2024
 import numpy as np
 import cv2
 from itertools import chain
-from config.proc_img import regex_estudiante 
-from simce.errors import anotar_error
 # from simce.apoyo_proc_imgs import get_subpreguntas_completo
 import pandas as pd
 import re
