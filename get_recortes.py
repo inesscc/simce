@@ -47,7 +47,7 @@ def main(args):
 
     escribir_errores(queue)
 
-    #gen_pred_set(directorios, curso=CURSO)
+    gen_pred_set(dirs, curso=CURSO)
 
 
 if __name__ == "__main__":
