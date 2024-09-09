@@ -64,7 +64,7 @@ def obtener_predicciones(loader, device, model):
 
             probs.extend(max_probabilities)
             lst_directories.extend(directories)
-            break
+            
 
     print('Predicciones listas!')
     probs_float = [i.item() for i in probs]

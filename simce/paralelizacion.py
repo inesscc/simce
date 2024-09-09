@@ -19,7 +19,7 @@ import argparse
 from pathlib import Path
 VALID_INPUT = {'cuadernillo', 'pagina'}
 
-files = [i.name for i in Path('data/input_raw').rglob('*.jpg')]
+#files = [i.name for i in Path('data/input_raw').rglob('*.jpg')]
 ## procesamiento imagen ----------------------------------
 
 def process_single_image(preguntas, num: int, rbd, dic_pagina:dict, n_pages: int, subpreg_x_preg: dict, 
@@ -74,13 +74,15 @@ def process_single_image(preguntas, num: int, rbd, dic_pagina:dict, n_pages: int
         return 'Ocurrió un error: archivo no existe'
 
     file = rbd.name
-    if file not in files:
-        return ''
+
+    # if file not in files:
+    #     return ''
 
     if args.verbose:
         print(f'{file=}')
     # Leemos imagen
     img_preg = cv2.imread(str(rbd), 1) 
+
     img_crop = recorte_imagen(img_preg, 0, 150, 50, 160)
     
     # Eliminamos franjas negras en caso de existir
@@ -121,7 +123,8 @@ def process_single_image(preguntas, num: int, rbd, dic_pagina:dict, n_pages: int
                 
                 # Exportamos pregunta si no tiene subpreguntas:
                 if subpreg_x_preg[pregunta_selec] == 1:
-                    save_pregunta_completa(img_pregunta_recuadros, dir_subpreg_rbd, estudiante, pregunta_selec)
+                    save_pregunta_completa(img_pregunta_recuadros, dir_subpreg_rbd, estudiante, pregunta_selec,
+                                           args=args)
                     
                     return 'Éxito!'
 
@@ -154,10 +157,11 @@ def process_single_image(preguntas, num: int, rbd, dic_pagina:dict, n_pages: int
                 try:
                     file_out = str(dir_subpreg_rbd / f'{estudiante}_{pregunta_selec}_{int(subpreg_selec)}.jpg')
                     crop_and_save_subpreg(img_pregunta_recuadros, lineas_horizontales,
-                                          i=int(subpreg_selec)-1, file_out=file_out)
+                                          i=int(subpreg_selec)-1, file_out=file_out, args=args)
                 
                 # Si hay error en procesamiento subpregunta
                 except Exception as e:
+                    print(e)
                     preg_error = str(dir_subpreg_rbd / f'{estudiante}_{pregunta_selec}_{int(subpreg_selec)}')
                     agregar_error(queue= queue,
                                 pregunta=preg_error, 
