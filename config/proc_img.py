@@ -10,8 +10,21 @@ from dotenv import load_dotenv
 import os
 load_dotenv()
 
-
+# 1. VARIABLES QUE DEBERÁN SER ACTUALIZADAS MUY PROBABLEMENTE
 CURSO = Path('4b')
+
+carpeta_estudiantes = 'CE'
+carpeta_padres = 'CP'
+
+nombres_tablas_origen = {'padres': f'{carpeta_padres}_Origen_DobleMarca.csv',
+                 'estudiantes': f'{carpeta_estudiantes}_Origen_DobleMarca.csv'}
+
+
+
+# Nombre de tabla que contiene n° de subpreguntas, n° de recuadros por subpregunta:
+nombre_tabla_para_insumos = 'DD 4° BÁSICO 2023_CE_CP.xlsx'
+
+
 # Expresión regular para capturar el identificador del estudiante en nombre de archivos
 regex_estudiante = r'\d{7,}'
 
@@ -25,10 +38,12 @@ LIMPIAR_RUTA = False
 # mínimo entre línea y línea de cada subpregunta
 n_pixeles_entre_lineas = 22
 
-carpeta_estudiantes = 'CE'
-carpeta_padres = 'CP'
-
-
+IP_NAS = '10.10.100.28'
+FOLDER_DATOS = '4b_2023' # OJO, actualizar
+def conectar_a_NAS(IP_NAS, FOLDER_DATOS):
+    # Nos conectamos a disco NAS:
+    if not Path('P:/').is_dir():
+        os.system(rf"NET USE P: \\{IP_NAS}\{FOLDER_DATOS}" )
 
 def get_directorios(curso, filtro=None) -> dict:
     '''Acá se indican todos los directorios del proyecto. Luego, la función crear_directorios() toma todos
@@ -40,11 +55,9 @@ def get_directorios(curso, filtro=None) -> dict:
 
     # En producción nos conectamos a disco NAS para acceso a imágenes
     if os.getenv('ENV') == 'production':
-        IP_NAS = '10.10.100.28'
-        FOLDER_DATOS = '4b_2023'
-        # Nos conectamos a disco NAS:
-        if not Path('P:/').is_dir():
-            os.system(rf"NET USE P: \\{IP_NAS}\{FOLDER_DATOS}" )
+        
+        conectar_a_NAS(IP_NAS, FOLDER_DATOS)
+
         dd['dir_img_bruta'] = Path('P:/')
     else:
         # Solo aplica a desarrollo local:
@@ -99,13 +112,7 @@ regex_hoja_cuadernillo = r'_(\d+)'
 
 
 # PROCESAMIENTO POSIBLES DOBLES MARCAS -----
-nombres_tablas_origen = {'padres': f'{carpeta_padres}_Origen_DobleMarca.csv',
-                 'estudiantes': f'{carpeta_estudiantes}_Origen_DobleMarca.csv'}
 
-
-
-# Nombre de tabla que contiene n° de subpreguntas, n° de recuadros por subpregunta:
-nombre_tabla_para_insumos = 'DD 4° BÁSICO 2023_CE_CP.xlsx'
 # N° de filas que hay que saltarse al cargar la tabla (en qué fila se encuentran nombres de columnas)
 n_filas_ignorar_tabla_insumos = 4
 # Nombre columna con nombres de campos de la Base de datos:
@@ -119,8 +126,10 @@ id_estudiante = 'serie'
 variables_identificadoras = ['rbd', 'dvRbd', 'codigoCurso', id_estudiante, 'rutaImagen1']
 # Expresión regular para extraer rl rbd de la ruta en variable RutaImagen
 regex_extraer_rbd_de_ruta = r'\\(\d+)\\'
+
+# Diccionario que indica si la pregunta 1 debe ser ignorada al procesar datos
+dic_ignorar_p1 = {'estudiantes': True, 'padres': False}
 # Expresión regular que permite identificar variables asociadas a la pregunta 1
 # Utilizado para obviarla de la selección de preguntas
 regex_p1 = r'p1(_\d+)?$'
-# Diccionario que indica si la pregunta 1 debe ser ignorada al procesar datos
-dic_ignorar_p1 = {'estudiantes': True, 'padres': False}
+
