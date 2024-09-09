@@ -155,7 +155,7 @@ def process_single_image(preguntas:pd.Series, num: int, rbd:PathLike, dic_pagina
                 n_subpreg = len(lineas_horizontales) - 1
 
                 if n_subpreg != subpreg_x_preg[pregunta_selec]:
-                    preg_error = str(dir_subpreg_rbd / f'{estudiante}')
+                    preg_error = str(rbd)
                     dic_dif = get_subpregs_distintas(subpreg_x_preg, dir_subpreg_rbd, estudiante)
                     error = f'N° de subpreguntas incorrecto para serie {estudiante}, se encontraron {n_subpreg} subpreguntas {dic_dif}'
                     agregar_error(queue= queue, pregunta=preg_error, error=error, nivel_error=tipo_cuadernillo)
@@ -169,10 +169,10 @@ def process_single_image(preguntas:pd.Series, num: int, rbd:PathLike, dic_pagina
                 # Si hay error en procesamiento subpregunta
                 except Exception as e:
                     print(e)
-                    preg_error = str(dir_subpreg_rbd / f'{estudiante}_{pregunta_selec}_{int(subpreg_selec)}')
+                    preg_error = str(rbd)
                     agregar_error(queue= queue,
                                 pregunta=preg_error, 
-                                error='Subregunta no pudo ser procesada',
+                                error=f'Subregunta {estudiante}_{pregunta_selec}_{int(subpreg_selec)} no pudo ser procesada',
                                 nivel_error='Subpregunta', 
                                 )
                     return 'Ups, ocurrio un error en la subpregunta'
@@ -180,15 +180,17 @@ def process_single_image(preguntas:pd.Series, num: int, rbd:PathLike, dic_pagina
 
             except Exception as e:
                 print(e)
-                preg_error = str(dir_subpreg_rbd / f'{estudiante}_{pregunta_selec}')
-                agregar_error(queue= queue, pregunta=preg_error, error='Pregunta no pudo ser procesada', nivel_error='Pregunta')
+                preg_error = str(rbd)
+                agregar_error(queue= queue, pregunta=preg_error, error=f'Pregunta {pregunta_selec} no pudo ser procesada', nivel_error='Pregunta')
                 return
             
         except Exception as e:
             print('Ocurrió un error con la máscara')
             print(e)
-            preg_error = str(dir_subpreg_rbd / f'{estudiante}_{pregunta_selec}')
-            agregar_error(queue= queue, pregunta=preg_error, error='Ocurrio un error con la mascara', nivel_error='Pregunta')
+            preg_error = str(rbd)
+            agregar_error(queue= queue, pregunta=preg_error, 
+                          error=f'Ocurrió un error con la máscara para \
+                              {estudiante} en la pregunta {pregunta_selec}', nivel_error='Pregunta')
             
     print('Éxito!')
 
