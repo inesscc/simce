@@ -24,34 +24,30 @@ def main(args):
     else:
         from config.proc_img import  CURSO
         
-    directorios = get_directorios(curso=CURSO)
-    crear_directorios(directorios)
-    # 1.  Generar insumos para procesamiento
-    #generar_insumos_total(directorios, args=args) 
-    # 2. Generar tablas con dobles marcas
-    #get_tablas_99_total(directorios=directorios)
+    dirs = get_directorios(curso=CURSO)
+    crear_directorios(dirs)
 
-    dirs = get_directorios()
+    # 1.  Generar insumos para procesamiento
+    generar_insumos_total(dirs, args=args) 
+    # 2. Generar tablas con dobles marcas
+    get_tablas_99_total(directorios=dirs)
+
     
     manager = Manager()             # Objeto para gestionar datos compartidos entre procesos
     queue = manager.Queue()         # Cola de tareas
     
-    # process_general(dirs = dirs, regex_estudiante= regex_estudiante, 
-    #                 queue = queue, curso=CURSO, args=args, tipo_cuadernillo='padres')
-    
-    # import pandas as pd
-    # nombre_tabla_casos99 = f'casos_99_compilados_4b_padres.csv'
-    # df99 = pd.read_csv(dirs['dir_tabla_99'] / nombre_tabla_casos99)
-    # ests = df99.serie.sample(100, random_state=2).to_list()
-    # df99 = df99[df99.serie.isin(ests)]
     process_general(dirs = dirs, regex_estudiante= regex_estudiante, 
                     queue = queue, curso=CURSO, args=args, tipo_cuadernillo='padres',
+                    filter_rbd=['04243','04244'])
+
+    process_general(dirs = dirs, regex_estudiante= regex_estudiante, 
+                    queue = queue, curso=CURSO, args=args, tipo_cuadernillo='estudiantes',
                     filter_rbd=['04243','04244'])
     
 
     escribir_errores(queue)
 
-    gen_pred_set(directorios, curso=CURSO)
+    #gen_pred_set(directorios, curso=CURSO)
 
 
 if __name__ == "__main__":

@@ -30,7 +30,7 @@ carpeta_padres = 'CP'
 
 
 
-def get_directorios(curso=CURSO, filtro=None) -> dict:
+def get_directorios(curso, filtro=None) -> dict:
     '''Acá se indican todos los directorios del proyecto. Luego, la función crear_directorios() toma todos
     los directorios de este diccionario y los crea. La opción filtro permite cargar solo algunos directorios,
     en caso de requerirse. Si el filtro '''
@@ -102,8 +102,9 @@ regex_hoja_cuadernillo = r'_(\d+)'
 
 
 # PROCESAMIENTO POSIBLES DOBLES MARCAS -----
-nombre_tabla_estud_origen = f'{carpeta_estudiantes}_Origen_DobleMarca.csv'
-nombre_tabla_padres_origen = f'{carpeta_padres}_Origen_DobleMarca.csv'
+nombres_tablas_origen = {'padres': f'{carpeta_padres}_Origen_DobleMarca.csv',
+                 'estudiantes': f'{carpeta_estudiantes}_Origen_DobleMarca.csv'}
+
 
 
 # Nombre de tabla que contiene n° de subpreguntas, n° de recuadros por subpregunta:

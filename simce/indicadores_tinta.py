@@ -2,18 +2,28 @@ import cv2
 import numpy as np
 from simce.utils import get_mask_imagen
 import pandas as pd
+from os import PathLike
 
-def get_recuadros(mask):
+def get_recuadros(mask_blanco: np.ndarray)->tuple[np.ndarray, list[np.ndarray]]:
+    """Detecta recuadros en imagen. Genera máscara que intenta obtener todos los recuadros correspondientes a la subpregunta
+        siendo procesada. Es un insumo inicial que luego sigue siendo procesado a lo largo de la función
+        [preparar_mascaras](#preparar_mascaras). Esta función basta para detectar la mayoría de recuadros, salvo cuando estos tienen
+        mucha tinta, haciendo desaparecer el color blanco.
+
+    Args:
+        mask_blanco: máscara que intenta identificar color blanco dentro de la imagen
+    
+    Returns:
+        bordered_mask: máscara procesada que intenta identificar recuadros dentro de la imagen. 
+        
+        big_contours: contornos de recuadros. Son utilizados posteriormentes para marcarlos en la imagen.
+    """    
      # Define the border width in pixels
     top, bottom, left, right = [3]*4
 
     # Create a border around the image
-    bordered_mask = cv2.copyMakeBorder(mask, top, bottom, left, right,
+    bordered_mask = cv2.copyMakeBorder(mask_blanco, top, bottom, left, right,
                                         cv2.BORDER_CONSTANT, value=0).astype(np.uint8)
-
-    
-
-
 
     contours, _ = cv2.findContours(bordered_mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -49,11 +59,19 @@ def get_recuadros(mask):
         return bordered_mask, big_contours
     
 
+def preparar_mascaras(ruta: PathLike)-> tuple[np.ndarray, np.ndarray]:
+    """Genera máscaras que detectan recuadros de imagen, para posteriormente calcular indicadores de tinta en función 
+    [calcular_indices_tinta](#calcular_indices_tinta).
 
+    Args:
+        ruta: ruta de imagen a leer para obtener máscara
 
-def calcular_indices_tinta(ruta):
+    Returns:
+        bordered_mask: máscara con detección de contornos.
+        
+        bordered_rect_img: imagen a la que se le calcularán los indicadores.
+    """    
 
-    #bgr_img = cv2.imread(ruta)[20:-20, 15:-15]
     bgr_img = cv2.imread(ruta)
 
     mask_blanco = get_mask_imagen(bgr_img, lower_color=np.array([0,31,0]),
@@ -114,19 +132,37 @@ def calcular_indices_tinta(ruta):
     # Create a border around the image
     bordered_mask = cv2.copyMakeBorder(mask_blanco_fill, top, bottom, left, right,
                                         cv2.BORDER_CONSTANT, value=0).astype(np.uint8)
-    img = cv2.cvtColor(bgr_img,cv2.COLOR_BGR2GRAY) /255
+    rect_img = cv2.cvtColor(bgr_img,cv2.COLOR_BGR2GRAY) /255
     #bordered_mask = cv2.bitwise_not(bordered_mask)
 
+    bordered_rect_img = cv2.copyMakeBorder(rect_img, top, bottom, left, right, cv2.BORDER_CONSTANT, value=1)
+
+    return bordered_mask, bordered_rect_img
+
+def calcular_indices_tinta(ruta:str|PathLike)-> tuple[list[float, float], list[float, float]]:
+    """
+    Calcula índices de tinta para una subpregunta específica.
+
+    Args:
+        ruta: ruta de la imagen a la que se le calcularán los indicadores
+    
+    Returns:
+        indices_relevantes: lista con indicador de porcentaje de tinta de primer y segundo recuadros más altos.
+         
+        intensidades_relevantes: lista con indicador de intensidad de tinta de primer y segundo recuadros más altos.
+    
+    """
+
+    bordered_mask, bordered_rect_img = preparar_mascaras(ruta)
 
     contours, _ = cv2.findContours(bordered_mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
     big_contours = [
         i for i in contours if 250 < cv2.contourArea(i) < 2600 ]
-    #len(big_contours)
-    rect_img = img.copy()
-    bordered_rect_img = cv2.copyMakeBorder(rect_img, top, bottom, left, right, cv2.BORDER_CONSTANT, value=1)
+    #bgr_img = cv2.imread(ruta)[20:-20, 15:-15]
 
-    indices = []
+
+    porcentajes_tinta = []
     intensidades = []
 
     for contour in big_contours:
@@ -151,7 +187,7 @@ def calcular_indices_tinta(ruta):
                 h = h - px_cortar
                 y = y + px_cortar
         
-        cv2.rectangle(bordered_rect_img, (x, y), (x+w, y+h), 0, 3)
+        #cv2.rectangle(bordered_rect_img, (x, y), (x+w, y+h), 0, 3)
         img_crop = bordered_rect_img[y+3:y+h-3, x+3:x+w-3]
         idx_blanco = np.where(img_crop > 0.9)
         img_crop[idx_blanco] = 1
@@ -159,22 +195,38 @@ def calcular_indices_tinta(ruta):
 
         intensidad_promedio = 1- img_crop[img_crop != 1].mean()
         indice = 1 - img_crop.mean()
-        indices.append(np.round(indice, 3))
+        porcentajes_tinta.append(np.round(indice, 3))
         intensidades.append(np.round(intensidad_promedio, 3))
-    print(indices)
+
     
 
 
-    indices_relevantes = sorted(indices, reverse = True)[:2]
+    porcentajes_relevantes = sorted(porcentajes_tinta, reverse = True)[:2]
     intensidades_relevantes =   sorted([i for i in intensidades if not pd.isna(i)], reverse = True)[:2]
 
-    return indices_relevantes, intensidades_relevantes
+    return porcentajes_relevantes, intensidades_relevantes
 
+def get_indices_tinta_total(dirs: dict[str, PathLike]):
+    """
+    Toma tabla de predicciones y procede a calcular índices de tinta, que agrega a la tabla y luego
+    exporta una tabla final. Los indicadores calculados son:
+     
+      - Ratio porcentaje de tinta: ratio entre el porcentaje relleno del recuadro con más tinta
+        y el segundo recuadro con más tinta, para una subpregunta dada
+       
+      - Ratio de intensidad de tinta: ratio entre la intensidad promedio de la tinta del recuadro más intenso 
+      y el segundo más intenso, para una subpregunta dada
+       
+    **No retorna nada**
 
-def get_indices_tinta(dirs):
+    Args:
+        dirs: diccionario de directorios del proyecto
+
+    
+    """
     preds = pd.read_parquet(dirs['dir_predicciones'] / 'predicciones_modelo.parquet')
     preds['indices'] = preds.ruta_imagen_output.apply(lambda x: calcular_indices_tinta(x))
-
+    preds = preds.reset_index(drop=True)
     split = pd.DataFrame(preds['indices'].tolist(), columns = ['indice_tinta', 'indice_intensidad'])
     preds_final = preds.copy()
     for col in split.columns:

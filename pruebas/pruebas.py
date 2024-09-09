@@ -16,6 +16,7 @@ from time import time
 from simce.utils import dic_img_preg
 import pandas as pd
 
+
 # p1 = list(chain.from_iterable(
 #     [[str(j) for j in i.iterdir() if '_1' in j.name] for i in dir_est.iterdir()]))
 # p1_sample = p1[:100]

@@ -6,48 +6,56 @@ Created on Thu May  9 17:20:37 2024
 """
 import pandas as pd
 from config.proc_img import  variables_identificadoras, SEED, CURSO, ENCODING, LIMPIAR_RUTA, \
-regex_extraer_rbd_de_ruta, dic_ignorar_p1, regex_p1, \
-nombre_tabla_estud_origen, nombre_tabla_padres_origen, regex_estudiante 
+regex_extraer_rbd_de_ruta, dic_ignorar_p1, regex_p1, nombres_tablas_origen 
 from simce.utils import timing
 import re
 import json
 import random
 import numpy as np
 from pathlib import Path
-
+from os import PathLike
 random.seed(SEED)
 np.random.seed(SEED)
 
 @timing
-def get_tablas_99_total(directorios):
+def get_tablas_99_total(directorios:list[PathLike]):
+    '''Obtiene y exporta tabla de dobles marcas para estudiantes y padres.
+        **No retorna nada**
+        
+    Args:
+        directorios: lista de directorios del proyecto.'''
     
     print('Generando tabla estudiantes...')
 
     get_tablas_99(tipo_cuadernillo='estudiantes', 
-                  directorios=directorios)
+                  directorios=directorios, limpiar_ruta=LIMPIAR_RUTA)
     print('Generando tabla padres...')
 
     get_tablas_99(tipo_cuadernillo='padres', 
-                  directorios=directorios)
+                  directorios=directorios, limpiar_ruta=LIMPIAR_RUTA)
 
-def get_tablas_99(tipo_cuadernillo, directorios):
+def get_tablas_99(tipo_cuadernillo:str, directorios:list[PathLike], limpiar_ruta:bool):
+    '''Genera tabla de dobles marcas para un tipo de cuadernillo específico, donde cada fila es una
+      subpregunta con sospecha de doble marca. Utiliza insumos generados en 
+      [su respectivo módulo](../generar_insumos_img#simce.generar_insumos_img) para determinar a cuál de las
+       imágenes pertenece cada subpregunta, lo que posteriormente permite cargar la imagen correcta en 
+       [el módulo de paralelización](../paralelizacion#simce.paralelizacion). **No retorna nada**.
+        
+    Args:
+        tipo_cuadernillo: cuadernillo siendo analizado, puede ser "estudiantes" o "padres".
+        directorios: lista de directorios del proyecto.
+        limpiar_ruta: booleando que define si la ruta debe limpiarse. En particular, a veces las rutas llegan
+            con la serie del estudiante dentro de esta. En general, el proyecto se realiza de forma que dentro
+            de cada rbd están las imágenes de todos los estudiantes, por lo que damos la opción de borrar
+            la serie de la ruta.
+         '''
+    
 
-    if tipo_cuadernillo == 'estudiantes':
-
-
-        tabla_origen = nombre_tabla_estud_origen
-
-
-    elif tipo_cuadernillo == 'padres':
-
-
-        tabla_origen = nombre_tabla_padres_origen
+    nombre_tabla_origen = nombres_tablas_origen[tipo_cuadernillo]
 
 
     with open(directorios['dir_insumos'] / 'insumos.json') as f:
         insumos = json.load(f)
-
-
 
     if not tipo_cuadernillo in insumos.keys():
         print('No hay tabla de padres para este curso')
@@ -55,7 +63,8 @@ def get_tablas_99(tipo_cuadernillo, directorios):
     dic_cuadernillo = insumos[tipo_cuadernillo]['dic_cuadernillo']
 
 
-    Origen_DobleMarca = pd.read_csv(directorios['dir_input'] / tabla_origen, delimiter=';', encoding=ENCODING)
+    Origen_DobleMarca = pd.read_csv(directorios['dir_input'] / nombre_tabla_origen,
+                                     delimiter=';', encoding=ENCODING)
 
 
 
@@ -71,7 +80,7 @@ def get_tablas_99(tipo_cuadernillo, directorios):
 
     df_final = casos_99_origen.reset_index()
 
-    if LIMPIAR_RUTA:
+    if limpiar_ruta:
         df_final.ruta_imagen = df_final.ruta_imagen.str.replace(r'\\\d{7}', '', regex=True, n=1)
         
     df_final['ruta_imagen_output'] = (directorios['dir_subpreg'] / 
@@ -87,11 +96,29 @@ def get_tablas_99(tipo_cuadernillo, directorios):
     print('Tabla compilada generada exitosamente!')
 
 
-def procesar_casos_99(df_rptas, nombres_col, dic_cuadernillo, tipo_cuadernillo):
+def procesar_casos_99(tabla_origen: pd.DataFrame, nombres_col: list[str], dic_cuadernillo: dict[str, int],
+                       tipo_cuadernillo: str)->pd.DataFrame:
+    '''
+    Procesa tabla de origen, de forma que cada fila represente una subpregunta con sospecha de doble marca.
+    Además, identifica a cuál imagen corresponde la subpregunta.  
+
+    Args:
+        tabla_origen: tabla Origen proporcionada por ACE. Contiene las respuestas de todos los alumnos que tienen
+            al menos una sospecha de doble marca.
+        nombres_col: lista de nombres de columnas asociados a preguntas en la tabla de Origen.
+        dic_cuadernillo: diccionario que indica a qué imagen corresponde cada pregunta del cuadernillo.
+        tipo_cuadernillo: tipo de cuadernillo siendo analizado, puede ser "estudiantes" o "padres"
+
+    Returns:
+        casos_99_final: tabla dobles marcas procesada, tal que cada fila represente
+            una subpregunta con sospecha de doble marca
+    
+    
+    '''
 
     ignorar_p1 = dic_ignorar_p1[tipo_cuadernillo]
 
-    df_melt = df_rptas.melt(id_vars=variables_identificadoras,
+    df_melt = tabla_origen.melt(id_vars=variables_identificadoras,
                             value_vars=nombres_col,
                             var_name='preguntas',
                             value_name='respuestas')
@@ -102,29 +129,27 @@ def procesar_casos_99(df_rptas, nombres_col, dic_cuadernillo, tipo_cuadernillo):
     casos_99 = df_melt[(df_melt['respuestas'] == 99)].copy()
 
     # Si queremos obtener set de entrenamiento agregamos muestra de respuestas normales:
-    # if para_entrenamiento:
-
-    #     df_sample = df_melt[df_melt.respuestas.ne(99)].sample(round(casos_99.shape[0] * .2), random_state=SEED )
-    #     casos_99 = pd.concat([casos_99, df_sample])
 
     # Usamos diccionario cuadernillo para ver a qué imagen está asociada esa pregunta específica:
     casos_99['ruta_imagen'] = (casos_99.rutaImagen1.str.replace(r'(_\d+.*)', '_', regex=True) +
                                casos_99.preguntas.str.extract(r'(p\d+)').squeeze().map(dic_cuadernillo) +
                                '.jpg')
+    casos_99_final = casos_99.drop(columns=['rutaImagen1']).set_index(['serie', 'preguntas'])
 
-    return casos_99.drop(columns=['rutaImagen1']).set_index(['serie', 'preguntas'])
-
-
-def gen_tabla_entrenamiento(casos_99, casos_99_origen):
-
-    casos_99_origen['dm_final'] = casos_99.respuestas
-    casos_99_origen['dm_final'] = casos_99_origen['dm_final'].fillna(0).astype(int)
-    casos_99_origen = casos_99_origen.rename(columns={'respuestas': 'dm_sospecha'})
-    casos_99_origen.dm_final = (casos_99_origen.dm_final == 99).astype(int)
-    casos_99_origen.dm_sospecha = (casos_99_origen.dm_sospecha == 99).astype(int)
+    return casos_99_final
 
 
-    return casos_99_origen
+# def gen_tabla_entrenamiento(casos_99, casos_99_origen):
+#     '''hola'''
+
+#     casos_99_origen['dm_final'] = casos_99.respuestas
+#     casos_99_origen['dm_final'] = casos_99_origen['dm_final'].fillna(0).astype(int)
+#     casos_99_origen = casos_99_origen.rename(columns={'respuestas': 'dm_sospecha'})
+#     casos_99_origen.dm_final = (casos_99_origen.dm_final == 99).astype(int)
+#     casos_99_origen.dm_sospecha = (casos_99_origen.dm_sospecha == 99).astype(int)
+
+
+#     return casos_99_origen
 
 
 # def procesar_casos_sample(df_rptas_fin, df_rptas_or, nombres_col, dic_cuadernillo, series):

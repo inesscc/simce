@@ -43,9 +43,9 @@ def get_n_paginas(directorio_imagenes: str)->int:
 
 def calcular_pregunta_actual(pages: tuple[int, int], p: int, dic_q: dict)-> int:
     '''Método programático para obtener pregunta del cuadernillo que se está
-    procesando. Dado que siempre una página tiene preguntas que vienen en orden
-    ascendente y la otra en orden descendente (por la lógica de cuadernillo), hubo
-    que incorporar esto en el algoritmo
+        procesando. Dado que siempre una página tiene preguntas que vienen en orden
+        ascendente y la otra en orden descendente (por la lógica de cuadernillo), hubo
+        que incorporar esto en el algoritmo
 
     Args:
         pages: tupla que contiene la página izquierda y la página derecha de la página del
@@ -291,7 +291,7 @@ def get_preg_por_hoja(n_pages:int, n_preguntas:int,
                        directorio_imagenes:os.PathLike, args:argparse.Namespace,
                          nivel:str='cuadernillo'
                          )->dict:
-    '''Función que puebla diccionario completo que mapea preguntas del cuestionario a su hoja o imagen
+    '''Puebla diccionario completo que mapea preguntas del cuestionario a su hoja o imagen
     correspondiente en el cuadernillo. Utiliza como insumo el número de páginas del cuadernillo y el n°
     de preguntas del cuestionario.
 
@@ -302,7 +302,7 @@ def get_preg_por_hoja(n_pages:int, n_preguntas:int,
         n_preguntas: número de preguntas del cuadernillo
 
         directorio_imagenes: directorio donde se encuentran imágenes del tipo de
-        cuadernillo que se está procesando (padres o estudiantes).
+            cuadernillo que se está procesando (padres o estudiantes).
 
         nivel: indica si se está obteniendo diccionario a nivel cuadernillo o página.
 
@@ -346,7 +346,7 @@ def get_subpreg_x_preg(df_preguntas: pd.DataFrame)-> dict:
 
     '''
     
-    df_preguntas['preg'] = df_preguntas[nombre_col_campo_bd].str.extract('^p(\d+)').astype(int)
+    df_preguntas['preg'] = df_preguntas[nombre_col_campo_bd].str.extract(r'^p(\d+)').astype(int)
     subpreg_x_preg = df_preguntas['preg'].value_counts().sort_index()
     subpreg_x_preg.index = 'p' + subpreg_x_preg.index.astype('string') 
     subpreg_x_preg = subpreg_x_preg.to_dict()
@@ -406,16 +406,16 @@ def generar_insumos(tipo_cuadernillo:str, directorios:dict[str, os.PathLike],
     df_para_insumos = pd.read_excel(directorios['dir_input'] / nombre_tabla_para_insumos,
                     skiprows=n_filas_ignorar_tabla_insumos, sheet_name=sheet_name)
     df_para_insumos = df_para_insumos[df_para_insumos[nombre_col_campo_bd].notnull()]
-    df_preguntas = df_para_insumos[df_para_insumos[nombre_col_campo_bd].str.contains('p\d+')].copy()
+    df_preguntas = df_para_insumos[df_para_insumos[nombre_col_campo_bd].str.contains(r'p\d+')].copy()
 
     n_pages = get_n_paginas(directorio_imagenes)
-    n_preguntas = df_para_insumos[nombre_col_campo_bd].str.extract('(p\d+)').nunique().iloc[0]
+    n_preguntas = df_para_insumos[nombre_col_campo_bd].str.extract(r'(p\d+)').nunique().iloc[0]
     dic_cuadernillo = get_preg_por_hoja(n_pages, n_preguntas,
                                          directorio_imagenes , args=args, nivel='cuadernillo')
     dic_pagina = get_preg_por_hoja(n_pages, n_preguntas,
                                     directorio_imagenes, args=args, nivel='pagina')
     subpreg_x_preg = get_subpreg_x_preg(df_preguntas)
-    n_subpreg_tot = df_para_insumos[nombre_col_campo_bd].str.contains('^p\d').sum()
+    n_subpreg_tot = df_para_insumos[nombre_col_campo_bd].str.contains(r'^p\d').sum()
     n_recuadros_x_subpreg = (df_preguntas
                                 .set_index('p'+df_preguntas.preg.astype('string'))[nombre_col_val_permitidos]
                                 .apply(lambda x: get_recuadros_x_subpreg(x))
