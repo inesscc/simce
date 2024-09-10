@@ -33,6 +33,8 @@ nombre_col_val_permitidos = 'Rango de valores Permitidos'
 ## Conexión a NAS -----
 IP_NAS = '10.10.100.28'
 FOLDER_DATOS = '4b_2023' # OJO, actualizar
+## TODO: actualizar conexión.
+## TODO: mostrar cómo cambiar tabla exportada.
 
 # 2. VARIABLES QUE ES PROBABLE QUE DEBAN SER ACTUALIZADAS:
 
@@ -44,7 +46,7 @@ regex_extraer_rbd_de_ruta = r'\\(\d+)\\'
 
 # Diccionario que indica si la pregunta 1 debe ser ignorada al procesar datos
 dic_ignorar_p1 = {'estudiantes': True, 'padres': False}
-
+# TODO: Ver cómo ignorar fácilmente más preguntas.
 
 # Expresión regular para capturar el identificador del estudiante en nombre de archivos
 regex_estudiante = r'\d{7,}'
@@ -72,7 +74,7 @@ def get_directorios(curso, filtro=None) -> dict:
     en caso de requerirse. Si el filtro '''
     dd = dict()
     dd['dir_data'] = Path('data/')
-    dd['dir_input'] = dd['dir_data'] / 'input_raw' 
+    dd['dir_input'] = dd['dir_data'] / 'input_bruto' 
 
     # En producción nos conectamos a disco NAS para acceso a imágenes
     if os.getenv('ENV') == 'production':
@@ -86,7 +88,7 @@ def get_directorios(curso, filtro=None) -> dict:
     dd['dir_estudiantes'] = dd['dir_input'] / carpeta_estudiantes
     dd['dir_padres'] = dd['dir_input'] / carpeta_padres
 
-    dd['dir_input_proc'] = Path('data/input_proc/')
+    dd['dir_input_proc'] = Path('data/input_procesado/')
     dd['dir_subpreg_aux'] = dd['dir_input_proc'] / curso / 'subpreg_recortadas'
     dd['dir_subpreg'] = dd['dir_subpreg_aux'] / 'base'
     dd['dir_subpreg_aug'] = dd['dir_subpreg_aux'] / 'augmented'
