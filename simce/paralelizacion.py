@@ -191,8 +191,8 @@ def process_single_image(preguntas:pd.Series, num: int, rbd:PathLike, dic_pagina
             agregar_error(queue= queue, pregunta=preg_error, 
                           error=f'Ocurrió un error con la máscara para \
                               {estudiante} en la pregunta {pregunta_selec}', nivel_error='Pregunta')
-            
-    print('Éxito!')
+    if args.verbose:
+       print('Éxito!')
 
 
 ## división en bloques --------------------
@@ -274,11 +274,12 @@ def process_general(dirs:dict[str, PathLike], regex_estudiante: str, queue:Queue
     df99.ruta_imagen = df99.ruta_imagen.str.replace('\\', '/')
     dir_preg99 = [dirs['dir_img_bruta'] / i for i in df99.ruta_imagen]
 
+
     n_pages, _, subpreg_x_preg, _, dic_pagina, _ = get_insumos(tipo_cuadernillo,
                                                                 dir_insumos=dirs['dir_insumos'])
 
     # Dividir en bloques para procesamiento paralelo
-    num_workers = cpu_count() -1
+    num_workers = min(len(dir_preg99), cpu_count() -1)
     print('###########')
     print(f'Cantidad de CPUs a usar {num_workers}')
     print('###########')

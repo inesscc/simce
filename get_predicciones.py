@@ -11,7 +11,7 @@ import data_loader.data_loaders as module_data
 from simce.predicciones import obtener_predicciones, exportar_predicciones, prepare_model
 
 from config.proc_img import get_directorios
-from config.proc_img import SEED, CURSO
+from config.proc_img import SEED, CURSO, nombre_tabla_predicciones
 import numpy as np
 import pandas as pd
 import argparse
@@ -36,7 +36,7 @@ def main(config):
                                 return_directory=True, dir_data=dirs['dir_train_test'])
     loader.num_workers = 0
     predictions, probs_float, lst_directories = obtener_predicciones(loader, device, model)
-    resto_datos = pd.read_csv(dirs['dir_train_test'] / 'data_pred.csv')
+    resto_datos = pd.read_csv(dirs['dir_train_test'] / nombre_tabla_predicciones)
     preds = pd.DataFrame({'pred': predictions,
                 'proba': probs_float,
                 'dirs': lst_directories})
