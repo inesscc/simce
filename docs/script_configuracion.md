@@ -199,7 +199,7 @@ Es el nombre de la tabla que contiene las predicciones. Quedó parametrizada par
 
 Este archivo de configuración, en cambio, es un archivo `.json`, que tiene una estructura anidada. La gran mayoría de sus valores está avocada al entrenamiento, así que no los detallaremos aquí.
 
-```json
+```json hl_lines="4"
     "data_loader": {
         "type": "TrainTestDataLoader",
         "args": {
