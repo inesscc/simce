@@ -32,6 +32,10 @@ A continuación se presenta la estructura del proyecto, con el fin de que sea po
     │   └── proc_img.py - configuraciones asociadas al recorte de subpreguntas.
     │
     ├── data/ - carpeta con datos del modelo
+    │   ├── input_modelamiento - aquí se guarda la tabla con datos a predecir, que recibe el modelo
+    │   ├── input_proc - aquí se guardan las subpreguntas recortadas y la tabla de dobles marcas procesada
+    │   ├── input_raw - aquí se guardan los datos brutos: tabla origen, tabla campos BD e imágenes si no se realiza conexión al disco NAS
+    │   └── output - contiene las predicciones y posibles visualizaciones.
     │
     ├── data_loader/ - carga de datos en Torch 
     │   └── data_loaders.py
