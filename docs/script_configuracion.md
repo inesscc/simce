@@ -215,7 +215,7 @@ Este archivo de configuración, en cambio, es un archivo `.json`, que tiene una 
 
 ```
 
-Esta sección hace referencia al data_loader, que es el objeto que se encarga de carga las imágenes y pasárselas al modelo. Lo importante es que el nombre del `data_file` sea el mismo que [nombre_tabla_predicciones](#__codelineno-20-72) en la sección anterior.
+Esta sección hace referencia al data_loader, que es el objeto que se encarga de cargar las imágenes y pasárselas al modelo. Lo importante es que el nombre del `data_file` sea el mismo que [nombre_tabla_predicciones](#__codelineno-20-72) en la sección anterior.
 
 **Importante:** no tocar los otros valores, pues podrían llevar a problemas al predecir.
 
