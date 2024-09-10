@@ -9,22 +9,22 @@
       
       
       
-        <link rel="prev" href="../outputs/">
+        <link rel="prev" href="../tutorial/">
       
       
-        <link rel="next" href="../generar_insumos_img/">
+        <link rel="next" href="../outputs/">
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.34">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.31">
     
     
       
-        <title>Cómo utilizar el script de configuración - SIMCE Docs</title>
+        <title>Tutorial archivos de configuración - SIMCE Docs</title>
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.35f28582.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.3cba04c6.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
@@ -48,7 +48,7 @@
     
       <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
-    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -73,6 +73,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#proc_imgpy" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -88,12 +93,12 @@
     <a href=".." title="SIMCE Docs" class="md-header__button md-logo" aria-label="SIMCE Docs" data-md-component="logo">
       
   
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
       
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
     </label>
     <div class="md-header__title" data-md-component="header-title">
       <div class="md-header__ellipsis">
@@ -105,7 +110,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Cómo utilizar el script de configuración
+              Tutorial archivos de configuración
             
           </span>
         </div>
@@ -121,7 +126,7 @@
     <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Cambiar a modo oscurso"  type="radio" name="__palette" id="__palette_0">
     
       <label class="md-header__button md-icon" title="Cambiar a modo oscurso" for="__palette_1" hidden>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
       </label>
     
   
@@ -131,7 +136,7 @@
     <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Cambiar a modo normal"  type="radio" name="__palette" id="__palette_1">
     
       <label class="md-header__button md-icon" title="Cambiar a modo normal" for="__palette_0" hidden>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
       </label>
     
   
@@ -139,13 +144,13 @@
       
     
     
-      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
     
     
     
       <label class="md-header__button md-icon" for="__search">
         
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
       </label>
       <div class="md-search" data-md-component="search" role="dialog">
   <label class="md-search__overlay" for="__search"></label>
@@ -154,15 +159,15 @@
       <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
         
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
         
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
       </label>
       <nav class="md-search__options" aria-label="Search">
         
         <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
           
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
         </button>
       </nav>
       
@@ -209,7 +214,7 @@
     <a href=".." title="SIMCE Docs" class="md-nav__button md-logo" aria-label="SIMCE Docs" data-md-component="logo">
       
   
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
 
     </a>
     SIMCE Docs
@@ -248,27 +253,7 @@
         
   
   <span class="md-ellipsis">
-    Tutorial de uso
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../outputs/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Guía de outputs del proyecto
+    Tutorial de uso de scripts de procesamiento y predicción
   </span>
   
 
@@ -291,16 +276,115 @@
       
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Tutorial archivos de configuración
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
-    Cómo utilizar el script de configuración
+    Tutorial archivos de configuración
   </span>
   
 
       </a>
       
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#proc_imgpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      proc_img.py
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="proc_img.py">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#es-bastante-probable-que-estos-valores-deban-ser-modificados" class="md-nav__link">
+    <span class="md-ellipsis">
+      Es bastante probable que estos valores deban ser modificados:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#es-relativamente-probable-que-estos-valores-deban-ser-modificados" class="md-nav__link">
+    <span class="md-ellipsis">
+      Es relativamente probable que estos valores deban ser modificados:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#es-menos-probable-que-estos-valores-deban-ser-modificados" class="md-nav__link">
+    <span class="md-ellipsis">
+      Es menos probable que estos valores deban ser modificados:
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#config_predjson" class="md-nav__link">
+    <span class="md-ellipsis">
+      config_pred.json
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../outputs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Guía de outputs del proyecto
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -512,6 +596,65 @@
   
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#proc_imgpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      proc_img.py
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="proc_img.py">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#es-bastante-probable-que-estos-valores-deban-ser-modificados" class="md-nav__link">
+    <span class="md-ellipsis">
+      Es bastante probable que estos valores deban ser modificados:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#es-relativamente-probable-que-estos-valores-deban-ser-modificados" class="md-nav__link">
+    <span class="md-ellipsis">
+      Es relativamente probable que estos valores deban ser modificados:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#es-menos-probable-que-estos-valores-deban-ser-modificados" class="md-nav__link">
+    <span class="md-ellipsis">
+      Es menos probable que estos valores deban ser modificados:
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#config_predjson" class="md-nav__link">
+    <span class="md-ellipsis">
+      config_pred.json
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -525,9 +668,206 @@
                   
 
 
-  <h1>Cómo utilizar el script de configuración</h1>
+  <h1>Tutorial archivos de configuración</h1>
 
-
+<p>En este manual revisaremos qué son y qué información contienen los archivos de configuración. Cada script de procesamiento tiene asociado un archivo, ambos en la carpeta <code>config</code>:</p>
+<ul>
+<li><code>proc_img.py</code> para el script de recorte de imágenes </li>
+<li>Un archivo <code>.json</code> que actualmente llamamos <code>config_pred.json</code> para el script de predicción de dobles marcas. A diferencia del primero, este puede cambiar de nombre sin problema, pues debe ingresarse su ruta al llamar el script de predicción de dobles marcas, como se vio en <a href="../tutorial#get_predicciones.py">su sección de la documentación</a>.</li>
+</ul>
+<h2 id="proc_imgpy">proc_img.py</h2>
+<p>Este script centraliza los valores que podrían variar entre prueba y prueba a lo largo de los scripts que llevan al recorte de subpreguntas. De esta forma, al cambiar valores acá, se cambiarán automáticamente todas las menciones a estos valores en los otros script. La idea, entonces, es que, en caso de necesitar hacer cambios al script entregado, lo más probable es que tengan que ser hechos acá. A continuación explicamos en detalle algunas de las líneas.</p>
+<h3 id="es-bastante-probable-que-estos-valores-deban-ser-modificados">Es bastante probable que estos valores deban ser modificados:</h3>
+<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1"></a><span class="n">CURSO</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;4b&#39;</span><span class="p">)</span>
+</span></code></pre></div></td></tr></table></div>
+<p>Acá se define qué curso está siendo procesado. En este caso, estamos procesando 4° básico. Esto afecta principalmente nombres de archivos y carpetas que dan orden al proyecto, en la medida que se van generando. Por ejemplo, los datos de subpreguntas se guardan en <pre>data/input_proc/<b>4b</b>/subpreg_recortadas</pre>.</p>
+<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-1-2">2</a></span>
+<span class="normal"><a href="#__codelineno-1-3">3</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2"></a><span class="n">carpeta_estudiantes</span> <span class="o">=</span> <span class="s1">&#39;CE&#39;</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3"></a><span class="n">carpeta_padres</span> <span class="o">=</span> <span class="s1">&#39;CP&#39;</span>
+</span></code></pre></div></td></tr></table></div>
+<p>Es el nombre de las carpetas de padres y estudiantes. Se utilizan para buscar en el directorio de archivos estas carpetas, además de que se crearán carpetas con estos nombres en los outputs. Si se dejara de usar esta nomenclatura en el sistema de archivos, deberían cambiarse estos valores a algo que corresponda a la nueva nomenclatura.</p>
+<p><div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-2-4">4</a></span>
+<span class="normal"><a href="#__codelineno-2-5">5</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4"></a><span class="n">nombres_tablas_origen</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;padres&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">carpeta_padres</span><span class="si">}</span><span class="s1">_Origen_DobleMarca.csv&#39;</span><span class="p">,</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5"></a>                 <span class="s1">&#39;estudiantes&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">carpeta_estudiantes</span><span class="si">}</span><span class="s1">_Origen_DobleMarca.csv&#39;</span><span class="p">}</span>
+</span></code></pre></div></td></tr></table></div>
+Contiene los nombres de las tablas de Origen. Si los nombres cambian, deben ser cambiados aquí también. Notar que se hace referencia a las variables <code>carpeta_padres</code> y <code>carpeta_estudiantes</code>, que se mencionaron anteriormente. Por lo tanto, por ejemplo, para padres, el nombre original del archivo era <code>CP_Origen_DobleMarca.csv</code>.</p>
+<p><div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-3-6">6</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6"></a><span class="n">nombre_tabla_para_insumos</span> <span class="o">=</span> <span class="s1">&#39;DD 4° BÁSICO 2023_CE_CP.xlsx&#39;</span>
+</span></code></pre></div></td></tr></table></div>
+Tabla que se utiliza para parte de la generación de insumos. De esta se pueden extraer número de preguntas, de subpreguntas, de opciones por subpregunta. Deberá ser actualizada al nombre que corresponda en su siguiente versión.</p>
+<p><div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-4-7">7</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7"></a><span class="n">n_filas_ignorar_tabla_insumos</span> <span class="o">=</span> <span class="mi">4</span>
+</span></code></pre></div></td></tr></table></div>
+En la versión que recibimos de la tabla, era necesario saltarse las primeras 4 filas para acceder a los datos que nos interesan. Lo dejamos parametrizado, en caso de que esto cambie.</p>
+<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-5-8">8</a></span>
+<span class="normal"><a href="#__codelineno-5-9">9</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8"></a><span class="n">nombre_col_campo_bd</span> <span class="o">=</span> <span class="s1">&#39;Nombre Campo BD&#39;</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9"></a><span class="n">nombre_col_val_permitidos</span> <span class="o">=</span> <span class="s1">&#39;Rango de valores Permitidos&#39;</span>
+</span></code></pre></div></td></tr></table></div>
+<p>Representa el nombre de la columna que contiene los nombres de los campos de la base de datos y los valores permitidos para cada subpregunta. Actualizar si el nombre de alguna de estas columnas cambia.</p>
+<p><div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-6-10">10</a></span>
+<span class="normal"><a href="#__codelineno-6-11">11</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10"></a><span class="n">IP_NAS</span> <span class="o">=</span> <span class="s1">&#39;10.10.100.28&#39;</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11"></a><span class="n">FOLDER_DATOS</span> <span class="o">=</span> <span class="s1">&#39;4b_2023&#39;</span> <span class="c1"># OJO, actualizar</span>
+</span></code></pre></div></td></tr></table></div>
+Valores utilizados para la conexión al disco NAS donde están los datos de imágenes. Si la IP o la carpeta de datos cambiara, debe ser ingresado aquí. </p>
+<h3 id="es-relativamente-probable-que-estos-valores-deban-ser-modificados">Es relativamente probable que estos valores deban ser modificados:</h3>
+<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-7-12">12</a></span>
+<span class="normal"><a href="#__codelineno-7-13">13</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12"></a><span class="n">id_estudiante</span> <span class="o">=</span> <span class="s1">&#39;serie&#39;</span>
+</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13"></a><span class="n">variables_identificadoras</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;rbd&#39;</span><span class="p">,</span> <span class="s1">&#39;dvRbd&#39;</span><span class="p">,</span> <span class="s1">&#39;codigoCurso&#39;</span><span class="p">,</span> <span class="n">id_estudiante</span><span class="p">,</span> <span class="s1">&#39;rutaImagen1&#39;</span><span class="p">]</span>
+</span></code></pre></div></td></tr></table></div>
+<p>Representan variables que utilizaremos de la tabla origen. Si cualquiera de estas variables cambia de nombre en la tabla origen, deberán ser actualizadas acá.</p>
+<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-8-14">14</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14"></a><span class="n">regex_extraer_rbd_de_ruta</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">(\d+)</span><span class="se">\\</span><span class="s1">&#39;</span>
+</span></code></pre></div></td></tr></table></div>
+<p>Expresión regular que el RBD de la ruta que se encuentra en la variable rutaImagen1 (busca uno o más dígitos consecutivos rodeados de paréntesis).</p>
+<p><div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-9-15">15</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-9-15"><a id="__codelineno-9-15" name="__codelineno-9-15"></a><span class="n">dic_ignorar_p1</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;estudiantes&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;padres&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+</span></code></pre></div></td></tr></table></div>
+Determina si la pregunta 1 debe ser ignorada o no en cada cuadernillo. En el caso que estudiamos nosotros, el cuadernillo de estudiantes preguntaba la edad en la pregunta 1, por lo que debía ser ignorada. En el caso de los padres, era una pregunta común y corriente, por lo que no se ignora.</p>
+<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-10-16">16</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-10-16"><a id="__codelineno-10-16" name="__codelineno-10-16"></a><span class="n">regex_estudiante</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;\d{7,}&#39;</span>
+</span></code></pre></div></td></tr></table></div>
+<p>Acá se define cómo extraeremos los identificadores de los estudiantes de rutas de archivos, principalmente. Lo que busca este código son 7 números seguidos. Por lo tanto, si el identificador de estudiante cambiara a más o menos números o incorporara letras, habría que modificar esto para que funcione de manera acorde.</p>
+<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-11-17">17</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-11-17"><a id="__codelineno-11-17" name="__codelineno-11-17"></a><span class="n">ENCODING</span> <span class="o">=</span> <span class="s1">&#39;utf-8&#39;</span>
+</span></code></pre></div></td></tr></table></div>
+<p>Define cuál es el encoding utilizado a la hora de leer la tabla de origen. Nos pasó en una ocasión que se usaba encoding "Latin-1" para una tabla de octavo básico, por lo que decidimos parametrizar esto.</p>
+<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-12-18">18</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-12-18"><a id="__codelineno-12-18" name="__codelineno-12-18"></a><span class="n">LIMPIAR_RUTA</span> <span class="o">=</span> <span class="kc">False</span>
+</span></code></pre></div></td></tr></table></div>
+<p>En algunos casos las rutas a los archivos de los cuadernillos en la tabla de origen, incluían el identificador del alumno como una carpeta. En general, nosotros trabajamos de forma que dentro de las carpetas de cada rbd se encontraban todas las imágenes, sin una carpeta intermedia por cada alumno del rbd. Así, cuando pasa esto, este parámetro elimina de la ruta el identificador del alumno.</p>
+<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-13-19">19</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-13-19"><a id="__codelineno-13-19" name="__codelineno-13-19"></a><span class="n">IGNORAR_PRIMERA_PAGINA</span> <span class="o">=</span> <span class="kc">True</span>
+</span></code></pre></div></td></tr></table></div>
+<p>Este parámetro define si se debe ignorar la primera página en la recolección de insumos. Esto, porque usualmente la primera página tiene preguntas de ejemplo, que deben ser ignoradas. Se agrega en caso en que alguna iteración contenga alguna pregunta que no sea de ejemplo en la primera página.</p>
+<h3 id="es-menos-probable-que-estos-valores-deban-ser-modificados">Es menos probable que estos valores deban ser modificados:</h3>
+<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-14-20">20</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-14-20"><a id="__codelineno-14-20" name="__codelineno-14-20"></a><span class="n">n_pixeles_entre_lineas</span> <span class="o">=</span> <span class="mi">22</span>
+</span></code></pre></div></td></tr></table></div>
+<p>Especifica cuántos píxeles se espera que haya como mínimo entre dos líneas separadoras de subpreguntas. Debiera ser relevante solo si cambiara el diseño del cuestionario de forma que las subpreguntas queden más (o menos) espaciadas.</p>
+<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-15-21">21</a></span>
+<span class="normal"><a href="#__codelineno-15-22">22</a></span>
+<span class="normal"><a href="#__codelineno-15-23">23</a></span>
+<span class="normal"><a href="#__codelineno-15-24">24</a></span>
+<span class="normal"><a href="#__codelineno-15-25">25</a></span>
+<span class="normal"><a href="#__codelineno-15-26">26</a></span>
+<span class="normal"><a href="#__codelineno-15-27">27</a></span>
+<span class="normal"><a href="#__codelineno-15-28">28</a></span>
+<span class="normal"><a href="#__codelineno-15-29">29</a></span>
+<span class="normal"><a href="#__codelineno-15-30">30</a></span>
+<span class="normal"><a href="#__codelineno-15-31">31</a></span>
+<span class="normal"><a href="#__codelineno-15-32">32</a></span>
+<span class="normal"><a href="#__codelineno-15-33">33</a></span>
+<span class="normal"><a href="#__codelineno-15-34">34</a></span>
+<span class="normal"><a href="#__codelineno-15-35">35</a></span>
+<span class="normal"><a href="#__codelineno-15-36">36</a></span>
+<span class="normal"><a href="#__codelineno-15-37">37</a></span>
+<span class="normal"><a href="#__codelineno-15-38">38</a></span>
+<span class="normal"><a href="#__codelineno-15-39">39</a></span>
+<span class="normal"><a href="#__codelineno-15-40">40</a></span>
+<span class="normal"><a href="#__codelineno-15-41">41</a></span>
+<span class="normal"><a href="#__codelineno-15-42">42</a></span>
+<span class="normal"><a href="#__codelineno-15-43">43</a></span>
+<span class="normal"><a href="#__codelineno-15-44">44</a></span>
+<span class="normal"><a href="#__codelineno-15-45">45</a></span>
+<span class="normal"><a href="#__codelineno-15-46">46</a></span>
+<span class="normal"><a href="#__codelineno-15-47">47</a></span>
+<span class="normal"><a href="#__codelineno-15-48">48</a></span>
+<span class="normal"><a href="#__codelineno-15-49">49</a></span>
+<span class="normal"><a href="#__codelineno-15-50">50</a></span>
+<span class="normal"><a href="#__codelineno-15-51">51</a></span>
+<span class="normal"><a href="#__codelineno-15-52">52</a></span>
+<span class="normal"><a href="#__codelineno-15-53">53</a></span>
+<span class="normal"><a href="#__codelineno-15-54">54</a></span>
+<span class="normal"><a href="#__codelineno-15-55">55</a></span>
+<span class="normal"><a href="#__codelineno-15-56">56</a></span>
+<span class="normal"><a href="#__codelineno-15-57">57</a></span>
+<span class="normal"><a href="#__codelineno-15-58">58</a></span>
+<span class="normal"><a href="#__codelineno-15-59">59</a></span>
+<span class="normal"><a href="#__codelineno-15-60">60</a></span>
+<span class="normal"><a href="#__codelineno-15-61">61</a></span>
+<span class="normal"><a href="#__codelineno-15-62">62</a></span>
+<span class="normal"><a href="#__codelineno-15-63">63</a></span>
+<span class="normal"><a href="#__codelineno-15-64">64</a></span>
+<span class="normal"><a href="#__codelineno-15-65">65</a></span>
+<span class="normal"><a href="#__codelineno-15-66">66</a></span>
+<span class="normal"><a href="#__codelineno-15-67">67</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-15-21"><a id="__codelineno-15-21" name="__codelineno-15-21"></a><span class="k">def</span> <span class="nf">get_directorios</span><span class="p">(</span><span class="n">curso</span><span class="p">,</span> <span class="n">filtro</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="__span-15-22"><a id="__codelineno-15-22" name="__codelineno-15-22"></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;Acá se indican todos los directorios del proyecto. Luego, la función crear_directorios() toma todos</span>
+</span><span id="__span-15-23"><a id="__codelineno-15-23" name="__codelineno-15-23"></a><span class="sd">    los directorios de este diccionario y los crea. La opción filtro permite cargar solo algunos directorios,</span>
+</span><span id="__span-15-24"><a id="__codelineno-15-24" name="__codelineno-15-24"></a><span class="sd">    en caso de requerirse. Si el filtro &#39;&#39;&#39;</span>
+</span><span id="__span-15-25"><a id="__codelineno-15-25" name="__codelineno-15-25"></a>    <span class="n">dd</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+</span><span id="__span-15-26"><a id="__codelineno-15-26" name="__codelineno-15-26"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;data/&#39;</span><span class="p">)</span>
+</span><span id="__span-15-27"><a id="__codelineno-15-27" name="__codelineno-15-27"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_input&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_data&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="s1">&#39;input_raw&#39;</span> 
+</span><span id="__span-15-28"><a id="__codelineno-15-28" name="__codelineno-15-28"></a>
+</span><span id="__span-15-29"><a id="__codelineno-15-29" name="__codelineno-15-29"></a>    <span class="c1"># En producción nos conectamos a disco NAS para acceso a imágenes</span>
+</span><span id="__span-15-30"><a id="__codelineno-15-30" name="__codelineno-15-30"></a>    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;ENV&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;production&#39;</span><span class="p">:</span>
+</span><span id="__span-15-31"><a id="__codelineno-15-31" name="__codelineno-15-31"></a><span class="hll">        <span class="n">conectar_a_NAS</span><span class="p">(</span><span class="n">IP_NAS</span><span class="p">,</span> <span class="n">FOLDER_DATOS</span><span class="p">)</span>
+</span></span><span id="__span-15-32"><a id="__codelineno-15-32" name="__codelineno-15-32"></a><span class="hll">        <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_img_bruta&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;P:/&#39;</span><span class="p">)</span>
+</span></span><span id="__span-15-33"><a id="__codelineno-15-33" name="__codelineno-15-33"></a>
+</span><span id="__span-15-34"><a id="__codelineno-15-34" name="__codelineno-15-34"></a>    <span class="k">else</span><span class="p">:</span>
+</span><span id="__span-15-35"><a id="__codelineno-15-35" name="__codelineno-15-35"></a>        <span class="c1"># Solo aplica a desarrollo local:</span>
+</span><span id="__span-15-36"><a id="__codelineno-15-36" name="__codelineno-15-36"></a>        <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_img_bruta&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_input&#39;</span><span class="p">]</span>  
+</span><span id="__span-15-37"><a id="__codelineno-15-37" name="__codelineno-15-37"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_estudiantes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_input&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">carpeta_estudiantes</span>
+</span><span id="__span-15-38"><a id="__codelineno-15-38" name="__codelineno-15-38"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_padres&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_input&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">carpeta_padres</span>
+</span><span id="__span-15-39"><a id="__codelineno-15-39" name="__codelineno-15-39"></a>
+</span><span id="__span-15-40"><a id="__codelineno-15-40" name="__codelineno-15-40"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_input_proc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;data/input_proc/&#39;</span><span class="p">)</span>
+</span><span id="__span-15-41"><a id="__codelineno-15-41" name="__codelineno-15-41"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_subpreg_aux&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_input_proc&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">curso</span> <span class="o">/</span> <span class="s1">&#39;subpreg_recortadas&#39;</span>
+</span><span id="__span-15-42"><a id="__codelineno-15-42" name="__codelineno-15-42"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_subpreg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_subpreg_aux&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="s1">&#39;base&#39;</span>
+</span><span id="__span-15-43"><a id="__codelineno-15-43" name="__codelineno-15-43"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_subpreg_aug&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_subpreg_aux&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="s1">&#39;augmented&#39;</span>
+</span><span id="__span-15-44"><a id="__codelineno-15-44" name="__codelineno-15-44"></a>
+</span><span id="__span-15-45"><a id="__codelineno-15-45" name="__codelineno-15-45"></a>
+</span><span id="__span-15-46"><a id="__codelineno-15-46" name="__codelineno-15-46"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_tabla_99&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_input_proc&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="s1">&#39;output_tabla_99&#39;</span>
+</span><span id="__span-15-47"><a id="__codelineno-15-47" name="__codelineno-15-47"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_insumos&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_input_proc&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">curso</span> <span class="o">/</span>  <span class="s1">&#39;insumos&#39;</span>
+</span><span id="__span-15-48"><a id="__codelineno-15-48" name="__codelineno-15-48"></a>
+</span><span id="__span-15-49"><a id="__codelineno-15-49" name="__codelineno-15-49"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_train_test&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_data&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="s1">&#39;input_modelamiento&#39;</span>
+</span><span id="__span-15-50"><a id="__codelineno-15-50" name="__codelineno-15-50"></a>
+</span><span id="__span-15-51"><a id="__codelineno-15-51" name="__codelineno-15-51"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_output&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;data/output&#39;</span><span class="p">)</span>
+</span><span id="__span-15-52"><a id="__codelineno-15-52" name="__codelineno-15-52"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_modelos&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_output&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="s1">&#39;modelos&#39;</span> 
+</span><span id="__span-15-53"><a id="__codelineno-15-53" name="__codelineno-15-53"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_predicciones&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_output&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="s1">&#39;predicciones&#39;</span>
+</span><span id="__span-15-54"><a id="__codelineno-15-54" name="__codelineno-15-54"></a>
+</span><span id="__span-15-55"><a id="__codelineno-15-55" name="__codelineno-15-55"></a>
+</span><span id="__span-15-56"><a id="__codelineno-15-56" name="__codelineno-15-56"></a>
+</span><span id="__span-15-57"><a id="__codelineno-15-57" name="__codelineno-15-57"></a>    <span class="k">if</span> <span class="n">filtro</span><span class="p">:</span>
+</span><span id="__span-15-58"><a id="__codelineno-15-58" name="__codelineno-15-58"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filtro</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="__span-15-59"><a id="__codelineno-15-59" name="__codelineno-15-59"></a>            <span class="n">filtro</span> <span class="o">=</span> <span class="p">[</span><span class="n">filtro</span><span class="p">]</span>
+</span><span id="__span-15-60"><a id="__codelineno-15-60" name="__codelineno-15-60"></a>
+</span><span id="__span-15-61"><a id="__codelineno-15-61" name="__codelineno-15-61"></a>        <span class="n">dd</span> <span class="o">=</span> <span class="p">{</span> <span class="n">k</span><span class="p">:</span><span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">dd</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">filtro</span> <span class="p">}</span>
+</span><span id="__span-15-62"><a id="__codelineno-15-62" name="__codelineno-15-62"></a>
+</span><span id="__span-15-63"><a id="__codelineno-15-63" name="__codelineno-15-63"></a>        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">filtro</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+</span><span id="__span-15-64"><a id="__codelineno-15-64" name="__codelineno-15-64"></a>
+</span><span id="__span-15-65"><a id="__codelineno-15-65" name="__codelineno-15-65"></a>            <span class="n">dd</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">dd</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+</span><span id="__span-15-66"><a id="__codelineno-15-66" name="__codelineno-15-66"></a>
+</span><span id="__span-15-67"><a id="__codelineno-15-67" name="__codelineno-15-67"></a>    <span class="k">return</span> <span class="n">dd</span>
+</span></code></pre></div></td></tr></table></div>
+<p>Esta función permite obtener todos los directorios del proyecto. Además tiene la opción de filtrar, de forma de obtener algún directorio específico que a uno pudiera interesarle. Si uno quisiera cambiar el nombre de algún directorio, en este lugar debe hacerse. Destacamos en el código dónde se genera la conexión a la máquina NAS que contiene las imágenes de los cuadernillos.</p>
+<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-16-68">68</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-16-68"><a id="__codelineno-16-68" name="__codelineno-16-68"></a><span class="n">regex_hoja_cuadernillo</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;_(\d+)&#39;</span>
+</span></code></pre></div></td></tr></table></div>
+<p>Esta expresión regular se utiliza para extraer el número de la imagen asociada a un cuadernillo. Estas en general tienen un formato <code>{identificador_estudiante}_1.jpg</code>, <code>{identificador_estudiante}_2.jpg</code>, etc. Entonces, esta expresión regular busca encontrar un guión bajo(_) y uno o más números y luego extrae ese número o números. Se  utiliza para determinar qué preguntas aparecen en qué archivos de imágenes en la <a href="../generar_insumos_img#simce.generar_insumos_img.poblar_diccionario_preguntas">recolección de insumos, en la función que puebla el diccionario de preguntas</a>.</p>
+<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-17-69">69</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-17-69"><a id="__codelineno-17-69" name="__codelineno-17-69"></a><span class="n">regex_p1</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;p1(_\d+)?$&#39;</span>
+</span></code></pre></div></td></tr></table></div>
+<p>Expresión regular que identifica la pregunta 1, busca que el string termine con "p1" y opcionalmente que puedan existir subpreguntas con un string tipo "p1_1". Se utiliza para quitar la pregunta 1 del análisis en los cuadernillos en que se indique que así debe ser, según el diccionario de la sección anterior.</p>
+<p>Estos últimos valores pueden ser ignorados sin problema, están asociados al entrenamiento:</p>
+<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-18-70">70</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-18-70"><a id="__codelineno-18-70" name="__codelineno-18-70"></a><span class="n">SEED</span> <span class="o">=</span> <span class="mi">2024</span>
+</span></code></pre></div></td></tr></table></div>
+<p>Esta es una semilla que permite hacer replicables los resultados. Si se cambia, cada etapa del procesamiento que contenga algo de aleatoriedad, tendrá resultados distintos. Por lo tanto, <strong>es mejor no tocarla</strong>.</p>
+<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-19-71">71</a></span>
+<span class="normal"><a href="#__codelineno-19-72">72</a></span>
+<span class="normal"><a href="#__codelineno-19-73">73</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-19-71"><a id="__codelineno-19-71" name="__codelineno-19-71"></a><span class="n">FRAC_SAMPLE</span> <span class="o">=</span> <span class="mf">.05</span>
+</span><span id="__span-19-72"><a id="__codelineno-19-72" name="__codelineno-19-72"></a><span class="c1"># n° de rondas de aumentado de datos (máximo 5):</span>
+</span><span id="__span-19-73"><a id="__codelineno-19-73" name="__codelineno-19-73"></a><span class="n">N_AUGMENT_ROUNDS</span> <span class="o">=</span> <span class="mi">5</span>
+</span></code></pre></div></td></tr></table></div>
+<p>Determina qué porcentaje de los datos de estudiantes con doble marca serán  y cuántas rondas de aumentado de datos serán realizadas para el entrenamiento. No son relevantes para esta etapa del proyecto.</p>
+<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-20-72">72</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-20-72"><a id="__codelineno-20-72" name="__codelineno-20-72"></a><span class="n">nombre_tabla_predicciones</span> <span class="o">=</span> <span class="s1">&#39;data_pred.csv&#39;</span>
+</span></code></pre></div></td></tr></table></div>
+<p>Es el nombre de la tabla que contiene las predicciones. Quedó parametrizada para poder hacer referencia a ella en la siguiente sección.</p>
+<h2 id="config_predjson">config_pred.json</h2>
+<p>Este archivo de configuración, en cambio, es un archivo <code>.json</code>, que tiene una estructura anidada. La gran mayoría de sus valores está avocada al entrenamiento, así que no los detallaremos aquí.</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="w">    </span><span class="nt">&quot;data_loader&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TrainTestDataLoader&quot;</span><span class="p">,</span>
+</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="w">        </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-21-4"><a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="hll"><span class="w">            </span><span class="nt">&quot;data_file&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;data_pred.csv&quot;</span><span class="p">,</span>
+</span></span><span id="__span-21-5"><a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a><span class="w">            </span><span class="nt">&quot;batch_size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">64</span><span class="p">,</span>
+</span><span id="__span-21-6"><a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a><span class="w">            </span><span class="nt">&quot;shuffle&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+</span><span id="__span-21-7"><a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a><span class="w">            </span><span class="nt">&quot;cortar_bordes&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+</span><span id="__span-21-8"><a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a><span class="w">            </span><span class="nt">&quot;num_workers&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
+</span><span id="__span-21-9"><a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a>
+</span><span id="__span-21-10"><a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a><span class="w">            </span><span class="nt">&quot;validation_split&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span>
+</span><span id="__span-21-11"><a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-21-12"><a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a><span class="w">    </span><span class="p">},</span>
+</span></code></pre></div>
+<p>Esta sección hace referencia al data_loader, que es el objeto que se encarga de carga las imágenes y pasárselas al modelo. Lo importante es que el nombre del <code>data_file</code> sea el mismo que <a href="#__codelineno-20-72">nombre_tabla_predicciones</a> en la sección anterior.</p>
+<p><strong>Importante:</strong> no tocar los otros valores, pues podrían llevar a problemas al predecir.</p>
+<p>El resto del archivo de configuración puede ignorarse, lo que no implica que se le pueden borrar los otros elementos, pues muchos de ellos tienen que ver con la configuración del modelo (que es fija, a menos que re-entrenáramos un modelo). </p>
 
 
 
@@ -574,10 +914,10 @@
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.07f07601.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.code.copy", "content.code.select", "content.code.annotate"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.56dfad97.min.js"></script>
+      <script src="../assets/javascripts/bundle.fe8b6f2b.min.js"></script>
       
     
   </body>
