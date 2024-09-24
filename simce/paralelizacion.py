@@ -19,7 +19,7 @@ from pathlib import Path
 from multiprocessing import Queue
 VALID_INPUT = {'cuadernillo', 'pagina'}
 
-#files = [i.name for i in Path('data/input_raw').rglob('*.jpg')]
+
 ## procesamiento imagen ----------------------------------
 
 def process_single_image(preguntas:pd.Series, num: int, rbd:PathLike, dic_pagina:dict,
@@ -57,10 +57,7 @@ def process_single_image(preguntas:pd.Series, num: int, rbd:PathLike, dic_pagina
         
         
     """
-    # from pathlib import Path
-    # df99 = df99[df99['serie'] == 4077894] #data\input_raw\CP\02748\4077894_4.jpg
-    # num = 1
-    # rbd = Path('data/input_raw/CP/02748/4077894_4.jpg')
+
     
     pregunta_selec = re.search(r'p(\d{1,2})', preguntas.iloc[num]).group(0)          # seleccion de pregunta
     estudiante = re.search(f'({regex_estudiante})', str(rbd)).group(1)               # serie estudiante

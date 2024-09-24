@@ -9,7 +9,7 @@ import numpy as np
 import cv2
 from config.proc_img import regex_estudiante, regex_hoja_cuadernillo, nombre_col_campo_bd, \
              IGNORAR_PRIMERA_PAGINA, nombre_tabla_para_insumos, \
-          n_filas_ignorar_tabla_insumos, nombre_col_val_permitidos
+          n_filas_ignorar_tabla_insumos, nombre_col_val_permitidos, masks
 from simce.utils import timing
 import pandas as pd
 import re
@@ -188,7 +188,8 @@ def generar_diccionarios_x_pagina(n_pages: int, n_preguntas:int, directorio_imag
                         continue
 
                     # Detecto recuadros naranjos
-                    mask_naranjo = get_mask_imagen(media_img)
+                    mask_naranjo = get_mask_imagen(media_img, lower_color=masks['naranjo']['low'],
+                                                   upper_color=masks['naranjo']['up'])
 
                     # Obtengo contornos
                     big_contours = proc.get_contornos_grandes(mask_naranjo)
