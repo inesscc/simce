@@ -65,9 +65,9 @@ variables_identificadoras = ['rbd', 'dvRbd', 'codigoCurso', id_estudiante, 'ruta
 # Expresión regular para extraer rl rbd de la ruta en variable RutaImagen
 regex_extraer_rbd_de_ruta = r'\\(\d+)\\'
 
-# Diccionario que indica si la pregunta 1 debe ser ignorada al procesar datos
-dic_ignorar_p1 = {'estudiantes': True, 'padres': False}
-# TODO: Ver cómo ignorar fácilmente más preguntas.
+# Diccionario que indica qué preguntas deben ser ignorada al procesar datos
+dic_ignorar_preguntas = {'estudiantes': [1], 'padres': None}
+
 
 # Expresión regular para capturar el identificador del estudiante en nombre de archivos
 regex_estudiante = r'\d{7,}'
@@ -148,10 +148,6 @@ def conectar_a_NAS(IP_NAS, FOLDER_DATOS):
 # OBTENCIÓN DE INSUMOS ----------------------------------------
 regex_hoja_cuadernillo = r'_(\d+)'
 
-
-# Expresión regular que permite identificar variables asociadas a la pregunta 1
-# Utilizado para obviarla de la selección de preguntas
-regex_p1 = r'p1(_\d+)?$'
 
 
 ## 4. VARIABLES QUE PUEDEN SER IGNORADAS (vienen del entrenamiento):
