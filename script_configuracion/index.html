@@ -347,6 +347,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#valores-que-pueden-ser-ignorados-sin-problema-estan-asociados-al-entrenamiento" class="md-nav__link">
+    <span class="md-ellipsis">
+      Valores que pueden ser ignorados sin problema, están asociados al entrenamiento:
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -639,6 +648,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#valores-que-pueden-ser-ignorados-sin-problema-estan-asociados-al-entrenamiento" class="md-nav__link">
+    <span class="md-ellipsis">
+      Valores que pueden ser ignorados sin problema, están asociados al entrenamiento:
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -680,33 +698,40 @@
 <h3 id="es-bastante-probable-que-estos-valores-deban-ser-modificados">Es bastante probable que estos valores deban ser modificados:</h3>
 <div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1"></a><span class="n">CURSO</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;4b&#39;</span><span class="p">)</span>
 </span></code></pre></div></td></tr></table></div>
-<p>Acá se define qué curso está siendo procesado. En este caso, estamos procesando 4° básico. Esto afecta principalmente nombres de archivos y carpetas que dan orden al proyecto, en la medida que se van generando. Por ejemplo, los datos de subpreguntas se guardan en <pre>data/input_proc/<b>4b</b>/subpreg_recortadas</pre>.</p>
+<p>Acá se define qué curso está siendo procesado. En este caso, estamos procesando 4° básico. Esto afecta principalmente nombres de archivos y carpetas que dan orden al proyecto, en la medida que se van generando. Por ejemplo, los datos de subpreguntas se guardan en <pre>data/input_proc/<b>4b</b>/subpreg_recortadas</pre></p>
+<hr />
 <div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-1-2">2</a></span>
 <span class="normal"><a href="#__codelineno-1-3">3</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2"></a><span class="n">carpeta_estudiantes</span> <span class="o">=</span> <span class="s1">&#39;CE&#39;</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3"></a><span class="n">carpeta_padres</span> <span class="o">=</span> <span class="s1">&#39;CP&#39;</span>
 </span></code></pre></div></td></tr></table></div>
 <p>Es el nombre de las carpetas de padres y estudiantes. Se utilizan para buscar en el directorio de archivos estas carpetas, además de que se crearán carpetas con estos nombres en los outputs. Si se dejara de usar esta nomenclatura en el sistema de archivos, deberían cambiarse estos valores a algo que corresponda a la nueva nomenclatura.</p>
+<hr />
 <p><div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-2-4">4</a></span>
 <span class="normal"><a href="#__codelineno-2-5">5</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4"></a><span class="n">nombres_tablas_origen</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;padres&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">carpeta_padres</span><span class="si">}</span><span class="s1">_Origen_DobleMarca.csv&#39;</span><span class="p">,</span>
 </span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5"></a>                 <span class="s1">&#39;estudiantes&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">carpeta_estudiantes</span><span class="si">}</span><span class="s1">_Origen_DobleMarca.csv&#39;</span><span class="p">}</span>
 </span></code></pre></div></td></tr></table></div>
 Contiene los nombres de las tablas de Origen. Si los nombres cambian, deben ser cambiados aquí también. Notar que se hace referencia a las variables <code>carpeta_padres</code> y <code>carpeta_estudiantes</code>, que se mencionaron anteriormente. Por lo tanto, por ejemplo, para padres, el nombre original del archivo era <code>CP_Origen_DobleMarca.csv</code>.</p>
+<hr />
 <p><div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-3-6">6</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6"></a><span class="n">nombre_tabla_para_insumos</span> <span class="o">=</span> <span class="s1">&#39;DD 4° BÁSICO 2023_CE_CP.xlsx&#39;</span>
 </span></code></pre></div></td></tr></table></div>
 Tabla que se utiliza para parte de la generación de insumos. De esta se pueden extraer número de preguntas, de subpreguntas, de opciones por subpregunta. Deberá ser actualizada al nombre que corresponda en su siguiente versión.</p>
+<hr />
 <p><div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-4-7">7</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7"></a><span class="n">n_filas_ignorar_tabla_insumos</span> <span class="o">=</span> <span class="mi">4</span>
 </span></code></pre></div></td></tr></table></div>
 En la versión que recibimos de la tabla, era necesario saltarse las primeras 4 filas para acceder a los datos que nos interesan. Lo dejamos parametrizado, en caso de que esto cambie.</p>
+<hr />
 <div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-5-8">8</a></span>
 <span class="normal"><a href="#__codelineno-5-9">9</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8"></a><span class="n">nombre_col_campo_bd</span> <span class="o">=</span> <span class="s1">&#39;Nombre Campo BD&#39;</span>
 </span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9"></a><span class="n">nombre_col_val_permitidos</span> <span class="o">=</span> <span class="s1">&#39;Rango de valores Permitidos&#39;</span>
 </span></code></pre></div></td></tr></table></div>
 <p>Representa el nombre de la columna que contiene los nombres de los campos de la base de datos y los valores permitidos para cada subpregunta. Actualizar si el nombre de alguna de estas columnas cambia.</p>
+<hr />
 <p><div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-6-10">10</a></span>
 <span class="normal"><a href="#__codelineno-6-11">11</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10"></a><span class="n">IP_NAS</span> <span class="o">=</span> <span class="s1">&#39;10.10.100.28&#39;</span>
 </span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11"></a><span class="n">FOLDER_DATOS</span> <span class="o">=</span> <span class="s1">&#39;4b_2023&#39;</span> <span class="c1"># OJO, actualizar</span>
 </span></code></pre></div></td></tr></table></div>
 Valores utilizados para la conexión al disco NAS donde están los datos de imágenes. Si la IP o la carpeta de datos cambiara, debe ser ingresado aquí. </p>
+<hr />
 <h3 id="es-relativamente-probable-que-estos-valores-deban-ser-modificados">Es relativamente probable que estos valores deban ser modificados:</h3>
 <p><div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-7-12">12</a></span>
 <span class="normal"><a href="#__codelineno-7-13">13</a></span>
@@ -742,148 +767,161 @@ Como son rangos, cada máscara tiene un valor bajo (<code>low</code>) y alto (<c
 </span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>                          <span class="n">upper_color</span><span class="o">=</span><span class="n">masks</span><span class="p">[</span><span class="s1">&#39;negro&#39;</span><span class="p">][</span><span class="s1">&#39;up&#39;</span><span class="p">],</span> <span class="n">iters</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 </span></code></pre></div>
 Si detectan que alguna máscara no está funcionando adecuadamente, basta con modificar los rangos de la máscara que está teniendo problemas.</p>
+<hr />
 <div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-9-26">26</a></span>
 <span class="normal"><a href="#__codelineno-9-27">27</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-9-26"><a id="__codelineno-9-26" name="__codelineno-9-26"></a><span class="n">id_estudiante</span> <span class="o">=</span> <span class="s1">&#39;serie&#39;</span>
 </span><span id="__span-9-27"><a id="__codelineno-9-27" name="__codelineno-9-27"></a><span class="n">variables_identificadoras</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;rbd&#39;</span><span class="p">,</span> <span class="s1">&#39;dvRbd&#39;</span><span class="p">,</span> <span class="s1">&#39;codigoCurso&#39;</span><span class="p">,</span> <span class="n">id_estudiante</span><span class="p">,</span> <span class="s1">&#39;rutaImagen1&#39;</span><span class="p">]</span>
 </span></code></pre></div></td></tr></table></div>
 <p>Representan variables que utilizaremos de la tabla origen. Si cualquiera de estas variables cambia de nombre en la tabla origen, deberán ser actualizadas acá.</p>
+<hr />
 <div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-10-28">28</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-10-28"><a id="__codelineno-10-28" name="__codelineno-10-28"></a><span class="n">regex_extraer_rbd_de_ruta</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">(\d+)</span><span class="se">\\</span><span class="s1">&#39;</span>
 </span></code></pre></div></td></tr></table></div>
 <p>Expresión regular que el RBD de la ruta que se encuentra en la variable rutaImagen1 (busca uno o más dígitos consecutivos rodeados de paréntesis).</p>
-<p><div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-11-29">29</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-11-29"><a id="__codelineno-11-29" name="__codelineno-11-29"></a><span class="n">dic_ignorar_p1</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;estudiantes&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;padres&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+<hr />
+<p><div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-11-29">29</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-11-29"><a id="__codelineno-11-29" name="__codelineno-11-29"></a><span class="n">dic_ignorar_preguntas</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;estudiantes&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;padres&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
 </span></code></pre></div></td></tr></table></div>
-Determina si la pregunta 1 debe ser ignorada o no en cada cuadernillo. En el caso que estudiamos nosotros, el cuadernillo de estudiantes preguntaba la edad en la pregunta 1, por lo que debía ser ignorada. En el caso de los padres, era una pregunta común y corriente, por lo que no se ignora.</p>
-<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-12-30">30</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-12-30"><a id="__codelineno-12-30" name="__codelineno-12-30"></a><span class="n">regex_estudiante</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;\d{7,}&#39;</span>
+Determina qué preguntas deben ser ignoradas en cada cuadernillo. Esto aplica a preguntas que no son de selección de alternativas y, por lo tanto, no están sujetas a la posibilidad de tener una doble marca. En el caso que estudiamos nosotros, el cuadernillo de estudiantes preguntaba la edad en la pregunta 1, por lo que debía ser ignorada. En el caso de los padres, era una pregunta común y corriente, por lo que no se ignora esta ni ninguna otra pregunta, así que dejamos el valor con None. Si por ejemplo en una nueva iteración <strong>no</strong> hay que ignorar preguntas en estudiantes y hay que ignorar la pregunta 3 y 10 en padres, la línea de código quedaría así: </p>
+<div class="language-py highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="n">dic_ignorar_preguntas</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;estudiantes&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;padres&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">]}</span>
+</span></code></pre></div>
+<hr />
+<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-13-30">30</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-13-30"><a id="__codelineno-13-30" name="__codelineno-13-30"></a><span class="n">regex_estudiante</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;\d{7,}&#39;</span>
 </span></code></pre></div></td></tr></table></div>
 <p>Acá se define cómo extraeremos los identificadores de los estudiantes de rutas de archivos, principalmente. Lo que busca este código son 7 números seguidos. Por lo tanto, si el identificador de estudiante cambiara a más o menos números o incorporara letras, habría que modificar esto para que funcione de manera acorde.</p>
-<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-13-31">31</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-13-31"><a id="__codelineno-13-31" name="__codelineno-13-31"></a><span class="n">ENCODING</span> <span class="o">=</span> <span class="s1">&#39;utf-8&#39;</span>
+<hr />
+<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-14-31">31</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-14-31"><a id="__codelineno-14-31" name="__codelineno-14-31"></a><span class="n">ENCODING</span> <span class="o">=</span> <span class="s1">&#39;utf-8&#39;</span>
 </span></code></pre></div></td></tr></table></div>
 <p>Define cuál es el encoding utilizado a la hora de leer la tabla de origen. Nos pasó en una ocasión que se usaba encoding "Latin-1" para una tabla de octavo básico, por lo que decidimos parametrizar esto.</p>
-<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-14-32">32</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-14-32"><a id="__codelineno-14-32" name="__codelineno-14-32"></a><span class="n">LIMPIAR_RUTA</span> <span class="o">=</span> <span class="kc">False</span>
+<hr />
+<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-15-32">32</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-15-32"><a id="__codelineno-15-32" name="__codelineno-15-32"></a><span class="n">LIMPIAR_RUTA</span> <span class="o">=</span> <span class="kc">False</span>
 </span></code></pre></div></td></tr></table></div>
 <p>En algunos casos las rutas a los archivos de los cuadernillos en la tabla de origen, incluían el identificador del alumno como una carpeta. En general, nosotros trabajamos de forma que dentro de las carpetas de cada rbd se encontraban todas las imágenes, sin una carpeta intermedia por cada alumno del rbd. Así, cuando pasa esto, este parámetro elimina de la ruta el identificador del alumno.</p>
-<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-15-33">33</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-15-33"><a id="__codelineno-15-33" name="__codelineno-15-33"></a><span class="n">IGNORAR_PRIMERA_PAGINA</span> <span class="o">=</span> <span class="kc">True</span>
+<hr />
+<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-16-33">33</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-16-33"><a id="__codelineno-16-33" name="__codelineno-16-33"></a><span class="n">IGNORAR_PRIMERA_PAGINA</span> <span class="o">=</span> <span class="kc">True</span>
 </span></code></pre></div></td></tr></table></div>
 <p>Este parámetro define si se debe ignorar la primera página en la recolección de insumos. Esto, porque usualmente la primera página tiene preguntas de ejemplo, que deben ser ignoradas. Se agrega en caso en que alguna iteración contenga alguna pregunta que no sea de ejemplo en la primera página.</p>
+<hr />
 <h3 id="es-menos-probable-que-estos-valores-deban-ser-modificados">Es menos probable que estos valores deban ser modificados:</h3>
-<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-16-34">34</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-16-34"><a id="__codelineno-16-34" name="__codelineno-16-34"></a><span class="n">n_pixeles_entre_lineas</span> <span class="o">=</span> <span class="mi">22</span>
+<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-17-34">34</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-17-34"><a id="__codelineno-17-34" name="__codelineno-17-34"></a><span class="n">n_pixeles_entre_lineas</span> <span class="o">=</span> <span class="mi">22</span>
 </span></code></pre></div></td></tr></table></div>
 <p>Especifica cuántos píxeles se espera que haya como mínimo entre dos líneas separadoras de subpreguntas. Debiera ser relevante solo si cambiara el diseño del cuestionario de forma que las subpreguntas queden más (o menos) espaciadas.</p>
-<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-17-35">35</a></span>
-<span class="normal"><a href="#__codelineno-17-36">36</a></span>
-<span class="normal"><a href="#__codelineno-17-37">37</a></span>
-<span class="normal"><a href="#__codelineno-17-38">38</a></span>
-<span class="normal"><a href="#__codelineno-17-39">39</a></span>
-<span class="normal"><a href="#__codelineno-17-40">40</a></span>
-<span class="normal"><a href="#__codelineno-17-41">41</a></span>
-<span class="normal"><a href="#__codelineno-17-42">42</a></span>
-<span class="normal"><a href="#__codelineno-17-43">43</a></span>
-<span class="normal"><a href="#__codelineno-17-44">44</a></span>
-<span class="normal"><a href="#__codelineno-17-45">45</a></span>
-<span class="normal"><a href="#__codelineno-17-46">46</a></span>
-<span class="normal"><a href="#__codelineno-17-47">47</a></span>
-<span class="normal"><a href="#__codelineno-17-48">48</a></span>
-<span class="normal"><a href="#__codelineno-17-49">49</a></span>
-<span class="normal"><a href="#__codelineno-17-50">50</a></span>
-<span class="normal"><a href="#__codelineno-17-51">51</a></span>
-<span class="normal"><a href="#__codelineno-17-52">52</a></span>
-<span class="normal"><a href="#__codelineno-17-53">53</a></span>
-<span class="normal"><a href="#__codelineno-17-54">54</a></span>
-<span class="normal"><a href="#__codelineno-17-55">55</a></span>
-<span class="normal"><a href="#__codelineno-17-56">56</a></span>
-<span class="normal"><a href="#__codelineno-17-57">57</a></span>
-<span class="normal"><a href="#__codelineno-17-58">58</a></span>
-<span class="normal"><a href="#__codelineno-17-59">59</a></span>
-<span class="normal"><a href="#__codelineno-17-60">60</a></span>
-<span class="normal"><a href="#__codelineno-17-61">61</a></span>
-<span class="normal"><a href="#__codelineno-17-62">62</a></span>
-<span class="normal"><a href="#__codelineno-17-63">63</a></span>
-<span class="normal"><a href="#__codelineno-17-64">64</a></span>
-<span class="normal"><a href="#__codelineno-17-65">65</a></span>
-<span class="normal"><a href="#__codelineno-17-66">66</a></span>
-<span class="normal"><a href="#__codelineno-17-67">67</a></span>
-<span class="normal"><a href="#__codelineno-17-68">68</a></span>
-<span class="normal"><a href="#__codelineno-17-69">69</a></span>
-<span class="normal"><a href="#__codelineno-17-70">70</a></span>
-<span class="normal"><a href="#__codelineno-17-71">71</a></span>
-<span class="normal"><a href="#__codelineno-17-72">72</a></span>
-<span class="normal"><a href="#__codelineno-17-73">73</a></span>
-<span class="normal"><a href="#__codelineno-17-74">74</a></span>
-<span class="normal"><a href="#__codelineno-17-75">75</a></span>
-<span class="normal"><a href="#__codelineno-17-76">76</a></span>
-<span class="normal"><a href="#__codelineno-17-77">77</a></span>
-<span class="normal"><a href="#__codelineno-17-78">78</a></span>
-<span class="normal"><a href="#__codelineno-17-79">79</a></span>
-<span class="normal"><a href="#__codelineno-17-80">80</a></span>
-<span class="normal"><a href="#__codelineno-17-81">81</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-17-35"><a id="__codelineno-17-35" name="__codelineno-17-35"></a><span class="k">def</span> <span class="nf">get_directorios</span><span class="p">(</span><span class="n">curso</span><span class="p">,</span> <span class="n">filtro</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-</span><span id="__span-17-36"><a id="__codelineno-17-36" name="__codelineno-17-36"></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;Acá se indican todos los directorios del proyecto. Luego, la función crear_directorios() toma todos</span>
-</span><span id="__span-17-37"><a id="__codelineno-17-37" name="__codelineno-17-37"></a><span class="sd">    los directorios de este diccionario y los crea. La opción filtro permite cargar solo algunos directorios,</span>
-</span><span id="__span-17-38"><a id="__codelineno-17-38" name="__codelineno-17-38"></a><span class="sd">    en caso de requerirse. Si el filtro &#39;&#39;&#39;</span>
-</span><span id="__span-17-39"><a id="__codelineno-17-39" name="__codelineno-17-39"></a>    <span class="n">dd</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-</span><span id="__span-17-40"><a id="__codelineno-17-40" name="__codelineno-17-40"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;data/&#39;</span><span class="p">)</span>
-</span><span id="__span-17-41"><a id="__codelineno-17-41" name="__codelineno-17-41"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_input&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_data&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="s1">&#39;input_raw&#39;</span> 
-</span><span id="__span-17-42"><a id="__codelineno-17-42" name="__codelineno-17-42"></a>
-</span><span id="__span-17-43"><a id="__codelineno-17-43" name="__codelineno-17-43"></a>    <span class="c1"># En producción nos conectamos a disco NAS para acceso a imágenes</span>
-</span><span id="__span-17-44"><a id="__codelineno-17-44" name="__codelineno-17-44"></a>    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;ENV&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;production&#39;</span><span class="p">:</span>
-</span><span id="__span-17-45"><a id="__codelineno-17-45" name="__codelineno-17-45"></a><span class="hll">        <span class="n">conectar_a_NAS</span><span class="p">(</span><span class="n">IP_NAS</span><span class="p">,</span> <span class="n">FOLDER_DATOS</span><span class="p">)</span>
-</span></span><span id="__span-17-46"><a id="__codelineno-17-46" name="__codelineno-17-46"></a><span class="hll">        <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_img_bruta&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;P:/&#39;</span><span class="p">)</span>
-</span></span><span id="__span-17-47"><a id="__codelineno-17-47" name="__codelineno-17-47"></a>
-</span><span id="__span-17-48"><a id="__codelineno-17-48" name="__codelineno-17-48"></a>    <span class="k">else</span><span class="p">:</span>
-</span><span id="__span-17-49"><a id="__codelineno-17-49" name="__codelineno-17-49"></a>        <span class="c1"># Solo aplica a desarrollo local:</span>
-</span><span id="__span-17-50"><a id="__codelineno-17-50" name="__codelineno-17-50"></a>        <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_img_bruta&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_input&#39;</span><span class="p">]</span>  
-</span><span id="__span-17-51"><a id="__codelineno-17-51" name="__codelineno-17-51"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_estudiantes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_input&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">carpeta_estudiantes</span>
-</span><span id="__span-17-52"><a id="__codelineno-17-52" name="__codelineno-17-52"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_padres&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_input&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">carpeta_padres</span>
-</span><span id="__span-17-53"><a id="__codelineno-17-53" name="__codelineno-17-53"></a>
-</span><span id="__span-17-54"><a id="__codelineno-17-54" name="__codelineno-17-54"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_input_proc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;data/input_proc/&#39;</span><span class="p">)</span>
-</span><span id="__span-17-55"><a id="__codelineno-17-55" name="__codelineno-17-55"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_subpreg_aux&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_input_proc&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">curso</span> <span class="o">/</span> <span class="s1">&#39;subpreg_recortadas&#39;</span>
-</span><span id="__span-17-56"><a id="__codelineno-17-56" name="__codelineno-17-56"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_subpreg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_subpreg_aux&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="s1">&#39;base&#39;</span>
-</span><span id="__span-17-57"><a id="__codelineno-17-57" name="__codelineno-17-57"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_subpreg_aug&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_subpreg_aux&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="s1">&#39;augmented&#39;</span>
-</span><span id="__span-17-58"><a id="__codelineno-17-58" name="__codelineno-17-58"></a>
-</span><span id="__span-17-59"><a id="__codelineno-17-59" name="__codelineno-17-59"></a>
-</span><span id="__span-17-60"><a id="__codelineno-17-60" name="__codelineno-17-60"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_tabla_99&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_input_proc&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="s1">&#39;output_tabla_99&#39;</span>
-</span><span id="__span-17-61"><a id="__codelineno-17-61" name="__codelineno-17-61"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_insumos&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_input_proc&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">curso</span> <span class="o">/</span>  <span class="s1">&#39;insumos&#39;</span>
-</span><span id="__span-17-62"><a id="__codelineno-17-62" name="__codelineno-17-62"></a>
-</span><span id="__span-17-63"><a id="__codelineno-17-63" name="__codelineno-17-63"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_train_test&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_data&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="s1">&#39;input_modelamiento&#39;</span>
-</span><span id="__span-17-64"><a id="__codelineno-17-64" name="__codelineno-17-64"></a>
-</span><span id="__span-17-65"><a id="__codelineno-17-65" name="__codelineno-17-65"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_output&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;data/output&#39;</span><span class="p">)</span>
-</span><span id="__span-17-66"><a id="__codelineno-17-66" name="__codelineno-17-66"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_modelos&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_output&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="s1">&#39;modelos&#39;</span> 
-</span><span id="__span-17-67"><a id="__codelineno-17-67" name="__codelineno-17-67"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_predicciones&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_output&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="s1">&#39;predicciones&#39;</span>
-</span><span id="__span-17-68"><a id="__codelineno-17-68" name="__codelineno-17-68"></a>
-</span><span id="__span-17-69"><a id="__codelineno-17-69" name="__codelineno-17-69"></a>
-</span><span id="__span-17-70"><a id="__codelineno-17-70" name="__codelineno-17-70"></a>
-</span><span id="__span-17-71"><a id="__codelineno-17-71" name="__codelineno-17-71"></a>    <span class="k">if</span> <span class="n">filtro</span><span class="p">:</span>
-</span><span id="__span-17-72"><a id="__codelineno-17-72" name="__codelineno-17-72"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filtro</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-</span><span id="__span-17-73"><a id="__codelineno-17-73" name="__codelineno-17-73"></a>            <span class="n">filtro</span> <span class="o">=</span> <span class="p">[</span><span class="n">filtro</span><span class="p">]</span>
-</span><span id="__span-17-74"><a id="__codelineno-17-74" name="__codelineno-17-74"></a>
-</span><span id="__span-17-75"><a id="__codelineno-17-75" name="__codelineno-17-75"></a>        <span class="n">dd</span> <span class="o">=</span> <span class="p">{</span> <span class="n">k</span><span class="p">:</span><span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">dd</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">filtro</span> <span class="p">}</span>
-</span><span id="__span-17-76"><a id="__codelineno-17-76" name="__codelineno-17-76"></a>
-</span><span id="__span-17-77"><a id="__codelineno-17-77" name="__codelineno-17-77"></a>        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">filtro</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-</span><span id="__span-17-78"><a id="__codelineno-17-78" name="__codelineno-17-78"></a>
-</span><span id="__span-17-79"><a id="__codelineno-17-79" name="__codelineno-17-79"></a>            <span class="n">dd</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">dd</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
-</span><span id="__span-17-80"><a id="__codelineno-17-80" name="__codelineno-17-80"></a>
-</span><span id="__span-17-81"><a id="__codelineno-17-81" name="__codelineno-17-81"></a>    <span class="k">return</span> <span class="n">dd</span>
+<hr />
+<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-18-35">35</a></span>
+<span class="normal"><a href="#__codelineno-18-36">36</a></span>
+<span class="normal"><a href="#__codelineno-18-37">37</a></span>
+<span class="normal"><a href="#__codelineno-18-38">38</a></span>
+<span class="normal"><a href="#__codelineno-18-39">39</a></span>
+<span class="normal"><a href="#__codelineno-18-40">40</a></span>
+<span class="normal"><a href="#__codelineno-18-41">41</a></span>
+<span class="normal"><a href="#__codelineno-18-42">42</a></span>
+<span class="normal"><a href="#__codelineno-18-43">43</a></span>
+<span class="normal"><a href="#__codelineno-18-44">44</a></span>
+<span class="normal"><a href="#__codelineno-18-45">45</a></span>
+<span class="normal"><a href="#__codelineno-18-46">46</a></span>
+<span class="normal"><a href="#__codelineno-18-47">47</a></span>
+<span class="normal"><a href="#__codelineno-18-48">48</a></span>
+<span class="normal"><a href="#__codelineno-18-49">49</a></span>
+<span class="normal"><a href="#__codelineno-18-50">50</a></span>
+<span class="normal"><a href="#__codelineno-18-51">51</a></span>
+<span class="normal"><a href="#__codelineno-18-52">52</a></span>
+<span class="normal"><a href="#__codelineno-18-53">53</a></span>
+<span class="normal"><a href="#__codelineno-18-54">54</a></span>
+<span class="normal"><a href="#__codelineno-18-55">55</a></span>
+<span class="normal"><a href="#__codelineno-18-56">56</a></span>
+<span class="normal"><a href="#__codelineno-18-57">57</a></span>
+<span class="normal"><a href="#__codelineno-18-58">58</a></span>
+<span class="normal"><a href="#__codelineno-18-59">59</a></span>
+<span class="normal"><a href="#__codelineno-18-60">60</a></span>
+<span class="normal"><a href="#__codelineno-18-61">61</a></span>
+<span class="normal"><a href="#__codelineno-18-62">62</a></span>
+<span class="normal"><a href="#__codelineno-18-63">63</a></span>
+<span class="normal"><a href="#__codelineno-18-64">64</a></span>
+<span class="normal"><a href="#__codelineno-18-65">65</a></span>
+<span class="normal"><a href="#__codelineno-18-66">66</a></span>
+<span class="normal"><a href="#__codelineno-18-67">67</a></span>
+<span class="normal"><a href="#__codelineno-18-68">68</a></span>
+<span class="normal"><a href="#__codelineno-18-69">69</a></span>
+<span class="normal"><a href="#__codelineno-18-70">70</a></span>
+<span class="normal"><a href="#__codelineno-18-71">71</a></span>
+<span class="normal"><a href="#__codelineno-18-72">72</a></span>
+<span class="normal"><a href="#__codelineno-18-73">73</a></span>
+<span class="normal"><a href="#__codelineno-18-74">74</a></span>
+<span class="normal"><a href="#__codelineno-18-75">75</a></span>
+<span class="normal"><a href="#__codelineno-18-76">76</a></span>
+<span class="normal"><a href="#__codelineno-18-77">77</a></span>
+<span class="normal"><a href="#__codelineno-18-78">78</a></span>
+<span class="normal"><a href="#__codelineno-18-79">79</a></span>
+<span class="normal"><a href="#__codelineno-18-80">80</a></span>
+<span class="normal"><a href="#__codelineno-18-81">81</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-18-35"><a id="__codelineno-18-35" name="__codelineno-18-35"></a><span class="k">def</span> <span class="nf">get_directorios</span><span class="p">(</span><span class="n">curso</span><span class="p">,</span> <span class="n">filtro</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="__span-18-36"><a id="__codelineno-18-36" name="__codelineno-18-36"></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;Acá se indican todos los directorios del proyecto. Luego, la función crear_directorios() toma todos</span>
+</span><span id="__span-18-37"><a id="__codelineno-18-37" name="__codelineno-18-37"></a><span class="sd">    los directorios de este diccionario y los crea. La opción filtro permite cargar solo algunos directorios,</span>
+</span><span id="__span-18-38"><a id="__codelineno-18-38" name="__codelineno-18-38"></a><span class="sd">    en caso de requerirse. Si el filtro &#39;&#39;&#39;</span>
+</span><span id="__span-18-39"><a id="__codelineno-18-39" name="__codelineno-18-39"></a>    <span class="n">dd</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+</span><span id="__span-18-40"><a id="__codelineno-18-40" name="__codelineno-18-40"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;data/&#39;</span><span class="p">)</span>
+</span><span id="__span-18-41"><a id="__codelineno-18-41" name="__codelineno-18-41"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_input&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_data&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="s1">&#39;input_raw&#39;</span> 
+</span><span id="__span-18-42"><a id="__codelineno-18-42" name="__codelineno-18-42"></a>
+</span><span id="__span-18-43"><a id="__codelineno-18-43" name="__codelineno-18-43"></a>    <span class="c1"># En producción nos conectamos a disco NAS para acceso a imágenes</span>
+</span><span id="__span-18-44"><a id="__codelineno-18-44" name="__codelineno-18-44"></a>    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;ENV&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;production&#39;</span><span class="p">:</span>
+</span><span id="__span-18-45"><a id="__codelineno-18-45" name="__codelineno-18-45"></a><span class="hll">        <span class="n">conectar_a_NAS</span><span class="p">(</span><span class="n">IP_NAS</span><span class="p">,</span> <span class="n">FOLDER_DATOS</span><span class="p">)</span>
+</span></span><span id="__span-18-46"><a id="__codelineno-18-46" name="__codelineno-18-46"></a><span class="hll">        <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_img_bruta&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;P:/&#39;</span><span class="p">)</span>
+</span></span><span id="__span-18-47"><a id="__codelineno-18-47" name="__codelineno-18-47"></a>
+</span><span id="__span-18-48"><a id="__codelineno-18-48" name="__codelineno-18-48"></a>    <span class="k">else</span><span class="p">:</span>
+</span><span id="__span-18-49"><a id="__codelineno-18-49" name="__codelineno-18-49"></a>        <span class="c1"># Solo aplica a desarrollo local:</span>
+</span><span id="__span-18-50"><a id="__codelineno-18-50" name="__codelineno-18-50"></a>        <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_img_bruta&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_input&#39;</span><span class="p">]</span>  
+</span><span id="__span-18-51"><a id="__codelineno-18-51" name="__codelineno-18-51"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_estudiantes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_input&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">carpeta_estudiantes</span>
+</span><span id="__span-18-52"><a id="__codelineno-18-52" name="__codelineno-18-52"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_padres&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_input&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">carpeta_padres</span>
+</span><span id="__span-18-53"><a id="__codelineno-18-53" name="__codelineno-18-53"></a>
+</span><span id="__span-18-54"><a id="__codelineno-18-54" name="__codelineno-18-54"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_input_proc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;data/input_proc/&#39;</span><span class="p">)</span>
+</span><span id="__span-18-55"><a id="__codelineno-18-55" name="__codelineno-18-55"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_subpreg_aux&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_input_proc&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">curso</span> <span class="o">/</span> <span class="s1">&#39;subpreg_recortadas&#39;</span>
+</span><span id="__span-18-56"><a id="__codelineno-18-56" name="__codelineno-18-56"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_subpreg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_subpreg_aux&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="s1">&#39;base&#39;</span>
+</span><span id="__span-18-57"><a id="__codelineno-18-57" name="__codelineno-18-57"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_subpreg_aug&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_subpreg_aux&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="s1">&#39;augmented&#39;</span>
+</span><span id="__span-18-58"><a id="__codelineno-18-58" name="__codelineno-18-58"></a>
+</span><span id="__span-18-59"><a id="__codelineno-18-59" name="__codelineno-18-59"></a>
+</span><span id="__span-18-60"><a id="__codelineno-18-60" name="__codelineno-18-60"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_tabla_99&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_input_proc&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="s1">&#39;output_tabla_99&#39;</span>
+</span><span id="__span-18-61"><a id="__codelineno-18-61" name="__codelineno-18-61"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_insumos&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_input_proc&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">curso</span> <span class="o">/</span>  <span class="s1">&#39;insumos&#39;</span>
+</span><span id="__span-18-62"><a id="__codelineno-18-62" name="__codelineno-18-62"></a>
+</span><span id="__span-18-63"><a id="__codelineno-18-63" name="__codelineno-18-63"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_train_test&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_data&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="s1">&#39;input_modelamiento&#39;</span>
+</span><span id="__span-18-64"><a id="__codelineno-18-64" name="__codelineno-18-64"></a>
+</span><span id="__span-18-65"><a id="__codelineno-18-65" name="__codelineno-18-65"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_output&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;data/output&#39;</span><span class="p">)</span>
+</span><span id="__span-18-66"><a id="__codelineno-18-66" name="__codelineno-18-66"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_modelos&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_output&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="s1">&#39;modelos&#39;</span> 
+</span><span id="__span-18-67"><a id="__codelineno-18-67" name="__codelineno-18-67"></a>    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_predicciones&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dir_output&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="s1">&#39;predicciones&#39;</span>
+</span><span id="__span-18-68"><a id="__codelineno-18-68" name="__codelineno-18-68"></a>
+</span><span id="__span-18-69"><a id="__codelineno-18-69" name="__codelineno-18-69"></a>
+</span><span id="__span-18-70"><a id="__codelineno-18-70" name="__codelineno-18-70"></a>
+</span><span id="__span-18-71"><a id="__codelineno-18-71" name="__codelineno-18-71"></a>    <span class="k">if</span> <span class="n">filtro</span><span class="p">:</span>
+</span><span id="__span-18-72"><a id="__codelineno-18-72" name="__codelineno-18-72"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filtro</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="__span-18-73"><a id="__codelineno-18-73" name="__codelineno-18-73"></a>            <span class="n">filtro</span> <span class="o">=</span> <span class="p">[</span><span class="n">filtro</span><span class="p">]</span>
+</span><span id="__span-18-74"><a id="__codelineno-18-74" name="__codelineno-18-74"></a>
+</span><span id="__span-18-75"><a id="__codelineno-18-75" name="__codelineno-18-75"></a>        <span class="n">dd</span> <span class="o">=</span> <span class="p">{</span> <span class="n">k</span><span class="p">:</span><span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">dd</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">filtro</span> <span class="p">}</span>
+</span><span id="__span-18-76"><a id="__codelineno-18-76" name="__codelineno-18-76"></a>
+</span><span id="__span-18-77"><a id="__codelineno-18-77" name="__codelineno-18-77"></a>        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">filtro</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+</span><span id="__span-18-78"><a id="__codelineno-18-78" name="__codelineno-18-78"></a>
+</span><span id="__span-18-79"><a id="__codelineno-18-79" name="__codelineno-18-79"></a>            <span class="n">dd</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">dd</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+</span><span id="__span-18-80"><a id="__codelineno-18-80" name="__codelineno-18-80"></a>
+</span><span id="__span-18-81"><a id="__codelineno-18-81" name="__codelineno-18-81"></a>    <span class="k">return</span> <span class="n">dd</span>
 </span></code></pre></div></td></tr></table></div>
 <p>Esta función permite obtener todos los directorios del proyecto. Además tiene la opción de filtrar, de forma de obtener algún directorio específico que a uno pudiera interesarle. Si uno quisiera cambiar el nombre de algún directorio, en este lugar debe hacerse. Destacamos en el código dónde se genera la conexión a la máquina NAS que contiene las imágenes de los cuadernillos.</p>
-<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-18-82">82</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-18-82"><a id="__codelineno-18-82" name="__codelineno-18-82"></a><span class="n">regex_hoja_cuadernillo</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;_(\d+)&#39;</span>
+<hr />
+<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-19-82">82</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-19-82"><a id="__codelineno-19-82" name="__codelineno-19-82"></a><span class="n">regex_hoja_cuadernillo</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;_(\d+)&#39;</span>
 </span></code></pre></div></td></tr></table></div>
 <p>Esta expresión regular se utiliza para extraer el número de la imagen asociada a un cuadernillo. Estas en general tienen un formato <code>{identificador_estudiante}_1.jpg</code>, <code>{identificador_estudiante}_2.jpg</code>, etc. Entonces, esta expresión regular busca encontrar un guión bajo(_) y uno o más números y luego extrae ese número o números. Se  utiliza para determinar qué preguntas aparecen en qué archivos de imágenes en la <a href="../generar_insumos_img#simce.generar_insumos_img.poblar_diccionario_preguntas">recolección de insumos, en la función que puebla el diccionario de preguntas</a>.</p>
-<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-19-83">83</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-19-83"><a id="__codelineno-19-83" name="__codelineno-19-83"></a><span class="n">regex_p1</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;p1(_\d+)?$&#39;</span>
-</span></code></pre></div></td></tr></table></div>
-<p>Expresión regular que identifica la pregunta 1, busca que el string termine con "p1" y opcionalmente que puedan existir subpreguntas con un string tipo "p1_1". Se utiliza para quitar la pregunta 1 del análisis en los cuadernillos en que se indique que así debe ser, según el diccionario de la sección anterior.</p>
-<p>Estos últimos valores pueden ser ignorados sin problema, están asociados al entrenamiento:</p>
-<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-20-84">84</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-20-84"><a id="__codelineno-20-84" name="__codelineno-20-84"></a><span class="n">SEED</span> <span class="o">=</span> <span class="mi">2024</span>
+<hr />
+<h3 id="valores-que-pueden-ser-ignorados-sin-problema-estan-asociados-al-entrenamiento">Valores que pueden ser ignorados sin problema, están asociados al entrenamiento:</h3>
+<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-20-83">83</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-20-83"><a id="__codelineno-20-83" name="__codelineno-20-83"></a><span class="n">SEED</span> <span class="o">=</span> <span class="mi">2024</span>
 </span></code></pre></div></td></tr></table></div>
 <p>Esta es una semilla que permite hacer replicables los resultados. Si se cambia, cada etapa del procesamiento que contenga algo de aleatoriedad, tendrá resultados distintos. Por lo tanto, <strong>es mejor no tocarla</strong>.</p>
-<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-21-85">85</a></span>
-<span class="normal"><a href="#__codelineno-21-86">86</a></span>
-<span class="normal"><a href="#__codelineno-21-87">87</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-21-85"><a id="__codelineno-21-85" name="__codelineno-21-85"></a><span class="n">FRAC_SAMPLE</span> <span class="o">=</span> <span class="mf">.05</span>
-</span><span id="__span-21-86"><a id="__codelineno-21-86" name="__codelineno-21-86"></a><span class="c1"># n° de rondas de aumentado de datos (máximo 5):</span>
-</span><span id="__span-21-87"><a id="__codelineno-21-87" name="__codelineno-21-87"></a><span class="n">N_AUGMENT_ROUNDS</span> <span class="o">=</span> <span class="mi">5</span>
+<hr />
+<div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-21-84">84</a></span>
+<span class="normal"><a href="#__codelineno-21-85">85</a></span>
+<span class="normal"><a href="#__codelineno-21-86">86</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-21-84"><a id="__codelineno-21-84" name="__codelineno-21-84"></a><span class="n">FRAC_SAMPLE</span> <span class="o">=</span> <span class="mf">.05</span>
+</span><span id="__span-21-85"><a id="__codelineno-21-85" name="__codelineno-21-85"></a><span class="c1"># n° de rondas de aumentado de datos (máximo 5):</span>
+</span><span id="__span-21-86"><a id="__codelineno-21-86" name="__codelineno-21-86"></a><span class="n">N_AUGMENT_ROUNDS</span> <span class="o">=</span> <span class="mi">5</span>
 </span></code></pre></div></td></tr></table></div>
 <p>Determina qué porcentaje de los datos de estudiantes con doble marca serán  y cuántas rondas de aumentado de datos serán realizadas para el entrenamiento. No son relevantes para esta etapa del proyecto.</p>
+<hr />
 <div class="language-py highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-22-86">86</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-22-86"><a id="__codelineno-22-86" name="__codelineno-22-86"></a><span class="n">nombre_tabla_predicciones</span> <span class="o">=</span> <span class="s1">&#39;data_pred.csv&#39;</span>
 </span></code></pre></div></td></tr></table></div>
 <p>Es el nombre de la tabla que contiene las predicciones. Quedó parametrizada para poder hacer referencia a ella en la siguiente sección.</p>
+<hr />
 <h2 id="config_predjson">config_pred.json</h2>
 <p>Este archivo de configuración, en cambio, es un archivo <code>.json</code>, que tiene una estructura anidada. La gran mayoría de sus valores está avocada al entrenamiento, así que no los detallaremos aquí.</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="w">    </span><span class="nt">&quot;data_loader&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
