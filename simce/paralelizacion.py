@@ -172,7 +172,7 @@ def process_single_image(preguntas:pd.Series, num: int, rbd:PathLike, dic_pagina
                                 error=f'Subregunta {estudiante}_{pregunta_selec}_{int(subpreg_selec)} no pudo ser procesada',
                                 nivel_error='Subpregunta', 
                                 )
-                    return 'Ups, ocurrio un error en la subpregunta'
+                    return 'Ups, ocurrió un error en la subpregunta'
 
 
             except Exception as e:
