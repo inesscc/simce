@@ -7,7 +7,7 @@ import pandas as pd
 from multiprocessing import Pool, cpu_count
 from simce.errors import agregar_error
 from simce.utils import get_mask_imagen
-from config.proc_img import n_pixeles_entre_lineas
+from config.proc_img import n_pixeles_entre_lineas, masks
 from simce.proc_imgs import get_insumos, get_pages_cuadernillo, get_subpregs_distintas, eliminar_franjas_negras, recorte_imagen, \
     obtener_lineas_horizontales, bound_and_crop, crop_and_save_subpreg, get_pregunta_inicial_pagina, save_pregunta_completa, \
     partir_imagen_por_mitad, get_contornos_grandes, dejar_solo_recuadros_subpregunta, get_mascara_lineas_horizontales
@@ -111,7 +111,9 @@ def process_single_image(preguntas:pd.Series, num: int, rbd:PathLike, dic_pagina
     else:
         # Detecto recuadros naranjos
         try:
-            mask_naranjo = get_mask_imagen(media_img)
+            mask_naranjo = get_mask_imagen(media_img, lower_color=masks['naranjo']['low'],
+                                           upper_color=masks['naranjo']['up'])
+
         
             # Obtengo contornos
             big_contours = get_contornos_grandes(mask_naranjo)
@@ -137,12 +139,7 @@ def process_single_image(preguntas:pd.Series, num: int, rbd:PathLike, dic_pagina
                 if args.verbose:
                     print(f'{subpreg_selec=}')
                 
-                # Obtenemos subpreguntas:
-                #img_pregunta_crop = recorte_imagen(img_pregunta)
-                # img_crop_col = get_mask_imagen(img_pregunta_recuadros,
-                #                                lower_color=np.array(
-                #                                    [0, 111, 109]),
-                #                                upper_color=np.array([18, 255, 255]))
+
 
                 # Obtenemos lineas horizontales:
                 mask_lineas_horizontales = get_mascara_lineas_horizontales(img_recuadros_pregunta)

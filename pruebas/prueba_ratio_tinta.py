@@ -1,6 +1,6 @@
 import cv2
 from PIL import Image
-from config.proc_img import get_directorios
+from config.proc_img import get_directorios, mask_blanco_low, mask_blanco_up
 from simce.proc_imgs import bound_and_crop
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -10,6 +10,7 @@ import torch
 from torchvision import tv_tensors
 import numpy as np
 from simce.utils import get_mask_imagen
+
 def plot(imgs, col_title=None, **imshow_kwargs):
     if not isinstance(imgs[0], list):
         # Make a 2d grid even if there's just 1 row
@@ -112,8 +113,8 @@ def get_indices_tinta(ruta):
     #bgr_img = cv2.imread(ruta)[20:-20, 15:-15]
     bgr_img = cv2.imread(ruta)
 
-    mask_blanco = get_mask_imagen(bgr_img, lower_color=np.array([0,31,0]),
-                                  upper_color=np.array([179, 255, 255]), iters=1,
+    mask_blanco = get_mask_imagen(bgr_img, lower_color=mask_blanco_low,
+                                  upper_color=mask_blanco_up, iters=1,
                                     eliminar_manchas=False, revert=True)
     
     mask_blanco_fill, contornos_og = get_recuadros(mask_blanco)

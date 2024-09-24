@@ -55,6 +55,31 @@ Valores utilizados para la conexión al disco NAS donde están los datos de imá
 ### Es relativamente probable que estos valores deban ser modificados:
 
 ``` py linenums="12"
+masks = {
+    'naranjo':{'low': np.array([13, 11, 0]), 'up': np.array([29, 255, 255])},
+    'blanco':{'low': np.array([0,31,0]), 'up': np.array([179, 255, 255])},
+    'negro':{'low': np.array([0,0,225]), 'up': np.array([179, 255, 255])},
+    'azul':{'low': np.array([67,46,0]), 'up': np.array([156, 255, 255])},
+    'recuadros':{'low': np.array([0, 0, 224]), 'up': np.array([179, 11, 255])},
+    
+    # Estas máscaras se utilizan para la detección de líneas horizontales
+    # Son ligeramente diferentes a las que se usan en otras secciones del código
+    'naranjo2':{'low': np.array([0, 111, 109]) , 'up': np.array([18, 255, 255])},
+    'azul2':{'low':np.array([0, 0, 0]) , 'up': np.array([114, 255, 255])},
+    'negro2':{'low':np.array([0, 0, 204]) , 'up':np.array([179, 255, 255]) },
+         
+         }
+```
+Estas son las distintas máscaras que se usan a lo largo del proyecto para identificar distintos rangos de colores.
+Como son rangos, cada máscara tiene un valor bajo (`low`) y alto (`up`). En el script llamamos estas máscaras, de formas como la siguiente:
+
+``` py
+    im2 = get_mask_imagen(img_completa_crop, lower_color=masks['negro']['low'],
+                          upper_color=masks['negro']['up'], iters=2)
+```
+Si detectan que alguna máscara no está funcionando adecuadamente, basta con modificar los rangos de la máscara que está teniendo problemas.
+
+``` py linenums="26"
 id_estudiante = 'serie'
 variables_identificadoras = ['rbd', 'dvRbd', 'codigoCurso', id_estudiante, 'rutaImagen1']
 ```
@@ -62,37 +87,37 @@ variables_identificadoras = ['rbd', 'dvRbd', 'codigoCurso', id_estudiante, 'ruta
 Representan variables que utilizaremos de la tabla origen. Si cualquiera de estas variables cambia de nombre en la tabla origen, deberán ser actualizadas acá.
 
 
-``` py linenums="14"
+``` py linenums="28"
 regex_extraer_rbd_de_ruta = r'\\(\d+)\\'
 ```
 
 Expresión regular que el RBD de la ruta que se encuentra en la variable rutaImagen1 (busca uno o más dígitos consecutivos rodeados de paréntesis).
 
-``` py linenums="15"
+``` py linenums="29"
 dic_ignorar_p1 = {'estudiantes': True, 'padres': False}
 ```
 Determina si la pregunta 1 debe ser ignorada o no en cada cuadernillo. En el caso que estudiamos nosotros, el cuadernillo de estudiantes preguntaba la edad en la pregunta 1, por lo que debía ser ignorada. En el caso de los padres, era una pregunta común y corriente, por lo que no se ignora.
 
 
-```py linenums="16"
+```py linenums="30"
 regex_estudiante = r'\d{7,}'
 ```
 
 Acá se define cómo extraeremos los identificadores de los estudiantes de rutas de archivos, principalmente. Lo que busca este código son 7 números seguidos. Por lo tanto, si el identificador de estudiante cambiara a más o menos números o incorporara letras, habría que modificar esto para que funcione de manera acorde.
 
-```py linenums="17"
+```py linenums="31"
 ENCODING = 'utf-8'
 ```
 
 Define cuál es el encoding utilizado a la hora de leer la tabla de origen. Nos pasó en una ocasión que se usaba encoding "Latin-1" para una tabla de octavo básico, por lo que decidimos parametrizar esto.
 
-```py linenums="18"
+```py linenums="32"
 LIMPIAR_RUTA = False
 ```
 
 En algunos casos las rutas a los archivos de los cuadernillos en la tabla de origen, incluían el identificador del alumno como una carpeta. En general, nosotros trabajamos de forma que dentro de las carpetas de cada rbd se encontraban todas las imágenes, sin una carpeta intermedia por cada alumno del rbd. Así, cuando pasa esto, este parámetro elimina de la ruta el identificador del alumno.
 
-``` py linenums="19"
+``` py linenums="33"
 IGNORAR_PRIMERA_PAGINA = True
 ```
 
@@ -100,7 +125,7 @@ Este parámetro define si se debe ignorar la primera página en la recolección 
 
 ### Es menos probable que estos valores deban ser modificados:
 
-```py linenums="20"
+```py linenums="34"
 n_pixeles_entre_lineas = 22
 ```
 
@@ -108,7 +133,7 @@ Especifica cuántos píxeles se espera que haya como mínimo entre dos líneas s
 
 
 
-```py linenums="21" hl_lines="11 12"
+```py linenums="35" hl_lines="11 12"
 def get_directorios(curso, filtro=None) -> dict:
     '''Acá se indican todos los directorios del proyecto. Luego, la función crear_directorios() toma todos
     los directorios de este diccionario y los crea. La opción filtro permite cargar solo algunos directorios,
@@ -160,14 +185,14 @@ def get_directorios(curso, filtro=None) -> dict:
 
 Esta función permite obtener todos los directorios del proyecto. Además tiene la opción de filtrar, de forma de obtener algún directorio específico que a uno pudiera interesarle. Si uno quisiera cambiar el nombre de algún directorio, en este lugar debe hacerse. Destacamos en el código dónde se genera la conexión a la máquina NAS que contiene las imágenes de los cuadernillos.
 
-``` py linenums="68"
+``` py linenums="82"
 regex_hoja_cuadernillo = r'_(\d+)'
 ```
 
 Esta expresión regular se utiliza para extraer el número de la imagen asociada a un cuadernillo. Estas en general tienen un formato `{identificador_estudiante}_1.jpg`, `{identificador_estudiante}_2.jpg`, etc. Entonces, esta expresión regular busca encontrar un guión bajo(_) y uno o más números y luego extrae ese número o números. Se  utiliza para determinar qué preguntas aparecen en qué archivos de imágenes en la [recolección de insumos, en la función que puebla el diccionario de preguntas](../generar_insumos_img#simce.generar_insumos_img.poblar_diccionario_preguntas).
 
 
-``` py linenums="69"
+``` py linenums="83"
 regex_p1 = r'p1(_\d+)?$'
 ```
 
@@ -175,13 +200,13 @@ Expresión regular que identifica la pregunta 1, busca que el string termine con
 
 Estos últimos valores pueden ser ignorados sin problema, están asociados al entrenamiento:
 
-``` py linenums="70"
+``` py linenums="84"
 SEED = 2024
 ```
 
 Esta es una semilla que permite hacer replicables los resultados. Si se cambia, cada etapa del procesamiento que contenga algo de aleatoriedad, tendrá resultados distintos. Por lo tanto, **es mejor no tocarla**.
 
-``` py linenums="71"
+``` py linenums="85"
 FRAC_SAMPLE = .05
 # n° de rondas de aumentado de datos (máximo 5):
 N_AUGMENT_ROUNDS = 5
@@ -189,7 +214,7 @@ N_AUGMENT_ROUNDS = 5
 
 Determina qué porcentaje de los datos de estudiantes con doble marca serán  y cuántas rondas de aumentado de datos serán realizadas para el entrenamiento. No son relevantes para esta etapa del proyecto.
 
-``` py linenums="72"
+``` py linenums="86"
 nombre_tabla_predicciones = 'data_pred.csv'
 ```
 
@@ -199,7 +224,7 @@ Es el nombre de la tabla que contiene las predicciones. Quedó parametrizada par
 
 Este archivo de configuración, en cambio, es un archivo `.json`, que tiene una estructura anidada. La gran mayoría de sus valores está avocada al entrenamiento, así que no los detallaremos aquí.
 
-```json hl_lines="4"
+```json hl_lines="87"
     "data_loader": {
         "type": "TrainTestDataLoader",
         "args": {
@@ -215,7 +240,7 @@ Este archivo de configuración, en cambio, es un archivo `.json`, que tiene una 
 
 ```
 
-Esta sección hace referencia al data_loader, que es el objeto que se encarga de cargar las imágenes y pasárselas al modelo. Lo importante es que el nombre del `data_file` sea el mismo que [nombre_tabla_predicciones](#__codelineno-20-72) en la sección anterior.
+Esta sección hace referencia al data_loader, que es el objeto que se encarga de cargar las imágenes y pasárselas al modelo. Lo importante es que el nombre del `data_file` sea el mismo que [nombre_tabla_predicciones](#__codelineno-22-86) en la sección anterior.
 
 **Importante:** no tocar los otros valores, pues podrían llevar a problemas al predecir.
 
