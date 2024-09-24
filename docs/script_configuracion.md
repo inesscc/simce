@@ -13,7 +13,9 @@ Este script centraliza los valores que podrían variar entre prueba y prueba a l
 CURSO = Path('4b')
 ```
 
-Acá se define qué curso está siendo procesado. En este caso, estamos procesando 4° básico. Esto afecta principalmente nombres de archivos y carpetas que dan orden al proyecto, en la medida que se van generando. Por ejemplo, los datos de subpreguntas se guardan en <pre>data/input_proc/<b>4b</b>/subpreg_recortadas</pre>.
+Acá se define qué curso está siendo procesado. En este caso, estamos procesando 4° básico. Esto afecta principalmente nombres de archivos y carpetas que dan orden al proyecto, en la medida que se van generando. Por ejemplo, los datos de subpreguntas se guardan en <pre>data/input_proc/<b>4b</b>/subpreg_recortadas</pre>
+
+---
 
 ```py linenums="2"
 carpeta_estudiantes = 'CE'
@@ -22,22 +24,29 @@ carpeta_padres = 'CP'
 
 Es el nombre de las carpetas de padres y estudiantes. Se utilizan para buscar en el directorio de archivos estas carpetas, además de que se crearán carpetas con estos nombres en los outputs. Si se dejara de usar esta nomenclatura en el sistema de archivos, deberían cambiarse estos valores a algo que corresponda a la nueva nomenclatura.
 
+---
+
 ``` py linenums="4"
 nombres_tablas_origen = {'padres': f'{carpeta_padres}_Origen_DobleMarca.csv',
                  'estudiantes': f'{carpeta_estudiantes}_Origen_DobleMarca.csv'}
 ```
 Contiene los nombres de las tablas de Origen. Si los nombres cambian, deben ser cambiados aquí también. Notar que se hace referencia a las variables `carpeta_padres` y `carpeta_estudiantes`, que se mencionaron anteriormente. Por lo tanto, por ejemplo, para padres, el nombre original del archivo era `CP_Origen_DobleMarca.csv`.
 
+---
 
 ``` py linenums="6"
 nombre_tabla_para_insumos = 'DD 4° BÁSICO 2023_CE_CP.xlsx'
 ```
 Tabla que se utiliza para parte de la generación de insumos. De esta se pueden extraer número de preguntas, de subpreguntas, de opciones por subpregunta. Deberá ser actualizada al nombre que corresponda en su siguiente versión.
 
+---
+
 ``` py linenums="7"
 n_filas_ignorar_tabla_insumos = 4
 ```
 En la versión que recibimos de la tabla, era necesario saltarse las primeras 4 filas para acceder a los datos que nos interesan. Lo dejamos parametrizado, en caso de que esto cambie.
+
+---
 
 ``` py linenums="8"
 nombre_col_campo_bd = 'Nombre Campo BD'
@@ -46,11 +55,15 @@ nombre_col_val_permitidos = 'Rango de valores Permitidos'
 
 Representa el nombre de la columna que contiene los nombres de los campos de la base de datos y los valores permitidos para cada subpregunta. Actualizar si el nombre de alguna de estas columnas cambia.
 
+---
+
 ``` py linenums="10"
 IP_NAS = '10.10.100.28'
 FOLDER_DATOS = '4b_2023' # OJO, actualizar
 ```
 Valores utilizados para la conexión al disco NAS donde están los datos de imágenes. Si la IP o la carpeta de datos cambiara, debe ser ingresado aquí. 
+
+---
 
 ### Es relativamente probable que estos valores deban ser modificados:
 
@@ -79,6 +92,8 @@ Como son rangos, cada máscara tiene un valor bajo (`low`) y alto (`up`). En el 
 ```
 Si detectan que alguna máscara no está funcionando adecuadamente, basta con modificar los rangos de la máscara que está teniendo problemas.
 
+---
+
 ``` py linenums="26"
 id_estudiante = 'serie'
 variables_identificadoras = ['rbd', 'dvRbd', 'codigoCurso', id_estudiante, 'rutaImagen1']
@@ -86,6 +101,7 @@ variables_identificadoras = ['rbd', 'dvRbd', 'codigoCurso', id_estudiante, 'ruta
 
 Representan variables que utilizaremos de la tabla origen. Si cualquiera de estas variables cambia de nombre en la tabla origen, deberán ser actualizadas acá.
 
+---
 
 ``` py linenums="28"
 regex_extraer_rbd_de_ruta = r'\\(\d+)\\'
@@ -93,11 +109,19 @@ regex_extraer_rbd_de_ruta = r'\\(\d+)\\'
 
 Expresión regular que el RBD de la ruta que se encuentra en la variable rutaImagen1 (busca uno o más dígitos consecutivos rodeados de paréntesis).
 
-``` py linenums="29"
-dic_ignorar_p1 = {'estudiantes': True, 'padres': False}
-```
-Determina si la pregunta 1 debe ser ignorada o no en cada cuadernillo. En el caso que estudiamos nosotros, el cuadernillo de estudiantes preguntaba la edad en la pregunta 1, por lo que debía ser ignorada. En el caso de los padres, era una pregunta común y corriente, por lo que no se ignora.
+---
 
+``` py linenums="29"
+dic_ignorar_preguntas = {'estudiantes': [1], 'padres': None}
+```
+Determina qué preguntas deben ser ignoradas en cada cuadernillo. Esto aplica a preguntas que no son de selección de alternativas y, por lo tanto, no están sujetas a la posibilidad de tener una doble marca. En el caso que estudiamos nosotros, el cuadernillo de estudiantes preguntaba la edad en la pregunta 1, por lo que debía ser ignorada. En el caso de los padres, era una pregunta común y corriente, por lo que no se ignora esta ni ninguna otra pregunta, así que dejamos el valor con None. Si por ejemplo en una nueva iteración **no** hay que ignorar preguntas en estudiantes y hay que ignorar la pregunta 3 y 10 en padres, la línea de código quedaría así: 
+
+
+``` py 
+dic_ignorar_preguntas = {'estudiantes': None, 'padres': [3, 10]}
+```
+
+---
 
 ```py linenums="30"
 regex_estudiante = r'\d{7,}'
@@ -105,11 +129,15 @@ regex_estudiante = r'\d{7,}'
 
 Acá se define cómo extraeremos los identificadores de los estudiantes de rutas de archivos, principalmente. Lo que busca este código son 7 números seguidos. Por lo tanto, si el identificador de estudiante cambiara a más o menos números o incorporara letras, habría que modificar esto para que funcione de manera acorde.
 
+---
+
 ```py linenums="31"
 ENCODING = 'utf-8'
 ```
 
 Define cuál es el encoding utilizado a la hora de leer la tabla de origen. Nos pasó en una ocasión que se usaba encoding "Latin-1" para una tabla de octavo básico, por lo que decidimos parametrizar esto.
+
+---
 
 ```py linenums="32"
 LIMPIAR_RUTA = False
@@ -117,11 +145,15 @@ LIMPIAR_RUTA = False
 
 En algunos casos las rutas a los archivos de los cuadernillos en la tabla de origen, incluían el identificador del alumno como una carpeta. En general, nosotros trabajamos de forma que dentro de las carpetas de cada rbd se encontraban todas las imágenes, sin una carpeta intermedia por cada alumno del rbd. Así, cuando pasa esto, este parámetro elimina de la ruta el identificador del alumno.
 
+---
+
 ``` py linenums="33"
 IGNORAR_PRIMERA_PAGINA = True
 ```
 
 Este parámetro define si se debe ignorar la primera página en la recolección de insumos. Esto, porque usualmente la primera página tiene preguntas de ejemplo, que deben ser ignoradas. Se agrega en caso en que alguna iteración contenga alguna pregunta que no sea de ejemplo en la primera página.
+
+---
 
 ### Es menos probable que estos valores deban ser modificados:
 
@@ -131,7 +163,7 @@ n_pixeles_entre_lineas = 22
 
 Especifica cuántos píxeles se espera que haya como mínimo entre dos líneas separadoras de subpreguntas. Debiera ser relevante solo si cambiara el diseño del cuestionario de forma que las subpreguntas queden más (o menos) espaciadas.
 
-
+---
 
 ```py linenums="35" hl_lines="11 12"
 def get_directorios(curso, filtro=None) -> dict:
@@ -185,28 +217,27 @@ def get_directorios(curso, filtro=None) -> dict:
 
 Esta función permite obtener todos los directorios del proyecto. Además tiene la opción de filtrar, de forma de obtener algún directorio específico que a uno pudiera interesarle. Si uno quisiera cambiar el nombre de algún directorio, en este lugar debe hacerse. Destacamos en el código dónde se genera la conexión a la máquina NAS que contiene las imágenes de los cuadernillos.
 
+---
+
 ``` py linenums="82"
 regex_hoja_cuadernillo = r'_(\d+)'
 ```
 
 Esta expresión regular se utiliza para extraer el número de la imagen asociada a un cuadernillo. Estas en general tienen un formato `{identificador_estudiante}_1.jpg`, `{identificador_estudiante}_2.jpg`, etc. Entonces, esta expresión regular busca encontrar un guión bajo(_) y uno o más números y luego extrae ese número o números. Se  utiliza para determinar qué preguntas aparecen en qué archivos de imágenes en la [recolección de insumos, en la función que puebla el diccionario de preguntas](../generar_insumos_img#simce.generar_insumos_img.poblar_diccionario_preguntas).
 
+---
+
+### Valores que pueden ser ignorados sin problema, están asociados al entrenamiento:
 
 ``` py linenums="83"
-regex_p1 = r'p1(_\d+)?$'
-```
-
-Expresión regular que identifica la pregunta 1, busca que el string termine con "p1" y opcionalmente que puedan existir subpreguntas con un string tipo "p1_1". Se utiliza para quitar la pregunta 1 del análisis en los cuadernillos en que se indique que así debe ser, según el diccionario de la sección anterior.
-
-Estos últimos valores pueden ser ignorados sin problema, están asociados al entrenamiento:
-
-``` py linenums="84"
 SEED = 2024
 ```
 
 Esta es una semilla que permite hacer replicables los resultados. Si se cambia, cada etapa del procesamiento que contenga algo de aleatoriedad, tendrá resultados distintos. Por lo tanto, **es mejor no tocarla**.
 
-``` py linenums="85"
+---
+
+``` py linenums="84"
 FRAC_SAMPLE = .05
 # n° de rondas de aumentado de datos (máximo 5):
 N_AUGMENT_ROUNDS = 5
@@ -214,11 +245,15 @@ N_AUGMENT_ROUNDS = 5
 
 Determina qué porcentaje de los datos de estudiantes con doble marca serán  y cuántas rondas de aumentado de datos serán realizadas para el entrenamiento. No son relevantes para esta etapa del proyecto.
 
+---
+
 ``` py linenums="86"
 nombre_tabla_predicciones = 'data_pred.csv'
 ```
 
 Es el nombre de la tabla que contiene las predicciones. Quedó parametrizada para poder hacer referencia a ella en la siguiente sección.
+
+---
 
 ## config_pred.json
 
