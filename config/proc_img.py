@@ -8,6 +8,7 @@ Created on Tue Apr  9 10:50:14 2024
 from pathlib import Path
 from dotenv import load_dotenv
 import os
+import numpy as np
 load_dotenv()
 
 # 1. VARIABLES QUE ES MUY PROBABLE QUE DEBAN SER ACTUALIZADAS --------
@@ -32,11 +33,32 @@ nombre_col_val_permitidos = 'Rango de valores Permitidos'
 
 ## Conexión a NAS -----
 IP_NAS = '10.10.100.28'
+
 FOLDER_DATOS = 'Elements/ENTREGA01/Imagenes' # OJO, actualizar
 ## TODO: actualizar conexión.
 ## TODO: mostrar cómo cambiar tabla exportada.
 
 # 2. VARIABLES QUE ES PROBABLE QUE DEBAN SER ACTUALIZADAS:
+
+# Máscaras de color:
+masks = {
+    'naranjo':{'low': np.array([13, 11, 0]), 'up': np.array([29, 255, 255])},
+    'blanco':{'low': np.array([0,31,0]), 'up': np.array([179, 255, 255])},
+    'negro':{'low': np.array([0,0,225]), 'up': np.array([179, 255, 255])},
+    'azul':{'low': np.array([67,46,0]), 'up': np.array([156, 255, 255])},
+    'recuadros':{'low': np.array([0, 0, 224]), 'up': np.array([179, 11, 255])},
+    
+    # Estas máscaras se utilizan para la detección de líneas horizontales
+    # Son ligeramente diferentes a las que se usan en otras secciones del código
+    'naranjo2':{'low': np.array([0, 111, 109]) , 'up': np.array([18, 255, 255])},
+    'azul2':{'low':np.array([0, 0, 0]) , 'up': np.array([114, 255, 255])},
+    'negro2':{'low':np.array([0, 0, 204]) , 'up':np.array([179, 255, 255]) },
+         
+         }
+
+
+
+
 
 # Variables identificadoras tabla origen
 id_estudiante = 'serie'
@@ -44,9 +66,9 @@ variables_identificadoras = ['rbd', 'dvRbd', 'codigoCurso', id_estudiante, 'ruta
 # Expresión regular para extraer rl rbd de la ruta en variable RutaImagen
 regex_extraer_rbd_de_ruta = r'\\(\d+)\\'
 
-# Diccionario que indica si la pregunta 1 debe ser ignorada al procesar datos
-dic_ignorar_p1 = {'estudiantes': True, 'padres': False}
-# TODO: Ver cómo ignorar fácilmente más preguntas.
+# Diccionario que indica qué preguntas deben ser ignorada al procesar datos
+dic_ignorar_preguntas = {'estudiantes': [1], 'padres': None}
+
 
 # Expresión regular para capturar el identificador del estudiante en nombre de archivos
 regex_estudiante = r'\d{7,}'
@@ -131,10 +153,6 @@ def conectar_a_NAS(IP_NAS, FOLDER_DATOS):
 # OBTENCIÓN DE INSUMOS ----------------------------------------
 regex_hoja_cuadernillo = r'_(\d+)'
 
-
-# Expresión regular que permite identificar variables asociadas a la pregunta 1
-# Utilizado para obviarla de la selección de preguntas
-regex_p1 = r'p1(_\d+)?$'
 
 
 ## 4. VARIABLES QUE PUEDEN SER IGNORADAS (vienen del entrenamiento):

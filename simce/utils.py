@@ -52,7 +52,7 @@ def crear_directorios(directorios: list[PathLike]):
 
 
 
-def get_mask_imagen(media_img: np.ndarray, lower_color:np.array=np.array([13, 11, 0]), upper_color:np.array=np.array([29, 255, 255]),
+def get_mask_imagen(media_img: np.ndarray, lower_color:np.array, upper_color:np.array,
                     iters:int=4, eliminar_manchas:str='horizontal', revert:bool=False)->np.ndarray:
     """
     Genera una máscara binaria para una imagen dada, basada en un rango de color en el espacio de color HSV.

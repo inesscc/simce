@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 from simce.utils import get_mask_imagen
+from config.proc_img import masks
+import numpy as np
 import pandas as pd
 from os import PathLike
 
@@ -74,26 +76,26 @@ def preparar_mascaras(ruta: PathLike)-> tuple[np.ndarray, np.ndarray]:
 
     bgr_img = cv2.imread(ruta)
 
-    mask_blanco = get_mask_imagen(bgr_img, lower_color=np.array([0,31,0]),
-                                  upper_color=np.array([179, 255, 255]), iters=1,
+    mask_blanco = get_mask_imagen(bgr_img, lower_color=masks['blanco']['low'],
+                                  upper_color=masks['blanco']['up'], iters=1,
                                     eliminar_manchas=False, revert=True)
     
     mask_blanco_fill, contornos_og = get_recuadros(mask_blanco)
 
     if 'CE' in ruta:
         # Detectamos grises y negros si es cuestionario de estudiantes
-        mask_tinta = get_mask_imagen(bgr_img, lower_color=np.array([0,0,225]),
-                                    upper_color=np.array([179, 255, 255]), iters=1, eliminar_manchas=False,
+        mask_tinta = get_mask_imagen(bgr_img, lower_color=masks['negro']['low'],
+                                    upper_color=masks['negro']['up'], iters=1, eliminar_manchas=False,
                                     revert=True)
 
     elif 'CP' in ruta:
         # Detectamos tinta azul si es cuestionario de padres
-        mask_tinta = get_mask_imagen(bgr_img, lower_color=np.array([67,46,0]),
-                                    upper_color=np.array([156, 255, 255]), iters=1, eliminar_manchas=False)
+        mask_tinta = get_mask_imagen(bgr_img, lower_color=masks['azul']['low'],
+                                    upper_color=masks['azul']['up'], iters=1, eliminar_manchas=False)
         if mask_tinta.mean() < 0.7:
             # Detectamos grises y negros si no detectamos tinta azul
-            mask_tinta = get_mask_imagen(bgr_img, lower_color=np.array([0,0,225]),
-                                        upper_color=np.array([179, 255, 255]), iters=1, eliminar_manchas=False,
+            mask_tinta = get_mask_imagen(bgr_img, lower_color=masks['negro']['low'],
+                                        upper_color=masks['negro']['up'], iters=1, eliminar_manchas=False,
                                         revert=True)
 
     

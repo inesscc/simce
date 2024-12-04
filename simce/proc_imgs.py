@@ -12,6 +12,7 @@ import pandas as pd
 import re
 from dotenv import load_dotenv
 from simce.utils import get_mask_imagen, eliminar_o_rellenar_manchas
+from config.proc_img import masks
 import json
 import os
 import argparse
@@ -67,8 +68,8 @@ def dejar_solo_recuadros_subpregunta(img_pregunta: np.ndarray)-> np.ndarray:
     '''
     img_pregunta_crop = img_pregunta[60:-30, 30:-30]
     mask_recuadro = get_mask_imagen(img_pregunta_crop,
-                           lower_color=np.array([0, 0, 224]),
-                           upper_color=np.array([179, 11, 255]),
+                           lower_color=masks['recuadros']['low'],
+                           upper_color=masks['recuadros']['up'],
                            eliminar_manchas=None, iters=0, revert=False)
 
     # Si existen columnas blancas, las eliminamos:
@@ -107,19 +108,18 @@ def get_mascara_lineas_horizontales(img_recuadros:np.ndarray)->np.ndarray:
     '''
 
     px_naranjo = get_mask_imagen(img_recuadros,
-                                   lower_color=np.array(
-                                       [0, 111, 109]),
-                                   upper_color=np.array([18, 255, 255]),
+                                   lower_color=masks['naranjo2']['low'],
+                                   upper_color=masks['naranjo2']['up'],
                                    iters=1, revert=True)
 
     px_azul = get_mask_imagen(img_recuadros, 
-                                   lower_color=np.array([0, 0, 0]),
-                                     upper_color=np.array([114, 255, 255]),
+                                   lower_color=masks['azul2']['low'],
+                                   upper_color=masks['azul2']['up'],
                                      eliminar_manchas=None, iters=0)
     
     px_negro = get_mask_imagen(img_recuadros, 
-                                lower_color=np.array([0, 0, 204]),
-                                    upper_color=np.array([179, 255, 255]),
+                                   lower_color=masks['negro2']['low'],
+                                   upper_color=masks['negro2']['up'],
                                     eliminar_manchas=None, iters=0)
     
     idx_naranjo = np.where(px_naranjo == 0)
@@ -458,8 +458,8 @@ def eliminar_franjas_negras(img_completa_crop:np.ndarray)->np.ndarray:
     Returns:
         img_no_franja: imagen completa del cuadernillo, sin franjas negras, en caso de existir.
     """
-    im2 = get_mask_imagen(img_completa_crop, lower_color=np.array([0, 0, 241]),
-                          upper_color=np.array([179, 255, 255]), iters=2)
+    im2 = get_mask_imagen(img_completa_crop, lower_color=masks['negro']['low'],
+                          upper_color=masks['negro']['up'], iters=2)
 
     im2[:,:100] = 255
     im2[:,-100:] = 255

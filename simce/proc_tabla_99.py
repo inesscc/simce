@@ -6,7 +6,7 @@ Created on Thu May  9 17:20:37 2024
 """
 import pandas as pd
 from config.proc_img import  variables_identificadoras, SEED, CURSO, ENCODING, LIMPIAR_RUTA, \
-regex_extraer_rbd_de_ruta, dic_ignorar_p1, regex_p1, nombres_tablas_origen 
+regex_extraer_rbd_de_ruta, dic_ignorar_preguntas, nombres_tablas_origen 
 from simce.utils import timing
 import re
 import json
@@ -116,17 +116,20 @@ def procesar_casos_99(tabla_origen: pd.DataFrame, nombres_col: list[str], dic_cu
     
     '''
 
-    ignorar_p1 = dic_ignorar_p1[tipo_cuadernillo]
+    preguntas_ignorar = dic_ignorar_preguntas[tipo_cuadernillo]
 
     df_melt = tabla_origen.melt(id_vars=variables_identificadoras,
                             value_vars=nombres_col,
                             var_name='preguntas',
                             value_name='respuestas')
-    # Si pregunta 1 debe ser ignorada, la sacamos de la base:
-    if ignorar_p1:
-        df_melt = df_melt[df_melt.preguntas.ne(regex_p1)]
 
-    casos_99 = df_melt[(df_melt['respuestas'] == 99)].copy()
+
+    casos_99 = df_melt[(df_melt['respuestas'] == 99)].reset_index(drop=True).copy()
+    
+    # Si pregunta 1 debe ser ignorada, la sacamos de la base:
+    if preguntas_ignorar:
+        preguntas_ignorar_str = ['p'+str(i) for i in preguntas_ignorar]
+        casos_99 = casos_99[~(casos_99.preguntas.str.extract('^(p\d+)').isin(preguntas_ignorar_str).values)]
 
     # Si queremos obtener set de entrenamiento agregamos muestra de respuestas normales:
 
