@@ -37,13 +37,17 @@ def main(args):
     queue = manager.Queue()         # Cola de tareas
     
     process_general(dirs = dirs, regex_estudiante= regex_estudiante, 
-                    queue = queue, curso=CURSO, args=args, tipo_cuadernillo='padres',
-                    filter_rbd=['04243','01487'])
-
+                 queue = queue, curso=CURSO, args=args, tipo_cuadernillo='padres',
+                    filter_rbd=['10687'])
+#    process_general(dirs = dirs, regex_estudiante= regex_estudiante, 
+#                    queue = queue, curso=CURSO, args=args, tipo_cuadernillo='padres')
+    
     process_general(dirs = dirs, regex_estudiante= regex_estudiante, 
                     queue = queue, curso=CURSO, args=args, tipo_cuadernillo='estudiantes',
-                    filter_rbd=['04243','01487'])
-    
+                    filter_rbd=['10687'])
+ #   process_general(dirs = dirs, regex_estudiante= regex_estudiante, 
+ #                   queue = queue, curso=CURSO, args=args, tipo_cuadernillo='estudiantes')
+   
 
     escribir_errores(queue)
 

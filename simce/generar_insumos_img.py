@@ -30,6 +30,7 @@ def get_n_paginas(directorio_imagenes: str)->int:
     Returns:
         n_pages: n° de páginas totales del cuadernillo.
     '''
+    print (directorio_imagenes)
     rbds = list(directorio_imagenes.iterdir())
     rbd1 = rbds[0]
 
