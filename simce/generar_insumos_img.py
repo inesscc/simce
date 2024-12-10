@@ -8,7 +8,7 @@ Created on Thu May 16 17:46:31 2024
 import numpy as np
 import cv2
 from config.proc_img import regex_estudiante, regex_hoja_cuadernillo, nombre_col_campo_bd, \
-             IGNORAR_PRIMERA_PAGINA, nombre_tabla_para_insumos, \
+             IGNORAR_PRIMERA_PAGINA, REORDENAR_ARCHIVOS, nombre_tabla_para_insumos, \
           n_filas_ignorar_tabla_insumos, nombre_col_val_permitidos, masks
 from simce.utils import timing
 import pandas as pd
@@ -74,11 +74,22 @@ def calcular_pregunta_actual(pages: tuple[int, int], p: int, dic_q: dict)-> int:
     else:  # Para la portada
         return 0
 
+def reordenar_archivos(files_estudiante: list[os.PathLike])-> list[os.PathLike]:
+    
+    n = len(files_estudiante)
+    first_half = files_estudiante[:n//2]
+    second_half = files_estudiante[n//2:]
+
+    # Interleave the first half and the reversed second half
+    reordered_files = [file for pair in zip(first_half, reversed(second_half)) for file in pair]
+    
+    return reordered_files
+
 
 def generar_diccionarios_x_pagina(n_pages: int, n_preguntas:int, directorio_imagenes:os.PathLike,
                               nivel:str, args: list,
                               filter_rbd:None|list|str=None, filter_estudiante:None|list|str=None,
-                             ignorar_primera_pagina:bool=True,
+                             ignorar_primera_pagina:bool=True, reordenar_archivos_estudiante:bool=False
                              )->dict:
     '''
     Función similar a get_subpreguntas() en el módulo de [procesamiento de imágenes](proc_imgs.md) diseñada para obtener
@@ -101,6 +112,10 @@ def generar_diccionarios_x_pagina(n_pages: int, n_preguntas:int, directorio_imag
 
         ignorar_primera_pagina: booleano que indica si se debe ignorar la primera página a la hora de 
             generar los diccionarios automáticos (en general primera página contiene ejemplos que debemos ignorar.)
+            
+        reordenar_archivos_estudiante: determina si los archivos serán reordenados, pasando de una lógica [1, 2, 3, ..., n]
+                    a [1, n, 2, n-1, 3, n-2, ...]. Esto debió incorporarse para poder homologar el orden de los archivos
+                    original con el nuevo orden recibido.
 
         
 
@@ -156,9 +171,13 @@ def generar_diccionarios_x_pagina(n_pages: int, n_preguntas:int, directorio_imag
                 # pregunta inicial páginas altas
                 'q_alto': n_preguntas + 1}
 
-
+            files_estudiante = sorted(list(rbd.glob(f'{estudiante}*')))
+            
+            if reordenar_archivos_estudiante:
+                files_estudiante = reordenar_archivos(files_estudiante)
+            
             # Para cada imagen del cuadernillo de un estudiante (2 pág x img):
-            for num_pag, dir_pag in enumerate(sorted(list(rbd.glob(f'{estudiante}*')))):
+            for num_pag, dir_pag in enumerate(files_estudiante):
                 # Creamos directorio para guardar imágenes
 
                 # Obtenemos páginas del cuadernillo actual:
@@ -326,7 +345,7 @@ def get_preg_por_hoja(n_pages:int, n_preguntas:int,
 
     diccionario_nivel = generar_diccionarios_x_pagina(n_pages, n_preguntas, directorio_imagenes,
                                     filter_estudiante=primer_est, nivel=nivel, args=args,
-                                    ignorar_primera_pagina=IGNORAR_PRIMERA_PAGINA)
+                                    ignorar_primera_pagina=IGNORAR_PRIMERA_PAGINA, reordenar_archivos_estudiante=REORDENAR_ARCHIVOS)
     return diccionario_nivel
 
 

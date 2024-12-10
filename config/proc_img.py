@@ -14,6 +14,9 @@ load_dotenv()
 # 1. VARIABLES QUE ES MUY PROBABLE QUE DEBAN SER ACTUALIZADAS --------
 CURSO = Path('4b')
 
+# Determina si hay que reordenar archivos según orden recibido en 6to básico.
+REORDENAR_ARCHIVOS = False
+
 ## Tablas Origen -----
 carpeta_estudiantes = 'CE'
 carpeta_padres = 'CP'
