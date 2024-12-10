@@ -105,12 +105,12 @@ def get_directorios(curso, filtro=None) -> dict:
         
         conectar_a_NAS(IP_NAS, FOLDER_DATOS)
 
-        dd['dir_img_bruta'] = Path('P:/')
+        dd['dir_img_bruta'] = Path(f'P:/')
     else:
         # Solo aplica a desarrollo local:
         dd['dir_img_bruta'] = dd['dir_input']  
-    dd['dir_estudiantes'] = dd['dir_input'] / carpeta_estudiantes
-    dd['dir_padres'] = dd['dir_input'] / carpeta_padres
+    dd['dir_estudiantes'] = dd['dir_img_bruta'] / carpeta_estudiantes
+    dd['dir_padres'] = dd['dir_img_bruta'] / carpeta_padres
 
     dd['dir_input_proc'] = Path('data/input_procesado/')
     dd['dir_subpreg_aux'] = dd['dir_input_proc'] / curso / 'subpreg_recortadas'
@@ -145,8 +145,11 @@ def get_directorios(curso, filtro=None) -> dict:
 
 def conectar_a_NAS(IP_NAS, FOLDER_DATOS):
     # Nos conectamos a disco NAS:
-    if not Path('P:/').is_dir():
-        os.system(rf"NET USE P: \\{IP_NAS}\{FOLDER_DATOS}")
+    #if not Path('P:/').is_dir():
+    if Path('P:/').is_dir():
+        os.system(rf"NET USE P: /DELETE")
+        
+    os.system(rf"NET USE P: \\{IP_NAS}\{FOLDER_DATOS}")
 
 
 

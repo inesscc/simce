@@ -32,14 +32,17 @@ def get_n_paginas(directorio_imagenes: str)->int:
     '''
     print (directorio_imagenes)
     rbds = list(directorio_imagenes.iterdir())
-    rbd1 = rbds[0]
+    n_files_per_rbd = [len(list(rbd.iterdir())) for rbd in rbds]
+
+    idx_rbd1 = np.where(np.array(n_files_per_rbd)>0)[0][0]
+    rbd1 = rbds[idx_rbd1]
 
     estudiantes_rbd = {re.search(f'({regex_estudiante})', str(i)).group(1)
                        for i in rbd1.rglob('*jpg')}
     n_files = len(list(rbd1.glob(f'{estudiantes_rbd.pop()}*')))
     n_pages = n_files * 2
 
-    return n_pages
+    return n_pages, rbd1
 
 
 def calcular_pregunta_actual(pages: tuple[int, int], p: int, dic_q: dict)-> int:
@@ -291,7 +294,8 @@ def poblar_diccionario_preguntas(q: int, dic_paginas:dict, nivel:str='cuadernill
 
 def get_preg_por_hoja(n_pages:int, n_preguntas:int,
                        directorio_imagenes:os.PathLike, args:argparse.Namespace,
-                         nivel:str='cuadernillo'
+                       primer_rbd:os.PathLike,
+                         nivel:str='cuadernillo', 
                          )->dict:
     '''Puebla diccionario completo que mapea preguntas del cuestionario a su hoja o imagen
     correspondiente en el cuadernillo. Utiliza como insumo el número de páginas del cuadernillo y el n°
@@ -305,6 +309,8 @@ def get_preg_por_hoja(n_pages:int, n_preguntas:int,
 
         directorio_imagenes: directorio donde se encuentran imágenes del tipo de
             cuadernillo que se está procesando (padres o estudiantes).
+
+        primer_rbd: directorio del primer rbd con imágenes disponibles.
 
         nivel: indica si se está obteniendo diccionario a nivel cuadernillo o página.
 
@@ -323,10 +329,11 @@ def get_preg_por_hoja(n_pages:int, n_preguntas:int,
     primer_est = re.search(
         f'({regex_estudiante})',
         # primer estudiante del primer rbd:
-        str(next(next(directorio_imagenes.iterdir()).iterdir()))).group(1)
+        str(next(primer_rbd.iterdir()))).group(1)
 
     diccionario_nivel = generar_diccionarios_x_pagina(n_pages, n_preguntas, directorio_imagenes,
-                                    filter_estudiante=primer_est, nivel=nivel, args=args,
+                                    filter_estudiante=primer_est, filter_rbd=primer_rbd.name,
+                                    nivel=nivel, args=args,
                                     ignorar_primera_pagina=IGNORAR_PRIMERA_PAGINA)
     return diccionario_nivel
 
@@ -410,12 +417,15 @@ def generar_insumos(tipo_cuadernillo:str, directorios:dict[str, os.PathLike],
     df_para_insumos = df_para_insumos[df_para_insumos[nombre_col_campo_bd].notnull()]
     df_preguntas = df_para_insumos[df_para_insumos[nombre_col_campo_bd].str.contains(r'p\d+')].copy()
 
-    n_pages = get_n_paginas(directorio_imagenes)
+    n_pages, primer_rbd = get_n_paginas(directorio_imagenes)
     n_preguntas = df_para_insumos[nombre_col_campo_bd].str.extract(r'(p\d+)').nunique().iloc[0]
     dic_cuadernillo = get_preg_por_hoja(n_pages, n_preguntas,
-                                         directorio_imagenes , args=args, nivel='cuadernillo')
+                                         directorio_imagenes ,
+                                          primer_rbd=primer_rbd,
+                                           args=args, nivel='cuadernillo')
     dic_pagina = get_preg_por_hoja(n_pages, n_preguntas,
-                                    directorio_imagenes, args=args, nivel='pagina')
+                                    directorio_imagenes, primer_rbd=primer_rbd,
+                                      args=args, nivel='pagina')
     subpreg_x_preg = get_subpreg_x_preg(df_preguntas)
     n_subpreg_tot = df_para_insumos[nombre_col_campo_bd].str.contains(r'^p\d').sum()
     n_recuadros_x_subpreg = (df_preguntas
