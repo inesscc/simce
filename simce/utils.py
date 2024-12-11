@@ -45,7 +45,7 @@ def crear_directorios(directorios: list[PathLike]):
 
     for k,v  in directorios.items():
         # No creamos directorio imágenes brutas, porque ya debieran existir
-        if k != 'dir_img_bruta':
+        if k not in ['dir_img_bruta', 'dir_estudiantes', 'dir_padres']:
             v.mkdir(exist_ok=True, parents=True)
     print('Directorios generados exitosamente!')
 

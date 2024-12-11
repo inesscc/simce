@@ -12,10 +12,10 @@ import numpy as np
 load_dotenv()
 
 # 1. VARIABLES QUE ES MUY PROBABLE QUE DEBAN SER ACTUALIZADAS --------
-CURSO = Path('4b')
+CURSO = Path('6b')
 
 # Determina si hay que reordenar archivos según orden recibido en 6to básico.
-REORDENAR_ARCHIVOS = False
+REORDENAR_ARCHIVOS = True
 
 ## Tablas Origen -----
 carpeta_estudiantes = 'CE'
@@ -26,7 +26,7 @@ nombres_tablas_origen = {'padres': f'{carpeta_padres}_Origen_DobleMarca.csv',
 
 ## Tabla campos BD -----
 # Nombre de tabla que contiene n° de subpreguntas, n° de recuadros por subpregunta:
-nombre_tabla_para_insumos = 'DD 4° BÁSICO 2023_CE_CP.xlsx'
+nombre_tabla_para_insumos = 'DD 6° BÁSICO 2024_CE_CP.xlsx'
 # N° de filas que hay que saltarse al cargar la tabla (en qué fila se encuentran nombres de columnas)
 n_filas_ignorar_tabla_insumos = 4
 # Nombre columna con nombres de campos de la Base de datos:
@@ -36,9 +36,9 @@ nombre_col_val_permitidos = 'Rango de valores Permitidos'
 
 ## Conexión a NAS -----
 IP_NAS = '10.10.100.28'
-FOLDER_DATOS = '4b_2023' # OJO, actualizar
-## TODO: ver de que se pueda actualizar conexión.
-## TODO: mostrar cómo cambiar tabla exportada de excel a csv.
+FOLDER_DATOS = 'Elements/ENTREGA01/Imagenes' # OJO, actualizar
+## TODO: actualizar conexión.
+## TODO: mostrar cómo cambiar tabla exportada.
 
 # 2. VARIABLES QUE ES PROBABLE QUE DEBAN SER ACTUALIZADAS:
 
@@ -100,17 +100,19 @@ def get_directorios(curso, filtro=None) -> dict:
     dd['dir_data'] = Path('data/')
     dd['dir_input'] = dd['dir_data'] / 'input_bruto' 
 
+    print(os.getenv('ENV'))
+    
     # En producción nos conectamos a disco NAS para acceso a imágenes
     if os.getenv('ENV') == 'production':
         
         conectar_a_NAS(IP_NAS, FOLDER_DATOS)
 
-        dd['dir_img_bruta'] = Path('P:/')
+        dd['dir_img_bruta'] = Path(f'P:/')
     else:
         # Solo aplica a desarrollo local:
         dd['dir_img_bruta'] = dd['dir_input']  
-    dd['dir_estudiantes'] = dd['dir_input'] / carpeta_estudiantes
-    dd['dir_padres'] = dd['dir_input'] / carpeta_padres
+    dd['dir_estudiantes'] = dd['dir_img_bruta'] / carpeta_estudiantes
+    dd['dir_padres'] = dd['dir_img_bruta'] / carpeta_padres
 
     dd['dir_input_proc'] = Path('data/input_procesado/')
     dd['dir_subpreg_aux'] = dd['dir_input_proc'] / curso / 'subpreg_recortadas'
@@ -120,6 +122,8 @@ def get_directorios(curso, filtro=None) -> dict:
 
     dd['dir_tabla_99'] = dd['dir_input_proc'] / 'output_tabla_99'
     dd['dir_insumos'] = dd['dir_input_proc'] / curso /  'insumos'
+
+    
 
     dd['dir_train_test'] = dd['dir_data'] / 'input_modelamiento'
 
@@ -143,8 +147,11 @@ def get_directorios(curso, filtro=None) -> dict:
 
 def conectar_a_NAS(IP_NAS, FOLDER_DATOS):
     # Nos conectamos a disco NAS:
-    if not Path('P:/').is_dir():
-        os.system(rf"NET USE P: \\{IP_NAS}\{FOLDER_DATOS}")
+    #if not Path('P:/').is_dir():
+    if Path('P:/').is_dir():
+        os.system(rf"NET USE P: /DELETE")
+        
+    os.system(rf"NET USE P: \\{IP_NAS}\{FOLDER_DATOS}")
 
 
 
