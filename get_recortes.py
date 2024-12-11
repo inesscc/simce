@@ -38,13 +38,13 @@ def main(args):
     
     process_general(dirs = dirs, regex_estudiante= regex_estudiante, 
                  queue = queue, curso=CURSO, args=args, tipo_cuadernillo='padres',
-                    filter_rbd=['10687'])
+                    filter_rbd=['10098'])
 #    process_general(dirs = dirs, regex_estudiante= regex_estudiante, 
 #                    queue = queue, curso=CURSO, args=args, tipo_cuadernillo='padres')
     
     process_general(dirs = dirs, regex_estudiante= regex_estudiante, 
                     queue = queue, curso=CURSO, args=args, tipo_cuadernillo='estudiantes',
-                    filter_rbd=['10687'])
+                    filter_rbd=['10098'])
  #   process_general(dirs = dirs, regex_estudiante= regex_estudiante, 
  #                   queue = queue, curso=CURSO, args=args, tipo_cuadernillo='estudiantes')
    

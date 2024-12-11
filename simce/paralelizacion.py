@@ -253,6 +253,7 @@ def process_general(dirs:dict[str, PathLike], regex_estudiante: str, queue:Queue
 
     nombre_tabla_casos99 = f'casos_99_compilados_{curso}_{tipo_cuadernillo}.csv'
     df99 = pd.read_csv(dirs['dir_tabla_99'] / nombre_tabla_casos99, dtype={'rbd_ruta': 'string'}).sort_values('ruta_imagen')
+    
 
 
 

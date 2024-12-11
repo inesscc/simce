@@ -15,7 +15,7 @@ load_dotenv()
 CURSO = Path('6b')
 
 # Determina si hay que reordenar archivos según orden recibido en 6to básico.
-REORDENAR_ARCHIVOS = False
+REORDENAR_ARCHIVOS = True
 
 ## Tablas Origen -----
 carpeta_estudiantes = 'CE'
@@ -36,7 +36,6 @@ nombre_col_val_permitidos = 'Rango de valores Permitidos'
 
 ## Conexión a NAS -----
 IP_NAS = '10.10.100.28'
-
 FOLDER_DATOS = 'Elements/ENTREGA01/Imagenes' # OJO, actualizar
 ## TODO: actualizar conexión.
 ## TODO: mostrar cómo cambiar tabla exportada.
