@@ -75,6 +75,23 @@ def calcular_pregunta_actual(pages: tuple[int, int], p: int, dic_q: dict)-> int:
         return 0
 
 def reordenar_archivos(files_estudiante: list[os.PathLike])-> list[os.PathLike]:
+    """Si la variable REORDENAR_ARCHIVOS toma valor positivo, se corre esta función
+        que reordena los archivos según el orden que presentaron en las pruebas de 4to básico.
+        En particular, en 4to básico las páginas alternaban, tal que las imágenes presentaran
+        el orden de las páginas numeradas. Así la primera imagen tenía la página 1 (y la n), la
+        segunda imagen tenía la página 2 y la n-1, etc. En cambio, en 2024, cada imagen k contiene
+        las páginas 1 + (2(k-1)) y n - (2(k-1)). Así, la imagen 3, por ejemplo, contiene las páginas
+        1 + (2*(3 - 1)) y n - (2*(3 - 1)): 5 y n-4. Donde n es el número total de páginas.
+        
+        En resumen, esta función reordena desde el orden 2024 al orden que se tenía en las pruebas con las que
+        entrenamos el modelo originalmente  
+
+    Args:
+        files_estudiante: todos los archivos asociados a un estudiante específico.
+
+    Returns:
+        reordered_files: todos los archivos asociados a un estudiante específico, reordenados
+    """    
     
     n = len(files_estudiante)
     first_half = files_estudiante[:n//2]
