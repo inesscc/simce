@@ -44,7 +44,7 @@ FOLDER_DATOS = 'Public/6B_2024' # OJO, actualizar
 
 # Máscaras de color:
 masks = {
-    'naranjo':{'low': np.array([13, 11, 0]), 'up': np.array([29, 255, 255])},
+    'naranjo':{'low': np.array([10, 11, 0]), 'up': np.array([29, 255, 255])},
     'blanco':{'low': np.array([0,31,0]), 'up': np.array([179, 255, 255])},
     'negro':{'low': np.array([0,0,225]), 'up': np.array([179, 255, 255])},
     'azul':{'low': np.array([67,46,0]), 'up': np.array([156, 255, 255])},
