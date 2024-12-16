@@ -113,7 +113,7 @@ for i in range(len(mi_rev)):
             #plt.title(train[tr-ain.falsa_sospecha.eq(1)].ruta_imagen_output.iloc[i])
             plt.show()
         except Exception as e:
-            print(e)
+            print(f'Excepción: {e}')
             pass
 
 

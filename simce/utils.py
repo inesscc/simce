@@ -78,22 +78,24 @@ def get_mask_imagen(media_img: np.ndarray, lower_color:np.array, upper_color:np.
     # especificado son blancos, y todos los demás píxeles son negros.
     mask = cv2.inRange(hsv, lower_color, upper_color)
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
-    mask = cv2.dilate(mask, kernel, iterations=iters)
+    mask_dilate = cv2.dilate(mask, kernel, iterations=iters)
 
     if eliminar_manchas:
         
         if eliminar_manchas == 'vertical':
-            mask = eliminar_o_rellenar_manchas(mask, orientacion='vertical', limite=50)
+            mask_sin_manchas = eliminar_o_rellenar_manchas(mask_dilate, orientacion='vertical', limite=50)
         elif eliminar_manchas == 'horizontal':
 
-            mask = eliminar_o_rellenar_manchas(mask, orientacion='horizontal', limite=100)
+            mask_sin_manchas = eliminar_o_rellenar_manchas(mask_dilate, orientacion='horizontal', limite=100)
 
         else:
             return print('Valor inválido para eliminar manchas')
+    else:
+        mask_sin_manchas = mask_dilate
     if revert:
-        mask = cv2.bitwise_not(mask)
+        mask_sin_manchas = cv2.bitwise_not(mask_sin_manchas)
 
-    return mask
+    return mask_sin_manchas
 
 
 def eliminar_o_rellenar_manchas(mask:np.ndarray, orientacion:str, limite:int, rellenar:bool=False)->np.ndarray:
