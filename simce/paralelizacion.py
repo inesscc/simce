@@ -13,7 +13,8 @@ from simce.proc_imgs import get_insumos, get_pages_cuadernillo, get_subpregs_dis
     partir_imagen_por_mitad, get_contornos_grandes, dejar_solo_recuadros_subpregunta, get_mascara_lineas_horizontales
 from dotenv import load_dotenv
 load_dotenv()
-from simce.utils import timing
+from simce.utils import timing, eliminar_o_rellenar_manchas
+from simce.indicadores_tinta import get_recuadros
 import argparse
 from pathlib import Path
 from multiprocessing import Queue
@@ -140,13 +141,42 @@ def process_single_image(preguntas:pd.Series, num: int, rbd:PathLike, dic_pagina
 
                 # Obtenemos lineas horizontales:
                 mask_lineas_horizontales = get_mascara_lineas_horizontales(img_recuadros_pregunta)
+
+
                 
                 lineas_horizontales = obtener_lineas_horizontales(
                     mask_lineas_horizontales, n_pixeles_entre_lineas=n_pixeles_entre_lineas,
                       minLineLength=np.round(mask_lineas_horizontales.shape[1] * .6))
                 #print(lineas_horizontales)
-                
-                n_subpreg = len(lineas_horizontales) - 1
+                if lineas_horizontales is not None:
+                    n_subpreg = len(lineas_horizontales) - 1
+                else:
+                    n_subpreg = 0
+
+                if n_subpreg != subpreg_x_preg[pregunta_selec]:
+
+                    if args.verbose:
+                        print('No se encontraron las líneas esperadas, probando con otro método')
+
+                    mask_blanco = get_mask_imagen(img_recuadros_pregunta, lower_color=masks['blanco']['low'],
+                                    upper_color=masks['blanco']['up'], iters=1,
+                                        eliminar_manchas='horizontal', revert=True)
+        
+                    mask_blanco_fill, _ = get_recuadros(mask_blanco)
+                    mask_copy = mask_blanco_fill.copy()
+                    mean_mask =mask_copy.mean(axis=0)
+                    idx_recuadros = np.where(mean_mask > 0)
+                    mask_copy = mask_copy[:, idx_recuadros[0]]
+                    mask_copy_fill = eliminar_o_rellenar_manchas(mask_copy, orientacion='horizontal',
+                                                                 limite=5, rellenar=True)
+                    mean_fila = mask_copy_fill.mean(axis=1)
+                    serie_mean_fila = pd.Series(mean_fila)
+                    lineas_horizontales = serie_mean_fila[serie_mean_fila.ne(serie_mean_fila.shift(1)) & serie_mean_fila.eq(0)].index
+                    n_subpreg = len(lineas_horizontales) - 1
+
+
+                    
+
 
                 if n_subpreg != subpreg_x_preg[pregunta_selec]:
                     preg_error = str(rbd)
@@ -162,7 +192,7 @@ def process_single_image(preguntas:pd.Series, num: int, rbd:PathLike, dic_pagina
                 
                 # Si hay error en procesamiento subpregunta
                 except Exception as e:
-                    print(e)
+                    print(f'Excepción: {e}')
                     preg_error = str(rbd)
                     agregar_error(queue= queue,
                                 pregunta=preg_error, 
@@ -173,14 +203,15 @@ def process_single_image(preguntas:pd.Series, num: int, rbd:PathLike, dic_pagina
 
 
             except Exception as e:
-                print(e)
+                
                 preg_error = str(rbd)
+                print(f'Excepción: {e}\n pregunta: {preg_error}')
                 agregar_error(queue= queue, pregunta=preg_error, error=f'Pregunta {pregunta_selec} no pudo ser procesada', nivel_error='Pregunta')
                 return
             
         except Exception as e:
             print('Ocurrió un error con la máscara')
-            print(e)
+            print(f'Excepción: {e}')
             preg_error = str(rbd)
             agregar_error(queue= queue, pregunta=preg_error, 
                           error=f'Ocurrió un error con la máscara para \
@@ -253,17 +284,20 @@ def process_general(dirs:dict[str, PathLike], regex_estudiante: str, queue:Queue
 
     nombre_tabla_casos99 = f'casos_99_compilados_{curso}_{tipo_cuadernillo}.csv'
     df99 = pd.read_csv(dirs['dir_tabla_99'] / nombre_tabla_casos99, dtype={'rbd_ruta': 'string'}).sort_values('ruta_imagen')
-    
+
 
 
 
     if filter_rbd:
+        if isinstance(filter_rbd, str):
+            filter_rbd = [filter_rbd]
 
         df99 = df99[(df99.rbd_ruta.isin(filter_rbd))]
 
     if filter_estudiante:
-        if isinstance(filter_estudiante, int):
+        if isinstance(filter_estudiante, (int, str)):
             filter_estudiante = [filter_estudiante]
+        filter_estudiante = [int(i) for i in filter_estudiante]
         df99 = df99[df99.serie.isin(filter_estudiante)]
         
     df99.ruta_imagen = df99.ruta_imagen.str.replace('\\', '/')

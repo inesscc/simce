@@ -12,9 +12,9 @@ from simce.utils import timing
 def anotar_error(pregunta, error, nivel_error, e=None):
 
     print(error)
-
+    print(f'Excepción: {error}\nPregunta: {pregunta}')
     if e:
-        print(e)
+        print(f'Excepción: {e}\nPregunta: {pregunta}')
 
     if not Path('problemas_imagenes.xlsx').is_file():
         wb = Workbook()

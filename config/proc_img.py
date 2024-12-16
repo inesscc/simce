@@ -36,7 +36,7 @@ nombre_col_val_permitidos = 'Rango de valores Permitidos'
 
 ## Conexión a NAS -----
 IP_NAS = '10.10.100.28'
-FOLDER_DATOS = 'Elements/ENTREGA01/Imagenes' # OJO, actualizar
+FOLDER_DATOS = 'Public/6B_2024' # OJO, actualizar
 ## TODO: actualizar conexión.
 ## TODO: mostrar cómo cambiar tabla exportada.
 

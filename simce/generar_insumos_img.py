@@ -18,6 +18,7 @@ import simce.proc_imgs as proc
 import json
 import os
 import argparse
+import itertools
 
 def get_n_paginas(directorio_imagenes: str)->int:
     '''Obtiene el n° de páginas totales del cuadernillo SIMCE. Para esto obtiene
@@ -31,7 +32,7 @@ def get_n_paginas(directorio_imagenes: str)->int:
         n_pages: n° de páginas totales del cuadernillo.
     '''
     print (directorio_imagenes)
-    rbds = list(directorio_imagenes.iterdir())
+    rbds = list(itertools.islice(directorio_imagenes.iterdir(), 100))
     n_files_per_rbd = [len(list(rbd.iterdir())) for rbd in rbds]
 
     idx_rbd1 = np.where(np.array(n_files_per_rbd)>0)[0][0]

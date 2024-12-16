@@ -28,7 +28,7 @@ def main(args):
     crear_directorios(dirs)
 
     # 1.  Generar insumos para procesamiento
-    generar_insumos_total(dirs, args=args) 
+    #generar_insumos_total(dirs, args=args) 
     # 2. Generar tablas con dobles marcas
     get_tablas_99_total(directorios=dirs)
 
@@ -36,17 +36,26 @@ def main(args):
     manager = Manager()             # Objeto para gestionar datos compartidos entre procesos
     queue = manager.Queue()         # Cola de tareas
     
-    process_general(dirs = dirs, regex_estudiante= regex_estudiante, 
-                 queue = queue, curso=CURSO, args=args, tipo_cuadernillo='padres',
-                    filter_rbd=['10098'])
-#    process_general(dirs = dirs, regex_estudiante= regex_estudiante, 
-#                    queue = queue, curso=CURSO, args=args, tipo_cuadernillo='padres')
+    # process_general(dirs = dirs, regex_estudiante= regex_estudiante, filter_rbd='08775',
+    #              queue = queue, curso=CURSO, args=args, tipo_cuadernillo='padres',)
+    # process_general(dirs = dirs, regex_estudiante= regex_estudiante, 
+    #                queue = queue, curso=CURSO, args=args, tipo_cuadernillo='padres')
     
-    process_general(dirs = dirs, regex_estudiante= regex_estudiante, 
-                    queue = queue, curso=CURSO, args=args, tipo_cuadernillo='estudiantes',
-                    filter_rbd=['10098'])
- #   process_general(dirs = dirs, regex_estudiante= regex_estudiante, 
- #                   queue = queue, curso=CURSO, args=args, tipo_cuadernillo='estudiantes')
+
+
+    curso = '6b'
+    tipo_cuadernillo = 'estudiantes'
+    import pandas as pd
+    nombre_tabla_casos99 = f'casos_99_compilados_{curso}_{tipo_cuadernillo}.csv'
+    df99 = pd.read_csv(dirs['dir_tabla_99'] / nombre_tabla_casos99, dtype={'rbd_ruta': 'string'}).sort_values('ruta_imagen')
+    rbds = df99.drop_duplicates('rbd_ruta').rbd_ruta.head(20).tolist()
+
+
+    process_general(dirs = dirs, regex_estudiante= regex_estudiante, filter_rbd='02760', 
+                    filter_estudiante='0276010',
+                    queue = queue, curso=CURSO, args=args, tipo_cuadernillo='estudiantes')
+    # process_general(dirs = dirs, regex_estudiante= regex_estudiante, 
+    #                queue = queue, curso=CURSO, args=args, tipo_cuadernillo='estudiantes')
    
 
     escribir_errores(queue)
