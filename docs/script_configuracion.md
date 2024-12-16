@@ -16,6 +16,23 @@ CURSO = Path('4b')
 Acá se define qué curso está siendo procesado. En este caso, estamos procesando 4° básico. Esto afecta principalmente nombres de archivos y carpetas que dan orden al proyecto, en la medida que se van generando. Por ejemplo, los datos de subpreguntas se guardan en <pre>data/input_proc/<b>4b</b>/subpreg_recortadas</pre>
 
 ---
+{++
+
+**OJO: NUEVO EN LA ÚLTIMA VERSIÓN**
+
+```py linenums="2"
+REORDENAR_ARCHIVOS = True
+```
+
+Acá se define si es necesario reordenar los archivos para su procesamiento. Esto debido a que la relación entre la numeración de las imágenes y las páginas del cuadernillo que estas contienen, cambió en el año 2024. Ojo, si se genera otro orden en otro año, habrá que programar una forma de reordenarlo acorde con esto. La función  
+[`reordenar_archivos`](../generar_insumos_img#simce.generar_insumos_img.reordenar_archivos) se hace cargo de esto actualmente.
+
+++}
+
+---
+
+
+
 
 ```py linenums="2"
 carpeta_estudiantes = 'CE'

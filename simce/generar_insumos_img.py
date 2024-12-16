@@ -87,7 +87,7 @@ def reordenar_archivos(files_estudiante: list[os.PathLike])-> list[os.PathLike]:
         las páginas 1 + (2(k-1)) y n - (2(k-1)). Así, la imagen 3, por ejemplo, contiene las páginas
         1 + (2*(3 - 1)) y n - (2*(3 - 1)): 5 y n-4. Donde n es el número total de páginas.
         
-        En resumen, esta función reordena desde el orden 2024 al orden que se tenía en las pruebas con las que
+    En resumen, esta función reordena desde el orden 2024 al orden que se tenía en las pruebas con las que
         entrenamos el modelo originalmente  
 
     Args:
