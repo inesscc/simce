@@ -14,7 +14,7 @@ from simce.proc_imgs import get_insumos, get_pages_cuadernillo, get_subpregs_dis
 from dotenv import load_dotenv
 load_dotenv()
 from simce.utils import timing, eliminar_o_rellenar_manchas
-from simce.indicadores_tinta import get_recuadros
+from simce.indicadores_tinta import preparar_mascaras
 import argparse
 from pathlib import Path
 from multiprocessing import Queue
@@ -158,21 +158,11 @@ def process_single_image(preguntas:pd.Series, num: int, rbd:PathLike, dic_pagina
                     if args.verbose:
                         print('No se encontraron las líneas esperadas, probando con otro método')
 
-                    mask_blanco = get_mask_imagen(img_recuadros_pregunta, lower_color=masks['blanco']['low'],
-                                    upper_color=masks['blanco']['up'], iters=1,
-                                        eliminar_manchas='horizontal', revert=True)
         
-                    mask_blanco_fill, _ = get_recuadros(mask_blanco)
-                    mask_copy = mask_blanco_fill.copy()
-                    mean_mask =mask_copy.mean(axis=0)
-                    idx_recuadros = np.where(mean_mask > 0)
-                    mask_copy = mask_copy[:, idx_recuadros[0]]
-                    mask_copy_fill = eliminar_o_rellenar_manchas(mask_copy, orientacion='horizontal',
-                                                                 limite=5, rellenar=True)
-                    mean_fila = mask_copy_fill.mean(axis=1)
-                    serie_mean_fila = pd.Series(mean_fila)
-                    lineas_horizontales = serie_mean_fila[serie_mean_fila.ne(serie_mean_fila.shift(1)) & serie_mean_fila.eq(0)].index
-                    n_subpreg = len(lineas_horizontales) - 1
+                    mask_recuadros = preparar_mascaras(ruta=str(rbd),bgr_img=img_recuadros_pregunta,
+                                                         return_only_mask=True)
+
+                    lineas_horizontales, n_subpreg = get_lineas_con_recuadros(mask_recuadros)
 
 
                     
@@ -218,6 +208,31 @@ def process_single_image(preguntas:pd.Series, num: int, rbd:PathLike, dic_pagina
                               {estudiante} en la pregunta {pregunta_selec}', nivel_error='Pregunta')
     if args.verbose:
        print('Éxito!')
+
+def get_lineas_con_recuadros(mask_recuadros):
+    mask_copy = mask_recuadros.copy()
+    mean_mask =mask_copy.mean(axis=0)
+    idx_recuadros = np.where(mean_mask > 0)
+    mask_copy = mask_copy[:, idx_recuadros[0]]
+    mask_copy_fill = eliminar_o_rellenar_manchas(mask_copy, orientacion='horizontal',
+                                                                 limite=30, rellenar=True)
+                    
+    mean_fila = mask_copy_fill.mean(axis=1)
+
+    serie_mean_fila = pd.Series(mean_fila)
+
+    n_blancos = serie_mean_fila.eq(255)
+    grupos = n_blancos.ne(n_blancos.shift(1)).cumsum()
+    conteo_blancos = n_blancos.groupby(grupos).cumsum()
+    blancos_seguidos = conteo_blancos.groupby(grupos).transform('max')
+    df_blancos_y_grupos = pd.concat([blancos_seguidos, grupos], axis=1)
+    df_blancos_y_grupos.columns = ['n_blancos', 'grupo']
+    lineas_horizontales = df_blancos_y_grupos[df_blancos_y_grupos.n_blancos.gt(25)]\
+        .drop_duplicates('grupo', keep='last').index.values
+
+    n_subpreg = len(lineas_horizontales) 
+    lineas_horizontales = [0, *lineas_horizontales]
+    return lineas_horizontales,n_subpreg
 
 
 ## división en bloques --------------------

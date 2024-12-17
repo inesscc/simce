@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from simce.utils import get_mask_imagen
+from simce.utils import get_mask_imagen, eliminar_o_rellenar_manchas
 from config.proc_img import masks
 import numpy as np
 import pandas as pd
@@ -23,8 +23,12 @@ def get_recuadros(mask_blanco: np.ndarray)->tuple[np.ndarray, list[np.ndarray]]:
      # Define the border width in pixels
     top, bottom, left, right = [3]*4
 
+
+    mask_blanco_fill = eliminar_o_rellenar_manchas(mask_blanco, orientacion='horizontal',
+                                                                 limite=10, rellenar=False)
+
     # Create a border around the image
-    bordered_mask = cv2.copyMakeBorder(mask_blanco, top, bottom, left, right,
+    bordered_mask = cv2.copyMakeBorder(mask_blanco_fill, top, bottom, left, right,
                                         cv2.BORDER_CONSTANT, value=0).astype(np.uint8)
 
     contours, _ = cv2.findContours(bordered_mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
@@ -61,7 +65,7 @@ def get_recuadros(mask_blanco: np.ndarray)->tuple[np.ndarray, list[np.ndarray]]:
         return bordered_mask, big_contours
     
 
-def preparar_mascaras(ruta: PathLike)-> tuple[np.ndarray, np.ndarray]:
+def preparar_mascaras(ruta: PathLike, bgr_img:np.ndarray|None=None, return_only_mask=False)-> tuple[np.ndarray, np.ndarray]:
     """Genera máscaras que detectan recuadros de imagen, para posteriormente calcular indicadores de tinta en función 
     [calcular_indices_tinta](#calcular_indices_tinta).
 
@@ -73,12 +77,14 @@ def preparar_mascaras(ruta: PathLike)-> tuple[np.ndarray, np.ndarray]:
         
         bordered_rect_img: imagen a la que se le calcularán los indicadores.
     """    
+    if bgr_img is None:
+        bgr_img = cv2.imread(ruta)
 
-    bgr_img = cv2.imread(ruta)
 
     mask_blanco = get_mask_imagen(bgr_img, lower_color=masks['blanco']['low'],
-                                  upper_color=masks['blanco']['up'], iters=1,
-                                    eliminar_manchas=False, revert=True)
+                            upper_color=masks['blanco']['up'], iters=1,
+                                eliminar_manchas=False, revert=True)
+
     
     mask_blanco_fill, contornos_og = get_recuadros(mask_blanco)
 
@@ -121,11 +127,15 @@ def preparar_mascaras(ruta: PathLike)-> tuple[np.ndarray, np.ndarray]:
     idx_low_rows = np.where(sum_blanco < 12)[0]
     mask_blanco_fill[:, idx_low_rows] = 0
 
+
+    if return_only_mask:
+        return mask_blanco_fill
+
     # Creo contorno en torno a contornos originales, para no distorsionar
     for contour in contornos_og:
         x, y, w, h = cv2.boundingRect(contour)
         
-        cv2.rectangle(mask_blanco_fill, (x, y), (x+w, y+h), 0, 4)
+        cv2.rectangle(mask_blanco_fill, (x, y), (x+w, y+h), 120, 4)
 
 
     # Define the border width in pixels
