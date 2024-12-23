@@ -64,7 +64,8 @@ def get_tablas_99(tipo_cuadernillo:str, directorios:list[PathLike], limpiar_ruta
 
 
     Origen_DobleMarca = pd.read_csv(directorios['dir_input'] / nombre_tabla_origen,
-                                     delimiter=';', encoding=ENCODING)
+                                     delimiter=';', encoding=ENCODING,
+                                     dtype={'serie':str})
 
 
 
@@ -84,9 +85,9 @@ def get_tablas_99(tipo_cuadernillo:str, directorios:list[PathLike], limpiar_ruta
         df_final.ruta_imagen = df_final.ruta_imagen.str.replace(r'\\\d{7}', '', regex=True, n=1)
         
     df_final['ruta_imagen_output'] = (directorios['dir_subpreg'] / 
-                                      df_final.ruta_imagen.str.replace('\\', '/').str.replace('^/', '', regex=True)
-                                      .apply(lambda x: Path(x).parent) /
-                                        (df_final.serie.astype(str) + '_' + df_final.preguntas + '.jpg') )
+                                      (df_final.ruta_imagen.str.replace('\\', '/').str.replace('^/', '', regex=True)\
+                                      .str.replace('(_.*jpg)', '', regex=True)  + '_' + df_final.preguntas + '.jpg'))
+
 
 
 
