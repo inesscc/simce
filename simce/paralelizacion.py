@@ -7,7 +7,7 @@ import pandas as pd
 from multiprocessing import Pool, cpu_count
 from simce.errors import agregar_error
 from simce.utils import get_mask_imagen
-from config.proc_img import n_pixeles_entre_lineas, masks
+from config.proc_img import masks
 from simce.proc_imgs import get_insumos, get_pages_cuadernillo, get_subpregs_distintas, eliminar_franjas_negras, recorte_imagen, \
     obtener_lineas_horizontales, bound_and_crop, crop_and_save_subpreg, get_pregunta_inicial_pagina, save_pregunta_completa, \
     partir_imagen_por_mitad, get_contornos_grandes, dejar_solo_recuadros_subpregunta, separar_subpreguntas
@@ -183,30 +183,7 @@ def process_single_image(preguntas:pd.Series, num: int, rbd:PathLike, dic_pagina
     if args.verbose:
        print('Éxito!')
 
-def get_lineas_con_recuadros(mask_recuadros):
-    mask_copy = mask_recuadros.copy()
-    mean_mask =mask_copy.mean(axis=0)
-    idx_recuadros = np.where(mean_mask > 0)
-    mask_copy = mask_copy[:, idx_recuadros[0]]
-    mask_copy_fill = eliminar_o_rellenar_manchas(mask_copy, orientacion='horizontal',
-                                                                 limite=30, rellenar=True)
-                    
-    mean_fila = mask_copy_fill.mean(axis=1)
 
-    serie_mean_fila = pd.Series(mean_fila)
-
-    n_blancos = serie_mean_fila.eq(255)
-    grupos = n_blancos.ne(n_blancos.shift(1)).cumsum()
-    conteo_blancos = n_blancos.groupby(grupos).cumsum()
-    blancos_seguidos = conteo_blancos.groupby(grupos).transform('max')
-    df_blancos_y_grupos = pd.concat([blancos_seguidos, grupos], axis=1)
-    df_blancos_y_grupos.columns = ['n_blancos', 'grupo']
-    lineas_horizontales = df_blancos_y_grupos[df_blancos_y_grupos.n_blancos.gt(25)]\
-        .drop_duplicates('grupo', keep='last').index.values
-
-    n_subpreg = len(lineas_horizontales) 
-    lineas_horizontales = [0, *lineas_horizontales]
-    return lineas_horizontales,n_subpreg
 
 
 ## división en bloques --------------------

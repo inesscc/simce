@@ -13,7 +13,7 @@ import re
 from dotenv import load_dotenv
 from simce.utils import get_mask_imagen, eliminar_o_rellenar_manchas, preparar_mascaras
 
-from config.proc_img import masks
+from config.proc_img import masks, n_pixeles_entre_lineas
 import json
 import os
 import argparse
@@ -85,8 +85,69 @@ def separar_subpreguntas(img_recuadros_pregunta, rbd, pregunta_selec, subpreg_x_
             print('No se encontraron las líneas esperadas, probando con otro método')
 
         mask_recuadros = preparar_mascaras(ruta=str(rbd), bgr_img=img_recuadros_pregunta, return_only_mask=True)
-        lineas_horizontales, n_subpreg = get_lineas_con_recuadros(mask_recuadros)
+        lineas_horizontales, n_subpreg = get_lineas_entre_recuadros(mask_recuadros)
 
+    return lineas_horizontales, n_subpreg
+
+
+
+def get_lineas_entre_recuadros(mask_recuadros: np.ndarray) -> tuple[list[int], int]:
+    """Identifica las líneas horizontales donde hay recuadros de respuesta en una imagen binaria.
+
+    Esta función solo se utiliza cuando no se detectan líneas horizontales separadoras en la imagen de recuadros.
+
+    Analiza una máscara binaria para detectar regiones con recuadros de respuesta y 
+    determina las posiciones de las líneas separadoras entre estos.
+
+    Args:
+        mask_recuadros: Máscara binaria donde los recuadros están marcados con 255 (blanco)
+            y el fondo con 0 (negro)
+
+    Returns:
+            lineas_horizontales: Índices de las filas donde comienzan los grupos de recuadros
+            n_subpreg: Número total de subpreguntas detectadas (grupos de recuadros)
+    """
+    # Crear copia de trabajo de la máscara
+    mask_copy = mask_recuadros.copy()
+    
+    # Calcular promedio por columna para detectar regiones con recuadros
+    mean_mask = mask_copy.mean(axis=0)
+    idx_recuadros = np.where(mean_mask > 0) # Si media es mayor a 0, significa que hay píxeles blancos en la columna
+    
+    # Recortar máscara para mantener solo columnas con recuadros
+    mask_copy = mask_copy[:, idx_recuadros[0]]
+    
+    # Rellenar espacios pequeños en horizontal para conectar recuadros cercanos
+    mask_copy_fill = eliminar_o_rellenar_manchas(mask_copy, orientacion='horizontal',
+                                                limite=30, rellenar=True)
+    
+    # Calcular promedio por fila para detectar líneas horizontales
+    mean_fila = mask_copy_fill.mean(axis=1)
+    serie_mean_fila = pd.Series(mean_fila)
+
+    # Detectar secuencias de píxeles blancos (255)
+    n_blancos = serie_mean_fila.eq(255)
+
+    # Detectar grupos de píxeles blancos y negros
+    grupos = n_blancos.ne(n_blancos.shift(1)).cumsum()
+    
+    # Contar píxeles blancos consecutivos
+    conteo_blancos = n_blancos.groupby(grupos).cumsum()
+    blancos_seguidos = conteo_blancos.groupby(grupos).transform('max')
+    
+    # Organizar resultados en DataFrame
+    df_blancos_y_grupos = pd.concat([blancos_seguidos, grupos], axis=1)
+    df_blancos_y_grupos.columns = ['n_blancos', 'grupo']
+    
+    # Identificar líneas con suficientes píxeles blancos (>25)
+    lineas_horizontales = df_blancos_y_grupos[df_blancos_y_grupos.n_blancos.gt(25)]\
+        .drop_duplicates('grupo', keep='last').index.values
+
+    # Calcular número total de subpreguntas
+    n_subpreg = len(lineas_horizontales) 
+    
+    # Agregar índice 0 al inicio para incluir primera línea
+    lineas_horizontales = [0, *lineas_horizontales]
     return lineas_horizontales, n_subpreg
 
 
