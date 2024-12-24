@@ -11,7 +11,8 @@ from itertools import chain
 import pandas as pd
 import re
 from dotenv import load_dotenv
-from simce.utils import get_mask_imagen, eliminar_o_rellenar_manchas
+from simce.utils import get_mask_imagen, eliminar_o_rellenar_manchas, preparar_mascaras
+
 from config.proc_img import masks
 import json
 import os
@@ -52,7 +53,41 @@ def get_insumos(tipo_cuadernillo:str, dir_insumos:os.PathLike)-> tuple:
 
     return insumos_total
 
+def separar_subpreguntas(img_recuadros_pregunta, rbd, pregunta_selec, subpreg_x_preg, args):
+    """
+    Obtiene las líneas horizontales y el número de subpreguntas de una imagen de recuadros de pregunta.
 
+    Args:
+        img_recuadros_pregunta: Imagen de recuadros de pregunta.
+        rbd: Ruta de la pregunta a recortar.
+        pregunta_selec: Pregunta seleccionada.
+        subpreg_x_preg: Insumo con cantidad de subpreguntas por pregunta.
+        args: Argumentos enviados desde la línea de comandos.
+
+    Returns:
+        lineas_horizontales: Líneas horizontales encontradas en la imagen.
+        n_subpreg: Número de subpreguntas encontradas.
+    """
+    # Obtenemos lineas horizontales:
+    mask_lineas_horizontales = get_mascara_lineas_horizontales(img_recuadros_pregunta)
+
+    lineas_horizontales = obtener_lineas_horizontales(
+        mask_lineas_horizontales, n_pixeles_entre_lineas=n_pixeles_entre_lineas,
+        minLineLength=np.round(mask_lineas_horizontales.shape[1] * .6))
+
+    if lineas_horizontales is not None:
+        n_subpreg = len(lineas_horizontales) - 1
+    else:
+        n_subpreg = 0
+
+    if n_subpreg != subpreg_x_preg[pregunta_selec]:
+        if args.verbose:
+            print('No se encontraron las líneas esperadas, probando con otro método')
+
+        mask_recuadros = preparar_mascaras(ruta=str(rbd), bgr_img=img_recuadros_pregunta, return_only_mask=True)
+        lineas_horizontales, n_subpreg = get_lineas_con_recuadros(mask_recuadros)
+
+    return lineas_horizontales, n_subpreg
 
 
 def dejar_solo_recuadros_subpregunta(img_pregunta: np.ndarray)-> np.ndarray:

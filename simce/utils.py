@@ -22,7 +22,7 @@ from time import time
 from PIL import Image
 import random
 from os import PathLike
-
+from config.proc_img import masks
 # Mide tiempo que toma en correr una función. Es un wrapper.
 def timing(f):
   
@@ -50,6 +50,150 @@ def crear_directorios(directorios: list[PathLike]):
     print('Directorios generados exitosamente!')
 
 
+def preparar_mascaras(ruta: PathLike, bgr_img:np.ndarray|None=None, return_only_mask=False)-> tuple[np.ndarray, np.ndarray]:
+    """Genera máscaras que detectan recuadros de imagen, para posteriormente calcular indicadores de tinta en función 
+    [calcular_indices_tinta](#calcular_indices_tinta).
+
+    Args:
+        ruta: ruta de imagen a leer para obtener máscara
+
+    Returns:
+        bordered_mask: máscara con detección de contornos. OJO: si return_only_mask es True, solo retorna esta máscara, con menos pasos de procesamiento.
+        
+        bordered_rect_img: imagen a la que se le calcularán los indicadores.
+    """    
+    if bgr_img is None:
+        bgr_img = cv2.imread(ruta)
+
+
+    mask_blanco = get_mask_imagen(bgr_img, lower_color=masks['blanco']['low'],
+                            upper_color=masks['blanco']['up'], iters=1,
+                                eliminar_manchas=False, revert=True)
+
+    
+    mask_blanco_fill, contornos_og = get_recuadros(mask_blanco)
+
+    if 'CE' in ruta:
+        # Detectamos grises y negros si es cuestionario de estudiantes
+        mask_tinta = get_mask_imagen(bgr_img, lower_color=masks['negro']['low'],
+                                    upper_color=masks['negro']['up'], iters=1, eliminar_manchas=False,
+                                    revert=True)
+
+    elif 'CP' in ruta:
+        # Detectamos tinta azul si es cuestionario de padres
+        mask_tinta = get_mask_imagen(bgr_img, lower_color=masks['azul']['low'],
+                                    upper_color=masks['azul']['up'], iters=1, eliminar_manchas=False)
+        if mask_tinta.mean() < 0.7:
+            # Detectamos grises y negros si no detectamos tinta azul
+            mask_tinta = get_mask_imagen(bgr_img, lower_color=masks['negro']['low'],
+                                        upper_color=masks['negro']['up'], iters=1, eliminar_manchas=False,
+                                        revert=True)
+
+    
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
+    mask_tinta = cv2.morphologyEx(mask_tinta, cv2.MORPH_CLOSE, kernel, iterations=2)
+
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2,2))
+    mask_tinta = cv2.erode(mask_tinta, kernel, iterations=1)
+    
+    idx_blanco = np.where(mask_tinta == 255)
+    mask_blanco_fill[idx_blanco] = 255
+
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
+    mask_blanco_fill = cv2.morphologyEx(mask_blanco_fill, cv2.MORPH_CLOSE, kernel, iterations=2)
+
+
+    axis = 0
+    # Calculamos la media de cada columna:
+    sum_blanco = np.sum(mask_blanco_fill == 255, axis=axis)
+
+    # Si la media es menor a 100, reemplazamos con 0 (negro):
+    # Esto permite eliminar manchas de color que a veces se dan
+    idx_low_rows = np.where(sum_blanco < 12)[0]
+    mask_blanco_fill[:, idx_low_rows] = 0
+
+
+    if return_only_mask:
+        return mask_blanco_fill
+
+    # Creo contorno en torno a contornos originales, para no distorsionar
+    for contour in contornos_og:
+        x, y, w, h = cv2.boundingRect(contour)
+        
+        cv2.rectangle(mask_blanco_fill, (x, y), (x+w, y+h), 120, 4)
+
+
+    # Define the border width in pixels
+    top, bottom, left, right = [3]*4
+
+    # Create a border around the image
+    bordered_mask = cv2.copyMakeBorder(mask_blanco_fill, top, bottom, left, right,
+                                        cv2.BORDER_CONSTANT, value=0).astype(np.uint8)
+    rect_img = cv2.cvtColor(bgr_img,cv2.COLOR_BGR2GRAY) /255
+    #bordered_mask = cv2.bitwise_not(bordered_mask)
+
+    bordered_rect_img = cv2.copyMakeBorder(rect_img, top, bottom, left, right, cv2.BORDER_CONSTANT, value=1)
+
+    return bordered_mask, bordered_rect_img
+
+
+def get_recuadros(mask_blanco: np.ndarray)->tuple[np.ndarray, list[np.ndarray]]:
+    """Detecta recuadros en imagen. Genera máscara que intenta obtener todos los recuadros correspondientes a la subpregunta
+        siendo procesada. Es un insumo inicial que luego sigue siendo procesado a lo largo de la función
+        [preparar_mascaras](#preparar_mascaras). Esta función basta para detectar la mayoría de recuadros, salvo cuando estos tienen
+        mucha tinta, haciendo desaparecer el color blanco.
+
+    Args:
+        mask_blanco: máscara que intenta identificar color blanco dentro de la imagen
+    
+    Returns:
+        bordered_mask: máscara procesada que intenta identificar recuadros dentro de la imagen. 
+        
+        big_contours: contornos de recuadros. Son utilizados posteriormentes para marcarlos en la imagen.
+    """    
+     # Define the border width in pixels
+    top, bottom, left, right = [3]*4
+
+
+    mask_blanco_fill = eliminar_o_rellenar_manchas(mask_blanco, orientacion='horizontal',
+                                                                 limite=10, rellenar=False)
+
+    # Create a border around the image
+    bordered_mask = cv2.copyMakeBorder(mask_blanco_fill, top, bottom, left, right,
+                                        cv2.BORDER_CONSTANT, value=0).astype(np.uint8)
+
+    contours, _ = cv2.findContours(bordered_mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+
+    big_contours = [
+        i for i in contours if 600 < cv2.contourArea(i) < 2000 ]
+
+
+    for contour in big_contours:
+        x, y, w, h = cv2.boundingRect(contour)
+        
+        cv2.rectangle(bordered_mask, (x, y), (x+w, y+h), 255, -1)
+
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
+    bordered_mask2 = cv2.morphologyEx(bordered_mask, cv2.MORPH_CLOSE, kernel, iterations=3)
+
+
+    contours2, _ = cv2.findContours(bordered_mask2, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+
+    big_contours2 = [
+        i for i in contours2 if 600 < cv2.contourArea(i) < 2000 ]
+
+    
+    for contour in big_contours2:
+        x, y, w, h = cv2.boundingRect(contour)
+        
+        cv2.rectangle(bordered_mask2, (x, y), (x+w, y+h), 255, -1)
+
+    if len(big_contours2) >= len(big_contours):
+
+        return bordered_mask2, big_contours2
+    else:
+
+        return bordered_mask, big_contours
 
 
 def get_mask_imagen(media_img: np.ndarray, lower_color:np.array, upper_color:np.array,
@@ -185,7 +329,7 @@ def write_json(content, fname):
 
 
 def inf_loop(data_loader):
-    ''' wrapper function for endless data loader. '''
+    ''' función wrapper  para data loader. '''
     for loader in repeat(data_loader):
         yield from loader
 
