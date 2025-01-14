@@ -41,7 +41,7 @@ def main(args):
     process_general(dirs = dirs, regex_estudiante= regex_estudiante, 
                    queue = queue, curso=CURSO, args=args, tipo_cuadernillo='padres')
     
-    # curso = '6b'
+    # curso = '4b'
     # tipo_cuadernillo = 'estudiantes'
     # import pandas as pd
     # nombre_tabla_casos99 = f'casos_99_compilados_{curso}_{tipo_cuadernillo}.csv'

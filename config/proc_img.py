@@ -12,7 +12,8 @@ import numpy as np
 load_dotenv()
 
 # 1. VARIABLES QUE ES MUY PROBABLE QUE DEBAN SER ACTUALIZADAS --------
-CURSO = Path('6b')
+#CURSO = Path('6b')
+CURSO = Path('4b')
 
 # Determina si hay que reordenar archivos según orden recibido en 6to básico.
 REORDENAR_ARCHIVOS = True
@@ -26,7 +27,9 @@ nombres_tablas_origen = {'padres': f'{carpeta_padres}_Origen_DobleMarca.csv',
 
 ## Tabla campos BD -----
 # Nombre de tabla que contiene n° de subpreguntas, n° de recuadros por subpregunta:
-nombre_tabla_para_insumos = 'DD 6° BÁSICO 2024_CE_CP.xlsx'
+#nombre_tabla_para_insumos = 'DD 6° BÁSICO 2024_CE_CP.xlsx'
+nombre_tabla_para_insumos = 'DD 4° BÁSICO 2024_CE_CP.xlsx'
+
 # N° de filas que hay que saltarse al cargar la tabla (en qué fila se encuentran nombres de columnas)
 n_filas_ignorar_tabla_insumos = 4
 # Nombre columna con nombres de campos de la Base de datos:
@@ -35,8 +38,12 @@ nombre_col_campo_bd = 'Nombre Campo BD'
 nombre_col_val_permitidos = 'Rango de valores Permitidos'
 
 ## Conexión a NAS -----
-IP_NAS = '10.10.100.28'
-FOLDER_DATOS = 'Public/6B_2024' # OJO, actualizar
+#6B
+#IP_NAS = '10.10.100.28'
+#FOLDER_DATOS = 'Public/6B_2024' # OJO, actualizar
+#4B
+IP_NAS = '10.10.100.36'
+FOLDER_DATOS = 'Dev1Partition1' # OJO, actualizar
 ## TODO: actualizar conexión.
 ## TODO: mostrar cómo cambiar tabla exportada.
 
