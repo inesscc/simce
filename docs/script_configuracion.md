@@ -21,10 +21,13 @@ Acá se define qué curso está siendo procesado. En este caso, estamos procesan
 **OJO: NUEVO EN LA ÚLTIMA VERSIÓN**
 
 ```py linenums="2"
-REORDENAR_ARCHIVOS = True
+dic_reordenar = {'6b': True, '2m': False, '4b': False}
+REORDENAR_ARCHIVOS = dic_reordenar[str(CURSO)]
 ```
 
-Acá se define si es necesario reordenar los archivos para su procesamiento. Esto debido a que la relación entre la numeración de las imágenes y las páginas del cuadernillo que estas contienen, cambió en el año 2024. Ojo, si se genera otro orden en otro año, habrá que programar una forma de reordenarlo acorde con esto. La función  
+Acá se define si es necesario reordenar los archivos para su procesamiento. Esto debido a que la relación entre la numeración de las imágenes y las páginas del cuadernillo que estas contienen, cambió para sexto básico en el año 2024. Otros cursos no tuvieron un nuevo orden, por lo que se utiliza este sistema de diccionarios, donde se indica si es necesario reordenar los archivos. Aquí es posible ver que "2m" y "4b" tienen asociado un valor False, ya que no es necesario reordenarles.
+
+ **Ojo:** si se genera otro orden en otro año, habrá que programar una forma de reordenarlo acorde con esto. La función  
 [`reordenar_archivos`](../generar_insumos_img#simce.generar_insumos_img.reordenar_archivos) se hace cargo de esto actualmente.
 
 ++}
