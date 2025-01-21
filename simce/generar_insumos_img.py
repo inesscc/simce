@@ -31,7 +31,7 @@ def get_n_paginas(directorio_imagenes: str)->int:
     Returns:
         n_pages: n° de páginas totales del cuadernillo.
     '''
-    print (directorio_imagenes)
+    print (f'{directorio_imagenes=}')
     rbds = list(itertools.islice(directorio_imagenes.iterdir(), 100))
     n_files_per_rbd = [len(list(rbd.iterdir())) for rbd in rbds]
 

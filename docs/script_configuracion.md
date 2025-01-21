@@ -189,20 +189,23 @@ def get_directorios(curso, filtro=None) -> dict:
     en caso de requerirse. Si el filtro '''
     dd = dict()
     dd['dir_data'] = Path('data/')
-    dd['dir_input'] = dd['dir_data'] / 'input_raw' 
+    dd['dir_input'] = dd['dir_data'] / 'input_bruto' 
 
+    print(os.getenv('ENV'))
+    
     # En producción nos conectamos a disco NAS para acceso a imágenes
     if os.getenv('ENV') == 'production':
+        
         conectar_a_NAS(IP_NAS, FOLDER_DATOS)
-        dd['dir_img_bruta'] = Path('P:/')
 
+        dd['dir_img_bruta'] = Path(f'{NOMBRE_DISCO}/')
     else:
         # Solo aplica a desarrollo local:
         dd['dir_img_bruta'] = dd['dir_input']  
-    dd['dir_estudiantes'] = dd['dir_input'] / carpeta_estudiantes
-    dd['dir_padres'] = dd['dir_input'] / carpeta_padres
+    dd['dir_estudiantes'] = dd['dir_img_bruta'] / carpeta_estudiantes
+    dd['dir_padres'] = dd['dir_img_bruta'] / carpeta_padres
 
-    dd['dir_input_proc'] = Path('data/input_proc/')
+    dd['dir_input_proc'] = Path('data/input_procesado/')
     dd['dir_subpreg_aux'] = dd['dir_input_proc'] / curso / 'subpreg_recortadas'
     dd['dir_subpreg'] = dd['dir_subpreg_aux'] / 'base'
     dd['dir_subpreg_aug'] = dd['dir_subpreg_aux'] / 'augmented'
@@ -210,6 +213,8 @@ def get_directorios(curso, filtro=None) -> dict:
 
     dd['dir_tabla_99'] = dd['dir_input_proc'] / 'output_tabla_99'
     dd['dir_insumos'] = dd['dir_input_proc'] / curso /  'insumos'
+
+    
 
     dd['dir_train_test'] = dd['dir_data'] / 'input_modelamiento'
 

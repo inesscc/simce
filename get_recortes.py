@@ -28,7 +28,7 @@ def main(args):
     crear_directorios(dirs)
 
     # 1.  Generar insumos para procesamiento
-    #generar_insumos_total(dirs, args=args) 
+    generar_insumos_total(dirs, args=args) 
     # 2. Generar tablas con dobles marcas
     get_tablas_99_total(directorios=dirs)
 
@@ -41,7 +41,7 @@ def main(args):
     process_general(dirs = dirs, regex_estudiante= regex_estudiante, 
                    queue = queue, curso=CURSO, args=args, tipo_cuadernillo='padres')
     
-    # curso = '4b'
+    # curso = '2m'
     # tipo_cuadernillo = 'estudiantes'
     # import pandas as pd
     # nombre_tabla_casos99 = f'casos_99_compilados_{curso}_{tipo_cuadernillo}.csv'

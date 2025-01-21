@@ -12,11 +12,18 @@ import numpy as np
 load_dotenv()
 
 # 1. VARIABLES QUE ES MUY PROBABLE QUE DEBAN SER ACTUALIZADAS --------
-#CURSO = Path('6b')
-CURSO = Path('4b')
+#CURSO = Path('6b') 
+#CURSO = Path('4b')
+CURSO = Path('2m')
+
 
 # Determina si hay que reordenar archivos según orden recibido en 6to básico.
-REORDENAR_ARCHIVOS = True
+dic_reordenar = {'6b': True, '2m': False, '4b': False}
+REORDENAR_ARCHIVOS = dic_reordenar[str(CURSO)]
+
+# Determina el nombre del disco, si falla el disco actual cambiar a otra letra que venga
+# después de la F en el alfabeto.
+NOMBRE_DISCO = 'I:'
 
 ## Tablas Origen -----
 carpeta_estudiantes = 'CE'
@@ -28,7 +35,9 @@ nombres_tablas_origen = {'padres': f'{carpeta_padres}_Origen_DobleMarca.csv',
 ## Tabla campos BD -----
 # Nombre de tabla que contiene n° de subpreguntas, n° de recuadros por subpregunta:
 #nombre_tabla_para_insumos = 'DD 6° BÁSICO 2024_CE_CP.xlsx'
-nombre_tabla_para_insumos = 'DD 4° BÁSICO 2024_CE_CP.xlsx'
+#nombre_tabla_para_insumos = 'DD 4° BÁSICO 2024_CE_CP.xlsx'
+nombre_tabla_para_insumos = 'DD II MEDIO 2024_CE_CP.xlsx'
+
 
 # N° de filas que hay que saltarse al cargar la tabla (en qué fila se encuentran nombres de columnas)
 n_filas_ignorar_tabla_insumos = 4
@@ -42,8 +51,12 @@ nombre_col_val_permitidos = 'Rango de valores Permitidos'
 #IP_NAS = '10.10.100.28'
 #FOLDER_DATOS = 'Public/6B_2024' # OJO, actualizar
 #4B
+#IP_NAS = '10.10.100.36'
+#FOLDER_DATOS = 'Public/4B_2024' # OJO, actualizar
+#2M
 IP_NAS = '10.10.100.36'
-FOLDER_DATOS = 'Dev1Partition1' # OJO, actualizar
+FOLDER_DATOS = 'Public/2M_2024' # OJO, actualizar
+
 ## TODO: actualizar conexión.
 ## TODO: mostrar cómo cambiar tabla exportada.
 
@@ -107,14 +120,14 @@ def get_directorios(curso, filtro=None) -> dict:
     dd['dir_data'] = Path('data/')
     dd['dir_input'] = dd['dir_data'] / 'input_bruto' 
 
-    print(os.getenv('ENV'))
+    # print(os.getenv('ENV'))
     
     # En producción nos conectamos a disco NAS para acceso a imágenes
     if os.getenv('ENV') == 'production':
         
         conectar_a_NAS(IP_NAS, FOLDER_DATOS)
 
-        dd['dir_img_bruta'] = Path(f'P:/')
+        dd['dir_img_bruta'] = Path(f'{NOMBRE_DISCO}/')
     else:
         # Solo aplica a desarrollo local:
         dd['dir_img_bruta'] = dd['dir_input']  
@@ -154,11 +167,11 @@ def get_directorios(curso, filtro=None) -> dict:
 
 def conectar_a_NAS(IP_NAS, FOLDER_DATOS):
     # Nos conectamos a disco NAS:
-    #if not Path('P:/').is_dir():
-    if Path('P:/').is_dir():
-        os.system(rf"NET USE P: /DELETE")
+    
+    if Path(f'{NOMBRE_DISCO}:/').is_dir():
+        os.system(rf"NET USE {NOMBRE_DISCO} /DELETE")
         
-    os.system(rf"NET USE P: \\{IP_NAS}\{FOLDER_DATOS}")
+    os.system(rf"NET USE {NOMBRE_DISCO} \\{IP_NAS}\{FOLDER_DATOS}")
 
 
 

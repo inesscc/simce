@@ -182,8 +182,9 @@ def process_single_image(preguntas:pd.Series, num: int, rbd:PathLike, dic_pagina
                 
                 # Si hay error en procesamiento subpregunta
                 except Exception as e:
-                    print(f'Excepción: {e}')
                     preg_error = str(rbd)
+                    print(f'Excepción: {e}, para {estudiante} en {pregunta_selec}_{int(subpreg_selec)}')
+                    
                     agregar_error(queue= queue,
                                 pregunta=preg_error, 
                                 error=f'Subregunta {estudiante}_{pregunta_selec}_{int(subpreg_selec)} no pudo ser procesada',
@@ -201,8 +202,9 @@ def process_single_image(preguntas:pd.Series, num: int, rbd:PathLike, dic_pagina
             
         except Exception as e:
             print('Ocurrió un error con la máscara')
-            print(f'Excepción: {e}')
             preg_error = str(rbd)
+            print(f'Excepción: {e}, en {preg_error} para {estudiante}')
+            
             agregar_error(queue= queue, pregunta=preg_error, 
                           error=f'Ocurrió un error con la máscara para \
                               {estudiante} en la pregunta {pregunta_selec}', nivel_error='Pregunta')
